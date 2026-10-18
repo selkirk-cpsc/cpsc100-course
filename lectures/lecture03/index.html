@@ -137,6 +137,36 @@ Library · CPSC 100 Notes</title>
   .theme-toggle { font: inherit; font-size: .85rem; line-height: 1.2; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
   .theme-toggle:hover { border-color: var(--ink); }
   .topbar .theme-toggle { margin-left: auto; }
+  .topbar .print-btn + .theme-toggle { margin-left: 0; }
+  .topbar a { white-space: nowrap; }
+  @media (max-width: 480px) { .topbar .in:has(.print-btn) .crumb { display: none; } }
+
+  /* printing (the Print / PDF button, or the browser's own Print): light colours
+     on white, no site navigation, code wrapped instead of scrolling, and
+     headings, figures and code kept off page breaks where they fit */
+  @media print {
+    :root:not([data-print]), :root[data-theme] {   /* outranks the dark-mode rules */
+      --bg: #ffffff; --panel: #ffffff; --ink: #1d1d1f; --muted: #6b6b72;
+      --line: #d6d6db; --accent: #2f6fde; --accent-soft: #eef3fd; --alert: #911a28;
+      --code-bg: #f6f6f3;
+      --tok-kw: #7048e8; --tok-type: #0e7178; --tok-num: #b35a00;
+      --tok-str: #2b8a3e; --tok-com: #8a8a93; --tok-pre: #c2255c; --tok-fn: #1c4fb8;
+      --term-bg: #ffffff; --term-ink: #1d1d1f; --term-line: #c9c9cf; --term-in: #1a7f37;
+    }
+    @page { margin: 15mm 14mm; }
+    body { background: #fff; font-size: 11pt; line-height: 1.5; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .topbar, .pager, .theme-toggle, .print-btn { display: none !important; }
+    main { max-width: none; padding: 0; }
+    header.title { margin-top: 0; }
+    h1, h2, h3, h4, .run-label, .label { break-after: avoid; page-break-after: avoid; }
+    figure, img, svg, .columns, .callout, .tryit, table, nav#TOC,
+    div.sourceCode, pre, .runoutput { break-inside: avoid; page-break-inside: avoid; }
+    div.sourceCode, pre, pre.terminal, table, .animation { overflow: visible !important; }
+    pre, pre code, pre.terminal { white-space: pre-wrap !important; overflow-wrap: anywhere; }
+    pre > code.sourceCode > span { display: inline; }
+    a { text-decoration: none; }
+  }
 </style>
 <script>
   // apply a saved light/dark choice before the page draws (no flash)
@@ -147,6 +177,7 @@ Library · CPSC 100 Notes</title>
 <div class="topbar"><div class="in">
   <a href="../../">CPSC 100</a>
   <span class="crumb">Lecture notes</span>
+  <button type="button" class="theme-toggle print-btn" onclick="window.print()" title="Print this page, or choose Save as PDF in the print dialog">⎙ Print / PDF</button>
   <button type="button" class="theme-toggle" id="theme-toggle">☾ Dark</button>
 </div></div>
 <main>
