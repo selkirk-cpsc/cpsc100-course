@@ -53,3 +53,7 @@ Each demo steps through a flow diagram one box at a time. As you follow the arro
 | [strcat and the Stack](https://selkirk-cpsc.github.io/cpsc100-course/demos/strcat-stack/) | Two functions take turns using the same stack memory. An uninitialized `greeting` picks up another function's leftover password, and `strcat` adds onto the end of it. Tick the fix to start `greeting` as `""`. |
 
 You can type your own word into the string demos, or your own values into the 2D array demo, to see how the loop behaves.
+
+---
+
+*Notes by Ryan Bradshaw, based on earlier notes by Jonathan Doyle and Tanmay Deshpande. The notes and pages are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) and the code under MIT: see the [licence](https://github.com/selkirk-cpsc/cpsc100-course/blob/main/LICENSE.md).*
