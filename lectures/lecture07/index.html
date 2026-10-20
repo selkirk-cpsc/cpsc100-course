@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Midterm 1 Review · CPSC 100 Notes</title>
+<style>
+  :root {
+    --bg: #f6f6f3;
+    --panel: #ffffff;
+    --ink: #1d1d1f;
+    --muted: #6b6b72;
+    --line: #d6d6db;
+    --accent: #2f6fde;
+    --accent-soft: #dce8fd;
+    --alert: #911a28;
+    --code-bg: #f1f1ee;
+    --tok-kw: #7048e8; --tok-type: #0e7178; --tok-num: #b35a00;
+    --tok-str: #2b8a3e; --tok-com: #8a8a93; --tok-pre: #c2255c; --tok-fn: #1c4fb8;
+    --term-bg: #ffffff; --term-ink: #1d1d1f; --term-line: #c9c9cf; --term-in: #1a7f37;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5;
+      --line: #3a3b42; --accent: #6ea0ff; --accent-soft: #1d3157; --alert: #ff8f9c;
+      --code-bg: #25262b;
+      --tok-kw: #b197fc; --tok-type: #3bc9db; --tok-num: #ffa94d;
+      --tok-str: #69db7c; --tok-com: #868e96; --tok-pre: #f783ac; --tok-fn: #74c0fc;
+      --term-bg: #1d1f23; --term-ink: #e6e6e9; --term-line: #33363d; --term-in: #7ee787;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5;
+    --line: #3a3b42; --accent: #6ea0ff; --accent-soft: #1d3157; --alert: #ff8f9c;
+    --code-bg: #25262b;
+    --tok-kw: #b197fc; --tok-type: #3bc9db; --tok-num: #ffa94d;
+    --tok-str: #69db7c; --tok-com: #868e96; --tok-pre: #f783ac; --tok-fn: #74c0fc;
+    --term-bg: #1d1f23; --term-ink: #e6e6e9; --term-line: #33363d; --term-in: #7ee787;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 17px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  a { color: var(--accent); }
+  code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .9em; }
+
+  .topbar { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .topbar .in { max-width: 820px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 16px; align-items: center; }
+  .topbar a { text-decoration: none; font-weight: 600; }
+  .topbar .crumb { color: var(--muted); font-size: .9rem; }
+
+  main { max-width: 820px; margin: 0 auto; padding: 8px 16px 48px; }
+  header.title { margin: 28px 0 8px; }
+  header.title .week { color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: .85rem; }
+  header.title h1 { margin: 4px 0 0; font-size: 2.1rem; line-height: 1.2; }
+
+  nav#TOC { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 18px; margin: 20px 0 8px; }
+  nav#TOC::before { content: "In this chapter"; display: block; font-weight: 700; margin-bottom: 4px; }
+  nav#TOC ul { margin: 0; padding-left: 1.2em; }
+
+  h2 { font-size: 1.6rem; margin: 2.4em 0 .4em; padding-bottom: .2em; border-bottom: 2px solid var(--line); }
+  h3 { font-size: 1.2rem; margin: 1.8em 0 .3em; }
+  p, li { max-width: 72ch; }
+  li { margin: .2em 0; }
+  li > p { margin: 0; }
+  .alert { color: var(--alert); font-weight: 600; }
+  :not(pre) > code { background: var(--code-bg); padding: .08em .3em; border-radius: 4px; overflow-wrap: anywhere; }
+  math[display="block"] { overflow-x: auto; max-width: 100%; }
+
+  div.sourceCode { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; margin: 1em 0; overflow-x: auto; }
+  pre.sourceCode { margin: 0; padding: 12px 14px; line-height: 1.5; }
+  /* program output and shell sessions (minted text blocks) */
+  pre:not(.sourceCode) { background: var(--panel); border: 1px dashed var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; line-height: 1.5; }
+  /* sample runs of a program (make_notes.py compiles and runs it): a terminal
+     box in the page's theme, with what the user typed highlighted in green */
+  .runoutput { margin: -.3em 0 1.2em; }
+  .run-label { color: var(--muted); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin: .7em 0 .25em; }
+  pre.terminal { background: var(--term-bg); color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 8px; padding: 10px 14px; margin: 0 0 .5em; overflow-x: auto; line-height: 1.5; }
+  pre.terminal .in { color: var(--term-in); font-weight: 700; }
+  .run-label .run-setup { text-transform: none; letter-spacing: 0; font-weight: 400; }
+  pre.numberSource code > span { position: relative; left: -4em; }
+  pre.numberSource { margin-left: 3em; border-left: 1px solid var(--line); padding-left: 4px; }
+  pre.numberSource code > span > a:first-child::before {
+    content: counter(source-line); counter-increment: source-line; position: relative; left: -1em;
+    text-align: right; vertical-align: baseline; display: inline-block; width: 4em; color: var(--tok-com);
+  }
+  pre.numberSource code { counter-reset: source-line 0; }
+  pre > code.sourceCode > span { display: inline-block; line-height: 1.5; }
+  code.sourceCode > span > a:first-child { text-decoration: none; }
+  code span.kw, code span.cf { color: var(--tok-kw); font-weight: 600; }
+  code span.dt { color: var(--tok-type); }
+  code span.dv, code span.fl, code span.bn, code span.cn { color: var(--tok-num); }
+  code span.st, code span.ch, code span.sc, code span.ss, code span.vs { color: var(--tok-str); }
+  code span.co, code span.cv, code span.do, code span.an { color: var(--tok-com); font-style: italic; }
+  code span.pp, code span.im { color: var(--tok-pre); }
+  code span.fu, code span.bu { color: var(--tok-fn); }
+
+  img { max-width: 100%; height: auto; }
+  img.diagram { background: #fff; border-radius: 8px; padding: 8px; display: block; margin: 0 auto; }
+  /* PNGs are drawings (some with transparent backgrounds): same white card, so dark lines stay visible in dark mode */
+  img[src*=".png"] { background: #fff; border-radius: 8px; padding: 8px; }
+  .center, figure { text-align: center; }
+  figure { margin: 1em 0; }
+  figcaption { color: var(--muted); font-size: .9rem; }
+  .credit { text-align: center; color: var(--muted); font-size: .78rem; margin-top: -.6em; }
+  .credit p { max-width: none; }
+
+  /* slide columns: a figure keeps its natural width and the other column
+     fills the rest; when both can't fit, they stack (see notes.lua) */
+  .columns { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .columns > .column { flex: 1 1 280px; min-width: 0; }
+  .columns > .column.figure-col { flex: 0 1 auto; max-width: 100%; margin: 0 auto; }
+  .columns > .column.figure-col img:not(.diagram) { width: 320px; }
+
+  .multicol ul { columns: 4 8em; list-style: none; padding-left: 0; }
+
+  .callout { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 4px 16px; margin: 1em 0; }
+  .tryit { background: var(--accent-soft); border-radius: 10px; padding: 6px 18px; margin: 1.2em 0; }
+  .tryit .center { text-align: left; }
+  a.demo-link { display: inline-block; background: var(--accent); color: var(--bg); padding: 6px 14px; border-radius: 8px; text-decoration: none; }
+  a.demo-link code { background: none; color: inherit; }
+
+  table { border-collapse: collapse; margin: 1em auto; display: block; overflow-x: auto; max-width: 100%; width: fit-content; }
+  th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--panel); }
+
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .pager a { text-decoration: none; max-width: 48%; }
+  .pager .label { display: block; color: var(--muted); font-size: .85rem; }
+  .pager .next { margin-left: auto; text-align: right; }
+  .pager.top { margin-top: 16px; padding: 0 0 12px; border-top: none; border-bottom: 1px solid var(--line); font-size: .95rem; }
+  .pager.top + header.title { margin-top: 18px; }
+  .theme-toggle { font: inherit; font-size: .85rem; line-height: 1.2; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
+  .theme-toggle:hover { border-color: var(--ink); }
+  .topbar .theme-toggle { margin-left: auto; }
+  .topbar .print-btn + .theme-toggle { margin-left: 0; }
+  .topbar a { white-space: nowrap; }
+  @media (max-width: 480px) { .topbar .in:has(.print-btn) .crumb { display: none; } }
+
+  /* printing (the Print / PDF button, or the browser's own Print): light colours
+     on white, no site navigation, code wrapped instead of scrolling, and
+     headings, figures and code kept off page breaks where they fit */
+  @media print {
+    :root:not([data-print]), :root[data-theme] {   /* outranks the dark-mode rules */
+      --bg: #ffffff; --panel: #ffffff; --ink: #1d1d1f; --muted: #6b6b72;
+      --line: #d6d6db; --accent: #2f6fde; --accent-soft: #eef3fd; --alert: #911a28;
+      --code-bg: #f6f6f3;
+      --tok-kw: #7048e8; --tok-type: #0e7178; --tok-num: #b35a00;
+      --tok-str: #2b8a3e; --tok-com: #8a8a93; --tok-pre: #c2255c; --tok-fn: #1c4fb8;
+      --term-bg: #ffffff; --term-ink: #1d1d1f; --term-line: #c9c9cf; --term-in: #1a7f37;
+    }
+    @page { margin: 15mm 14mm; }
+    body { background: #fff; font-size: 11pt; line-height: 1.5; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .topbar, .pager, .theme-toggle, .print-btn { display: none !important; }
+    main { max-width: none; padding: 0; }
+    header.title { margin-top: 0; }
+    h1, h2, h3, h4, .run-label, .label { break-after: avoid; page-break-after: avoid; }
+    figure, img, svg, .columns, .callout, .tryit, table, nav#TOC,
+    div.sourceCode, pre, .runoutput { break-inside: avoid; page-break-inside: avoid; }
+    div.sourceCode, pre, pre.terminal, table, .animation { overflow: visible !important; }
+    pre, pre code, pre.terminal { white-space: pre-wrap !important; overflow-wrap: anywhere; }
+    pre > code.sourceCode > span { display: inline; }
+    a { text-decoration: none; }
+  }
+</style>
+<script>
+  // apply a saved light/dark choice before the page draws (no flash)
+  try { var t = localStorage.getItem('cpsc100-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+</head>
+<body>
+<div class="topbar"><div class="in">
+  <a href="../../">CPSC 100</a>
+  <span class="crumb">Lecture notes</span>
+  <button type="button" class="theme-toggle print-btn" onclick="window.print()" title="Print this page, or choose Save as PDF in the print dialog">⎙ Print / PDF</button>
+  <button type="button" class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</div></div>
+<main>
+<nav class="pager top" aria-label="Previous and next lecture">
+<a class="prev" href="../lecture06/"><span class="label">← Previous</span>Week
+6: Strings and Arrays in C</a>
+
+</nav>
+<header class="title">
+<div class="week">Week 7</div>
+<h1>Midterm 1 Review</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#week-by-week-recap"
+id="toc-week-by-week-recap">Week-by-Week Recap</a></li>
+<li><a href="#practice-problems" id="toc-practice-problems">Practice
+Problems</a></li>
+<li><a href="#common-mistakes" id="toc-common-mistakes">Common
+Mistakes</a></li>
+<li><a href="#questions" id="toc-questions">Questions?</a></li>
+</ul>
+</nav>
+<section id="week-by-week-recap" class="level2">
+<h2>Week-by-Week Recap</h2>
+<section id="week-1-programs-and-flow-diagrams" class="level3">
+<h3>Week 1: Programs and Flow Diagrams</h3>
+<div class="columns">
+<div class="column figure-col">
+<div class="center">
+<p><img src="fig01.svg?v=5d743a9c" alt="Flow diagram with boxes: Start; Input; Process; Output; Stop" class="diagram" loading="lazy"
+width="146" /></p>
+</div>
+</div><div class="column">
+<ul>
+<li><p>Every program: <span class="alert">Input
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\to</annotation></semantics></math>
+Process
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\to</annotation></semantics></math>
+Output</span></p></li>
+<li><p>Compile-run cycle: edit source
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\to</annotation></semantics></math>
+compile
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\to</annotation></semantics></math>
+run
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\to</annotation></semantics></math>
+(fix errors, repeat)</p></li>
+<li><p>Four basic flow-diagram pieces: oval (start/stop), rectangle
+(process), parallelogram (I/O), arrow</p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="week-2-variables-and-basic-io" class="level3">
+<h3>Week 2: Variables and Basic I/O</h3>
+<ul>
+<li><p>A variable is a <span class="alert">named box</span> in memory: a
+name, a size (from its type), and a stored value</p></li>
+<li><p><code class="sourceCode c">printf</code>/<code
+class="sourceCode c">scanf</code> conversion characters must match the
+variable’s type: <code>%d</code>, <code>%f</code>, <code>%c</code>,
+<code>%s</code></p></li>
+<li><p>Strings (first look): <code
+class="sourceCode c"><span class="dt">char</span> name<span class="op">[</span><span class="dv">50</span><span class="op">];</span></code>
+– a fixed-size array of characters</p></li>
+<li><p><code>&amp;</code> rule: <code class="sourceCode c">scanf</code>
+needs the <span class="alert">address</span> of a numeric/char variable,
+but <em>not</em> of a char array</p></li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>  age<span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">char</span> name<span class="op">[</span><span class="dv">50</span><span class="op">];</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>scanf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">&amp;</span>age<span class="op">);</span>   <span class="co">// &amp; for numeric types</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>scanf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%s</span><span class="st">&quot;</span><span class="op">,</span> name<span class="op">);</span>    <span class="co">// no &amp; for a char array</span></span></code></pre></div>
+</section>
+<section id="week-3-operators-and-expressions" class="level3">
+<h3>Week 3: Operators and Expressions</h3>
+<ul>
+<li><p>Arithmetic operators: <code>+ - * / %</code></p></li>
+<li><p><span class="alert">Integer division truncates</span> – <code
+class="sourceCode c"><span class="dv">7</span> <span class="op">/</span> <span class="dv">2</span></code>
+is <code class="sourceCode c"><span class="dv">3</span></code>, not
+<code class="sourceCode c"><span class="fl">3.5</span></code></p></li>
+<li><p>Precedence and casting control how mixed expressions
+evaluate</p></li>
+<li><p><code>#define</code>/<code
+class="sourceCode c"><span class="dt">const</span></code> name a value
+once instead of repeating a magic number</p></li>
+<li><p>Multiple I/O/process blocks can chain in one straight-line
+sequence</p></li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> a <span class="op">=</span> <span class="dv">7</span><span class="op">,</span> b <span class="op">=</span> <span class="dv">2</span><span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> a <span class="op">/</span> b<span class="op">);</span>          <span class="co">// 3</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%.1f\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">(</span><span class="dt">float</span><span class="op">)</span>a <span class="op">/</span> b<span class="op">);</span> <span class="co">// 3.5</span></span></code></pre></div>
+</section>
+<section id="week-4-conditionals" class="level3">
+<h3>Week 4: Conditionals</h3>
+<div class="columns">
+<div class="column figure-col">
+<div class="center">
+<p><img src="fig02.svg?v=201383f6" alt="Flow diagram with boxes: Start; Test Condition; Do this if true: statement 1 …; Do this if false: statement 1 …; Stop" class="diagram" loading="lazy"
+width="475" /></p>
+</div>
+</div><div class="column">
+<ul>
+<li><p>The <span class="alert">diamond</span> shape: decision
+points</p></li>
+<li><p><code class="sourceCode c"><span class="cf">if</span></code> /
+<code
+class="sourceCode c"><span class="cf">else</span> <span class="cf">if</span></code>
+/ <code
+class="sourceCode c"><span class="cf">else</span></code></p></li>
+<li><p><code
+class="sourceCode c"><span class="cf">switch</span></code>/<code
+class="sourceCode c"><span class="cf">case</span></code>: multi-way
+branch on one int/char value – needs <code
+class="sourceCode c"><span class="cf">break</span></code></p></li>
+<li><p>Relational (<code
+class="sourceCode c"><span class="op">&lt;</span> <span class="op">&gt;</span> <span class="op">&lt;=</span> <span class="op">&gt;=</span> <span class="op">==</span> <span class="op">!=</span></code>)
+and logical (<code>&amp;&amp; || !</code>) operators</p></li>
+<li><p><span class="alert"><code
+class="sourceCode c"><span class="op">=</span></code> assigns; <code
+class="sourceCode c"><span class="op">==</span></code>
+compares</span></p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="week-5-loops" class="level3">
+<h3>Week 5: Loops</h3>
+<ul>
+<li><p>The <span class="alert">loop-back arrow</span>: sends control
+back to a decision diamond</p></li>
+<li><p>Three templates: <code
+class="sourceCode c"><span class="cf">while</span></code> (test first),
+<code
+class="sourceCode c"><span class="cf">do</span><span class="op">..</span><span class="cf">while</span></code>
+(body first), <code
+class="sourceCode c"><span class="cf">for</span></code> (init; test;
+update)</p></li>
+<li><p>Loop-control patterns: counter, sentinel, accumulator</p></li>
+<li><p>Nested loops: inner dashed box completely inside outer dashed
+box; inner loop finishes fully for each outer iteration</p></li>
+<li><p><span class="alert">Off-by-one</span>: <code
+class="sourceCode c"><span class="op">&lt;</span></code> vs <code
+class="sourceCode c"><span class="op">&lt;=</span></code> in the loop
+bound</p></li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 5 iterations</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> i <span class="op">&lt;=</span> <span class="dv">5</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> &quot;</span><span class="op">,</span> i<span class="op">);</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</section>
+<section id="week-5-the-three-loop-templates" class="level3">
+<h3>Week 5: The Three Loop Templates</h3>
+<div class="columns">
+<div class="column figure-col">
+<p><strong><code>while</code></strong><br />
+<img src="fig03.svg?v=72e29d76" alt="Flow diagram with boxes: Start; Test Condition; Loop body: statement 1 …; End" class="diagram" loading="lazy" width="356" /></p>
+<p><br />
+Test first: the body may run <strong>zero</strong> times.</p>
+</div><div class="column figure-col">
+<p><strong><code>do..while</code></strong><br />
+<img src="fig04.svg?v=407c6b2b" alt="Flow diagram with boxes: Start; Loop body: statement 1 …; Test Condition; End" class="diagram" loading="lazy" width="285" /></p>
+<p><br />
+Body first: it runs <strong>at least once</strong>.</p>
+</div><div class="column figure-col">
+<p><strong><code>for</code></strong><br />
+<img src="fig05.svg?v=a69a3926" alt="Flow diagram with boxes: Start; Initialize counter; Test Condition; Loop body: statement 1 …; Update counter; End" class="diagram" loading="lazy" width="344" /></p>
+<p><br />
+Init, test, body, update, then loop back.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="practice-problems" class="level2">
+<h2>Practice Problems</h2>
+<section id="problem-1-integer-division" class="level3">
+<h3>Problem 1: Integer Division</h3>
+<p>What does this print?</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> total <span class="op">=</span> <span class="dv">17</span><span class="op">,</span> count <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> average <span class="op">=</span> total <span class="op">/</span> count<span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%.2f\n</span><span class="st">&quot;</span><span class="op">,</span> average<span class="op">);</span></span></code></pre></div>
+</section>
+<section id="solution-1-integer-division" class="level3">
+<h3>Solution 1: Integer Division</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> total <span class="op">=</span> <span class="dv">17</span><span class="op">,</span> count <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> average <span class="op">=</span> total <span class="op">/</span> count<span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%.2f\n</span><span class="st">&quot;</span><span class="op">,</span> average<span class="op">);</span></span></code></pre></div>
+<p>Prints <span class="alert"><code>3.00</code></span>, not
+<code>3.40</code>. <code
+class="sourceCode c">total <span class="op">/</span> count</code> is
+<span class="alert">integer division</span> – it computes <code
+class="sourceCode c"><span class="dv">3</span></code> <em>before</em>
+the result is ever stored in a <code
+class="sourceCode c"><span class="dt">float</span></code>. Fix: cast at
+least one operand, <code
+class="sourceCode c"><span class="op">(</span><span class="dt">float</span><span class="op">)</span>total <span class="op">/</span> count</code>.</p>
+</section>
+<section id="problem-2-vs." class="level3">
+<h3>Problem 2: <code>=</code> vs. <code>==</code></h3>
+<p>What is wrong with this code?</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> age <span class="op">=</span> <span class="dv">20</span><span class="op">;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>age <span class="op">=</span> <span class="dv">18</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;You just turned 18!</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</section>
+<section id="solution-2-vs." class="level3">
+<h3>Solution 2: <code>=</code> vs. <code>==</code></h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> age <span class="op">=</span> <span class="dv">20</span><span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">// </span><span class="al">BUG</span><span class="co">: assignment, not comparison</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>age <span class="op">=</span> <span class="dv">18</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;You just turned 18!</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code
+class="sourceCode c">age <span class="op">=</span> <span class="dv">18</span></code>
+<span class="alert">assigns</span> <code
+class="sourceCode c"><span class="dv">18</span></code> to <code
+class="sourceCode c">age</code> and evaluates to <code
+class="sourceCode c"><span class="dv">18</span></code> (nonzero
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\to</annotation></semantics></math>
+true) – the message always prints, and <code
+class="sourceCode c">age</code> is overwritten. Fix: <code
+class="sourceCode c"><span class="cf">if</span> <span class="op">(</span>age <span class="op">==</span> <span class="dv">18</span><span class="op">)</span></code>.</p>
+</section>
+<section id="problem-3-off-by-one" class="level3">
+<h3>Problem 3: Off-By-One</h3>
+<p>How many times does <code>"Lap"</code> print, and is that correct for
+“run 4 laps”?</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> lap <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> lap <span class="op">&lt;</span> <span class="dv">4</span><span class="op">;</span> lap<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Lap </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> lap<span class="op">);</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</section>
+<section id="solution-3-off-by-one" class="level3">
+<h3>Solution 3: Off-By-One</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// </span><span class="al">BUG</span><span class="co">: stops one short</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> lap <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> lap <span class="op">&lt;</span> <span class="dv">4</span><span class="op">;</span> lap<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Lap </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> lap<span class="op">);</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Prints <span class="alert">3</span> laps (1, 2, 3), not 4 – <code
+class="sourceCode c">lap <span class="op">&lt;</span> <span class="dv">4</span></code>
+stops before <code class="sourceCode c">lap</code> reaches <code
+class="sourceCode c"><span class="dv">4</span></code>. Fix: <code
+class="sourceCode c">lap <span class="op">&lt;=</span> <span class="dv">4</span></code>.</p>
+</section>
+<section id="problem-4-tracing-a-loop" class="level3">
+<h3>Problem 4: Tracing a Loop</h3>
+<div class="columns">
+<div class="column figure-col">
+<div class="center">
+<p><img src="fig06.svg?v=adf01bd4" alt="Flow diagram with boxes: Start; Declare variables: int i, total = 0; i = 1; i &lt;= 6?; i % 2 == 0?; total = total + i; total = total - 1; i = i + 1; Print total; Stop; Loop body" class="diagram" loading="lazy"
+width="667" /></p>
+</div>
+</div><div class="column">
+<p>Each time the program reaches the <code>i &lt;= 6</code> diamond,
+write down <code class="sourceCode c">i</code>, <code
+class="sourceCode c">total</code>, and whether the condition is True or
+False.</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">#</th>
+<th style="text-align: left;"><code>i</code></th>
+<th style="text-align: left;"><code>total</code></th>
+<th style="text-align: left;"><code>i &lt;= 6</code>?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">6</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">7</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">8</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">9</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<p>How many times does the body run?<br />
+What does it print?</p>
+</div>
+</div>
+</section>
+<section id="try-it-check-your-trace-problem-4" class="level3">
+<h3>Try It: Check Your Trace (Problem 4)</h3>
+<div class="tryit">
+<p>Step through the diagram one box at a time and compare each row with
+your trace table:</p>
+<div class="center">
+<p><span><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/review-loop-trace/"
+class="demo-link" target="_blank"
+rel="noopener"><code>selkirk-cpsc.github.io/cpsc100-course/demos/review-loop-trace/</code></a></span></p>
+</div>
+<ul>
+<li><p>Did you write a row for the <span class="alert">last</span>
+check, where <code
+class="sourceCode c">i <span class="op">&lt;=</span> <span class="dv">6</span></code>
+is False?</p></li>
+<li><p>Change the <code>6</code> to <code>0</code>: how many times does
+the loop body run now?</p></li>
+</ul>
+</div>
+</section>
+<section id="problem-5-missing-break" class="level3">
+<h3>Problem 5: Missing <code>break</code></h3>
+<p>What prints if <code class="sourceCode c">day</code> is <code
+class="sourceCode c"><span class="dv">2</span></code>?</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">switch</span> <span class="op">(</span>day<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="dv">1</span><span class="op">:</span> printf<span class="op">(</span><span class="st">&quot;Mon</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="dv">2</span><span class="op">:</span> printf<span class="op">(</span><span class="st">&quot;Tue</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="dv">3</span><span class="op">:</span> printf<span class="op">(</span><span class="st">&quot;Wed</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span> <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span> printf<span class="op">(</span><span class="st">&quot;Invalid</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</section>
+<section id="solution-5-missing-break" class="level3">
+<h3>Solution 5: Missing <code>break</code></h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">switch</span> <span class="op">(</span>day<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="dv">1</span><span class="op">:</span> printf<span class="op">(</span><span class="st">&quot;Mon</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="dv">2</span><span class="op">:</span> printf<span class="op">(</span><span class="st">&quot;Tue</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span>   <span class="co">// no break!</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="dv">3</span><span class="op">:</span> printf<span class="op">(</span><span class="st">&quot;Wed</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span> <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span> printf<span class="op">(</span><span class="st">&quot;Invalid</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Prints <span class="alert"><code>Tue</code></span> <em>and</em>
+<code>Wed</code> – once <code
+class="sourceCode c"><span class="cf">case</span> <span class="dv">2</span></code>
+matches, execution keeps running until it hits a <code
+class="sourceCode c"><span class="cf">break</span></code> or the end of
+the <code class="sourceCode c"><span class="cf">switch</span></code>.
+Fix: add <code
+class="sourceCode c"><span class="cf">break</span><span class="op">;</span></code>
+after each case’s statements.</p>
+</section>
+<section id="problem-6-conversion-character-mismatch" class="level3">
+<h3>Problem 6: Conversion Character Mismatch</h3>
+<p>What does this print?</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> price <span class="op">=</span> <span class="fl">19.99</span><span class="op">;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;Price: </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> price<span class="op">);</span></span></code></pre></div>
+</section>
+<section id="solution-6-conversion-character-mismatch" class="level3">
+<h3>Solution 6: Conversion Character Mismatch</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> price <span class="op">=</span> <span class="fl">19.99</span><span class="op">;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co">// </span><span class="al">BUG</span><span class="co">: %d expects an int</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;Price: </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> price<span class="op">);</span></span></code></pre></div>
+<p><span class="alert">Undefined behavior</span> – <code>%d</code> reads
+the bytes of <code class="sourceCode c">price</code> as if they were an
+<code class="sourceCode c"><span class="dt">int</span></code>, producing
+garbage output (not <code
+class="sourceCode c"><span class="dv">19</span></code> or <code
+class="sourceCode c"><span class="dv">20</span></code>). Fix: match the
+conversion character to the type,
+<code>printf("Price: %.2f\n", price);</code>.</p>
+</section>
+<section id="problem-7-tracing-nested-loops" class="level3">
+<h3>Problem 7: Tracing Nested Loops</h3>
+<div class="columns">
+<div class="column figure-col">
+<div class="center">
+<p><img src="fig07.svg?v=49dd4f82" alt="Flow diagram with boxes: Start; Declare variables: int i, j, count = 0; i = 3; i &gt;= 1?; j = 1; j &lt; i?; count = count + j; j = j + 1; i = i - 1; Print count; Stop" class="diagram" loading="lazy"
+width="606" /></p>
+</div>
+</div><div class="column">
+<p>Each time the <code>count</code> box runs, write down <code
+class="sourceCode c">i</code>, <code class="sourceCode c">j</code>, and
+<code class="sourceCode c">count</code> <em>after</em> the box. Careful:
+the outer loop counts <em>down</em>.</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">#</th>
+<th style="text-align: left;"><code>i</code></th>
+<th style="text-align: left;"><code>j</code></th>
+<th style="text-align: left;"><code>count</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">6</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<p>What does the program print?</p>
+</div>
+</div>
+</section>
+<section id="try-it-check-your-trace-problem-7" class="level3">
+<h3>Try It: Check Your Trace (Problem 7)</h3>
+<div class="tryit">
+<p>Step through the nested loops and compare each row with your trace
+table:</p>
+<div class="center">
+<p><span><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/review-nested-trace/"
+class="demo-link" target="_blank"
+rel="noopener"><code>selkirk-cpsc.github.io/cpsc100-course/demos/review-nested-trace/</code></a></span></p>
+</div>
+<ul>
+<li><p>Watch the row for <code class="sourceCode c">i</code> = 1: what
+happens the first time the inner test runs?</p></li>
+<li><p>Start the outer loop at <code class="sourceCode c">i</code> = 5
+instead: how many rows does your trace table need?</p></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="common-mistakes" class="level2">
+<h2>Common Mistakes</h2>
+<section id="mistake-conversion-character-mismatch" class="level3">
+<h3>Mistake: Conversion Character Mismatch</h3>
+<div class="columns">
+<div class="column">
+<p><strong>Buggy</strong></p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> gpa <span class="op">=</span> <span class="fl">3.85</span><span class="op">;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> gpa<span class="op">);</span></span></code></pre></div>
+</div><div class="column">
+<p><strong>Fixed</strong></p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> gpa <span class="op">=</span> <span class="fl">3.85</span><span class="op">;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%.2f\n</span><span class="st">&quot;</span><span class="op">,</span> gpa<span class="op">);</span></span></code></pre></div>
+</div>
+</div>
+<p><span class="alert">Rule:</span> the conversion character must match
+the variable’s type – <code>%d</code> for <code
+class="sourceCode c"><span class="dt">int</span></code>,
+<code>%f</code>/<code>%.Nf</code> for <code
+class="sourceCode c"><span class="dt">float</span></code>/<code
+class="sourceCode c"><span class="dt">double</span></code>.<br />
+<strong>Type:</strong> logic error (it compiles, with a warning, but
+prints garbage).</p>
+</section>
+<section id="mistake-instead-of" class="level3">
+<h3>Mistake: <code>=</code> Instead of <code>==</code></h3>
+<div class="columns">
+<div class="column">
+<p><strong>Buggy</strong></p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>count <span class="op">=</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Empty</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div><div class="column">
+<p><strong>Fixed</strong></p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>count <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Empty</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+</div>
+<p><span class="alert">Rule:</span> <code
+class="sourceCode c"><span class="op">=</span></code> assigns a value;
+<code class="sourceCode c"><span class="op">==</span></code> compares
+two values. A condition should almost always use <code
+class="sourceCode c"><span class="op">==</span></code>.<br />
+<strong>Type:</strong> logic error (it compiles, but the condition is
+wrong).</p>
+</section>
+<section id="mistake-forgetting-in-scanf" class="level3">
+<h3>Mistake: Forgetting <code>&amp;</code> in <code>scanf</code></h3>
+<div class="columns">
+<div class="column">
+<p><strong>Buggy</strong></p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> age<span class="op">;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>scanf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st">&quot;</span><span class="op">,</span> age<span class="op">);</span></span></code></pre></div>
+</div><div class="column">
+<p><strong>Fixed</strong></p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> age<span class="op">;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>scanf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">&amp;</span>age<span class="op">);</span></span></code></pre></div>
+</div>
+</div>
+<p><span class="alert">Rule:</span> <code
+class="sourceCode c">scanf</code> needs the <em>address</em> of a
+numeric or <code
+class="sourceCode c"><span class="dt">char</span></code> variable to
+store into – <code>&amp;</code> provides that address.<br />
+<strong>Type:</strong> runtime error (it compiles, with a warning, then
+crashes).</p>
+</section>
+<section id="mistake-missing-braces-around-a-loop-body" class="level3">
+<h3>Mistake: Missing Braces Around a Loop Body</h3>
+<div class="columns">
+<div class="column">
+<p><strong>Buggy</strong></p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="op">(</span>i <span class="op">&lt;</span> <span class="dv">3</span><span class="op">)</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> i<span class="op">);</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    i<span class="op">++;</span></span></code></pre></div>
+</div><div class="column">
+<p><strong>Fixed</strong></p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="op">(</span>i <span class="op">&lt;</span> <span class="dv">3</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> i<span class="op">);</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    i<span class="op">++;</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+</div>
+<p><span class="alert">Rule:</span> without braces, only the
+<em>first</em> statement is the loop body. <code
+class="sourceCode c">i<span class="op">++</span></code> never runs
+inside the loop, so <code class="sourceCode c">i</code> stays 0 and it
+prints 0 forever. Indenting doesn’t change this.<br />
+<strong>Type:</strong> logic error (it compiles and runs, but never
+stops).</p>
+</section>
+<section id="mistake-missing-break-in-switch" class="level3">
+<h3>Mistake: Missing <code>break</code> in <code>switch</code></h3>
+<div class="columns">
+<div class="column">
+<p><strong>Buggy</strong></p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="cf">switch</span> <span class="op">(</span>grade<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="ch">&#39;A&#39;</span><span class="op">:</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Great</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="ch">&#39;B&#39;</span><span class="op">:</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Good</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div><div class="column">
+<p><strong>Fixed</strong></p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="cf">switch</span> <span class="op">(</span>grade<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="ch">&#39;A&#39;</span><span class="op">:</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Great</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="ch">&#39;B&#39;</span><span class="op">:</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Good</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+</div>
+<p><span class="alert">Rule:</span> without <code
+class="sourceCode c"><span class="cf">break</span></code>, execution
+falls through into the next case regardless of its label.<br />
+<strong>Type:</strong> logic error (it compiles, but runs the wrong
+cases).</p>
+</section>
+</section>
+<section id="questions" class="level2">
+<h2>Questions?</h2>
+<section id="questions-1" class="level3">
+<h3>Questions?</h3>
+<p>Questions?</p>
+</section>
+</section>
+<nav class="pager" aria-label="Previous and next lecture">
+<a class="prev" href="../lecture06/"><span class="label">← Previous</span>Week
+6: Strings and Arrays in C</a>
+
+</nav>
+</main>
+<script>
+  // light/dark toggle: an explicit choice wins over the system setting
+  (function () {
+    var b = document.getElementById('theme-toggle'), r = document.documentElement;
+    function current() {
+      var t = r.getAttribute('data-theme');
+      return t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    function show() {
+      var dark = current() === 'dark';
+      b.textContent = dark ? '☀ Light' : '☾ Dark';
+      b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    b.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      r.setAttribute('data-theme', next);
+      try { localStorage.setItem('cpsc100-theme', next); } catch (e) {}
+      show();
+      b.blur();   // so Space goes back to the demo's "next step"
+    });
+    show();
+  })();
+</script>
+</body>
+</html>

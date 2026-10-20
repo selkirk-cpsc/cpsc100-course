@@ -18,6 +18,7 @@ Each week's lecture written out as a chapter you can read top to bottom, with th
 | 4 | [Control Flow; Conditionals](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture04/) |
 | 5 | [Loops](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture05/) |
 | 6 | [Strings and Arrays in C](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture06/) |
+| 7 | [Midterm 1 Review](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture07/) |
 
 ## Interactive Demos
 
@@ -45,6 +46,13 @@ Each demo steps through a flow diagram one box at a time. As you follow the arro
 | [Palindrome Checker](https://selkirk-cpsc.github.io/cpsc100-course/demos/palindrome/) | Move two indices, `left` and `right`, inward from both ends of a word, and use `break` to stop at the first mismatch. |
 | [Array Index Explorer](https://selkirk-cpsc.github.io/cpsc100-course/demos/array-index/) | Read and write `marks[i]` for any index. C doesn't check bounds, so an out-of-range index quietly reads or overwrites a neighbouring variable. |
 | [2D Array](https://selkirk-cpsc.github.io/cpsc100-course/demos/2d-array/) | Walk a 2D grid with a nested loop and watch each element light up in both the grid view and the single strip of memory C really uses (row-major order). |
+
+### Week 7: Midterm 1 Review
+
+| Demo | What it shows |
+|---|---|
+| [Tracing a Loop](https://selkirk-cpsc.github.io/cpsc100-course/demos/review-loop-trace/) | Check your trace table for a `for`-style loop with a decision inside: even values of `i` are added to `total`, odd values take 1 away. Change the loop limit to see the body run zero times. |
+| [Tracing Nested Loops](https://selkirk-cpsc.github.io/cpsc100-course/demos/review-nested-trace/) | Check your trace table for an outer loop that counts down and an inner loop with the test `j < i`. When `i` is 1, the inner loop runs zero times. |
 
 ### Other Topics
 

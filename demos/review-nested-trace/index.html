@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tracing Nested Loops Walkthrough</title>
+<style>
+  :root {
+    --bg: #f6f6f3;
+    --panel: #ffffff;
+    --ink: #1d1d1f;
+    --muted: #6b6b72;
+    --line: #a9aab2;
+    --node: #ffffff;
+    --visited: #eef1f6;
+    --accent: #2f6fde;
+    --accent-soft: #dce8fd;
+    --left: #d9480f;
+    --right: #7048e8;
+    --ok: #2b8a3e;
+    --ok-soft: #d3f9d8;
+    --bad: #c92a2a;
+    --bad-soft: #ffe0e0;
+    --term: #e9e9ec;
+    --out-bg: #ffffff; --out-ink: #1d1d1f; --out-line: #c9c9cf; --out-dim: #6b6b72;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141518;
+      --panel: #1e1f23;
+      --ink: #ececf0;
+      --muted: #9b9ca5;
+      --line: #5a5b63;
+      --node: #25262b;
+      --visited: #2b2e36;
+      --accent: #6ea0ff;
+      --accent-soft: #1d3157;
+      --left: #ff8a50;
+      --right: #a98bff;
+      --ok: #69db7c;
+      --ok-soft: #1c3a24;
+      --bad: #ff8787;
+      --bad-soft: #4a1f22;
+      --term: #2c2d33;
+      --out-bg: #111111; --out-ink: #e6e6e6; --out-line: #2c2d33; --out-dim: #8a8a8a;
+      --shadow: 0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5; --line: #5a5b63;
+    --node: #25262b; --visited: #2b2e36; --accent: #6ea0ff; --accent-soft: #1d3157;
+    --left: #ff8a50; --right: #a98bff; --ok: #69db7c; --ok-soft: #1c3a24;
+    --bad: #ff8787; --bad-soft: #4a1f22; --term: #2c2d33; --out-bg: #111111; --out-ink: #e6e6e6; --out-line: #2c2d33; --out-dim: #8a8a8a; --shadow: 0 1px 3px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .mono, code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+  header { max-width: 1280px; margin: 0 auto; padding: 20px 16px 4px; }
+  h1 { font-size: 1.45rem; margin: 0 0 4px; letter-spacing: -.01em; }
+  header p { margin: 0; color: var(--muted); }
+
+  main {
+    max-width: 1280px; margin: 0 auto; padding: 12px 16px 32px;
+    display: grid; gap: 16px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    align-items: start;
+  }
+  @media (max-width: 920px) { main { grid-template-columns: minmax(0, 1fr); } }
+
+  .card {
+    background: var(--panel); border-radius: 14px; box-shadow: var(--shadow);
+    padding: 16px;
+  }
+  .card h2 {
+    font-size: .78rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); margin: 0 0 10px;
+  }
+
+  /* ---------- Flow diagram ---------- */
+  .diagram { position: sticky; top: 12px; }
+  @media (max-width: 920px) { .diagram { position: static; } }
+  svg.flow { width: 100%; height: auto; display: block; max-height: calc(100vh - 60px); }
+  .flow text { fill: var(--ink); font-size: 14px; text-anchor: middle; dominant-baseline: central; }
+  .flow text.code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13.5px; }
+  .flow .node > :is(rect, polygon, circle) {
+    fill: var(--node); stroke: var(--line); stroke-width: 1.6;
+    transition: fill .25s, stroke .25s, stroke-width .25s;
+  }
+  .flow .node.visited > :is(rect, polygon, circle) { fill: var(--visited); }
+  .flow .node.active > :is(rect, polygon, circle) {
+    fill: var(--accent-soft); stroke: var(--accent); stroke-width: 3.2;
+    filter: drop-shadow(0 0 6px var(--accent));
+  }
+  .flow .edge { fill: none; stroke: var(--line); stroke-width: 1.6; marker-end: url(#arrow); transition: stroke .25s; }
+  .flow .edge.visited { stroke: var(--muted); }
+  .flow .edge.active {
+    stroke: var(--accent); stroke-width: 3.2; marker-end: url(#arrow-active);
+    stroke-dasharray: 8 6; animation: flow 0.6s linear infinite;
+  }
+  @keyframes flow { to { stroke-dashoffset: -14; } }
+  .flow .arrowhead { fill: var(--line); }
+  .flow .arrowhead-active { fill: var(--accent); }
+  .flow .elabel { font-size: 12.5px; font-weight: 600; fill: var(--muted); }
+  .flow .elabel.active { fill: var(--accent); }
+  .flow .bodybox { fill: none; stroke: var(--muted); stroke-dasharray: 6 5; stroke-width: 1.3; }
+  .flow .bodylabel { font-size: 13px; font-weight: 700; text-anchor: start; fill: var(--muted); }
+  .flow .badge rect { fill: var(--accent); }
+  .flow .badge text { fill: #fff; font-size: 12px; font-weight: 700; }
+  .flow .badge.false rect { fill: var(--muted); }
+
+  /* ---------- Right column ---------- */
+  .side { display: grid; gap: 16px; }
+
+  .wordbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .wordbar label { font-weight: 600; margin-right: 2px; }
+  .wordbar input {
+    font: inherit; font-family: ui-monospace, Menlo, Consolas, monospace;
+    padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--line);
+    background: var(--node); color: var(--ink); width: 9.5em;
+  }
+  .wordbar input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button {
+    font: inherit; cursor: pointer; border-radius: 8px; border: 1.5px solid var(--line);
+    background: var(--node); color: var(--ink); padding: 6px 12px;
+  }
+  button:hover { border-color: var(--accent); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button:disabled { opacity: .4; cursor: default; border-color: var(--line); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .preset { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9rem; padding: 4px 10px; }
+  .hint { color: var(--muted); font-size: .85rem; }
+
+  /* array */
+  .array-wrap { position: relative; padding: 52px 0 52px; margin: 0 auto; }
+  .cells { display: flex; gap: var(--gap); }
+  .col { width: var(--cell); display: flex; flex-direction: column; align-items: center; }
+  .cell {
+    width: var(--cell); height: var(--cell); border-radius: 8px;
+    border: 2px solid var(--line); background: var(--node);
+    display: grid; place-items: center;
+    font: 700 calc(var(--cell) * .48) ui-monospace, Menlo, Consolas, monospace;
+    transition: background .3s, border-color .3s, transform .3s;
+  }
+  .cell.term { background: var(--term); color: var(--muted); font-size: calc(var(--cell) * .32); border-style: dashed; }
+  .cell.done { background: var(--ok-soft); border-color: var(--ok); }
+  .cell.cmp-ok { background: var(--ok-soft); border-color: var(--ok); transform: translateY(-3px); box-shadow: 0 0 0 3px var(--ok-soft); }
+  .cell.cmp-bad { background: var(--bad-soft); border-color: var(--bad); transform: translateY(-3px); box-shadow: 0 0 0 3px var(--bad-soft); }
+  .idx { font: 12px ui-monospace, Menlo, Consolas, monospace; color: var(--muted); margin-top: 3px; }
+  .ptr {
+    position: absolute; transform: translateX(-50%);
+    left: calc(var(--i) * (var(--cell) + var(--gap)) + var(--cell) / 2);
+    display: flex; flex-direction: column; align-items: center;
+    font-weight: 700; font-size: 14px; line-height: 1.1;
+    transition: left .5s cubic-bezier(.4,.1,.2,1), opacity .3s;
+  }
+  .ptr.hidden { opacity: 0; }
+  .ptr .tri { font-size: 18px; }
+  .ptr.left { top: 6px; color: var(--left); }
+  .ptr.right { bottom: 4px; color: var(--right); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .82rem; color: var(--muted); justify-content: center; }
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; border: 1.5px solid; }
+
+  /* variables */
+  .vars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .var { border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 10px; text-align: center; }
+  .var .name { font: 600 13px ui-monospace, Menlo, Consolas, monospace; }
+  .var .val { font: 700 28px ui-monospace, Menlo, Consolas, monospace; line-height: 1.25; }
+  .var .sub { font-size: 12px; color: var(--muted); min-height: 1.3em; }
+  .var.left .name { color: var(--left); }
+  .var.right .name { color: var(--right); }
+  .var.changed { animation: pulse .9s ease-out; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--accent); background: var(--accent-soft); } 100% { box-shadow: 0 0 0 10px transparent; } }
+
+  /* explanation */
+  .explain .where { font-weight: 700; font-size: 1.05rem; margin-bottom: 4px; }
+  .explain .msg { min-height: 4.5em; }
+  .explain b { color: var(--accent); }
+  .output {
+    margin-top: 10px; font: 14px ui-monospace, Menlo, Consolas, monospace;
+    background: var(--out-bg); color: var(--out-ink); border: 1px solid var(--out-line); border-radius: 8px; padding: 8px 12px; min-height: 2.4em;
+  }
+  .output .prompt { color: var(--out-dim); }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+  .counter { margin-left: auto; color: var(--muted); font-size: .9rem; }
+  .progress { height: 4px; background: var(--visited); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+  .progress > div { height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+
+  /* trace */
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  th, td { padding: 5px 8px; text-align: center; border-bottom: 1px solid var(--visited); }
+  th { color: var(--muted); font-weight: 600; font-size: .8rem; }
+  td.mono { white-space: nowrap; }
+  td.yes { color: var(--ok); font-weight: 700; }
+  td.no { color: var(--bad); font-weight: 700; }
+  tr.latest { background: var(--accent-soft); }
+  .empty { color: var(--muted); font-style: italic; text-align: center; padding: 8px; }
+
+  /* shared additions */
+  .output { max-height: 10.5em; overflow: auto; }
+  .output .prompt { font-size: 12px; margin-bottom: 2px; }
+  .output pre { margin: 0; font: inherit; white-space: pre-wrap; }
+  .trace-wrap { max-height: 330px; overflow: auto; }
+  .t { color: var(--ok); font-weight: 700; }
+  .f { color: var(--muted); font-weight: 600; }
+  .cell.small { font-size: calc(var(--cell) * .3); }
+  .cell.hit { background: var(--ok-soft); border-color: var(--ok); }
+  .cell.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .cell.zone { background: var(--term); color: var(--muted); border-style: dashed; }
+  .cell.current { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .cell.stopcell { border-color: var(--accent); border-style: solid; color: var(--accent); transform: translateY(-3px); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .ptr.p { top: 6px; color: var(--left); }
+  .array-wrap { padding-bottom: 8px; }
+  .var.p .name { color: var(--left); }
+  .var.q .name { color: var(--right); }
+  .wordbar input[type=number] { width: 6em; }
+  .wordbar input.wide { width: 12em; }
+  .wordbar select { font: inherit; padding: 5px 8px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--node); color: var(--ink); }
+  .controls select { font: inherit; font-size: .9rem; padding: 5px 6px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--node); color: var(--ink); }
+  .side, .side > .card { min-width: 0; }
+  .note { font-size: .88rem; color: var(--muted); margin-top: 10px; }
+  kbd { font: 12px ui-monospace, Menlo, Consolas, monospace; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+
+  /* data-type keywords in the flow diagram */
+  :root { --type: #0c8599; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --type: #3bc9db; } }
+  :root[data-theme="dark"] { --type: #3bc9db; }
+  .flow .kw { fill: var(--type); font-weight: 700; }
+
+  .grid { border-collapse: separate; border-spacing: 5px; margin: 6px auto 0; width: auto; }
+  .grid th { font: 600 12px ui-monospace, Menlo, Consolas, monospace; color: var(--muted); padding: 2px 6px; border: 0; }
+  .grid th.rowh { text-align: right; color: var(--left); }
+  .grid th.colh { color: var(--right); }
+  .gridwrap { overflow-x: auto; }
+  .grid td { width: clamp(28px, 8vw, 44px); height: clamp(28px, 8vw, 44px); border: 2px solid var(--line); border-radius: 8px; padding: 0;
+             font: 700 clamp(13px, 3.6vw, 17px) ui-monospace, Menlo, Consolas, monospace; background: var(--node); transition: background .3s, border-color .3s; }
+  .grid td.na { border: 0; background: transparent; }
+  .grid th.zero { text-align: left; font-weight: 700; color: var(--bad); font-family: system-ui, sans-serif; white-space: nowrap; }
+  .grid tr.rowcur th.rowh { color: var(--accent); }
+  .grid tr.rowcur td:not(.na) { border-color: var(--accent-soft); }
+  .grid td.filled { background: var(--ok-soft); border-color: var(--ok); }
+  .grid td.now { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .grid th.colh.now { color: var(--accent); }
+  .vars { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .theme-toggle { font: inherit; font-size: .85rem; line-height: 1.2; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
+  .theme-toggle:hover { border-color: var(--ink); }
+  header .theme-toggle { float: right; margin: 0 0 8px 12px; }
+</style>
+<script>
+  // apply a saved light/dark choice before the page draws (no flash)
+  try { var t = localStorage.getItem('cpsc100-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+</head>
+<body>
+<header>
+  <button type="button" class="theme-toggle" id="theme-toggle">☾ Dark</button>
+  <h1>Tracing Nested Loops: Counting Down</h1>
+  <p>Step through the diagram from Lecture 7, Problem 7 and check your trace table. The outer loop counts <i>down</i>, and the inner test is <span class="mono">j &lt; i</span>, so when <span class="mono">i</span> is 1 the inner loop runs zero times.
+     Keys: <kbd>→</kbd>/<kbd>Space</kbd> next, <kbd>←</kbd> back, <kbd>R</kbd> reset.</p>
+</header>
+
+<main>
+  <section class="card diagram" aria-label="Flow diagram">
+    <svg class="flow" viewBox="0 0 620 900" role="img" aria-label="Tracing Nested Loops flow diagram">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path class="arrowhead" d="M0,0 L10,5 L0,10 z"/>
+        </marker>
+        <marker id="arrow-active" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <path class="arrowhead-active" d="M0,0 L10,5 L0,10 z"/>
+        </marker>
+      </defs>
+
+      <rect class="bodybox" x="110" y="342" width="440" height="418" rx="6"/>
+      <text class="bodylabel" x="116" y="333">Outer loop body</text>
+      <rect class="bodybox" x="140" y="410" width="320" height="250" rx="6"/>
+      <text class="bodylabel" x="146" y="402">Inner loop body</text>
+
+      <path class="edge" id="e-start-declare" d="M300 60 V85"/>
+      <path class="edge" id="e-declare-oinit" d="M300 135 V160"/>
+      <path class="edge" id="e-oinit-ocheck"  d="M300 200 V230"/>
+      <path class="edge" id="e-ocheck-iinit"  d="M300 310 V355"/>
+      <path class="edge" id="e-iinit-icheck"  d="M300 395 V420"/>
+      <path class="edge" id="e-icheck-body"   d="M300 500 V535"/>
+      <path class="edge" id="e-body-iupd"     d="M300 575 V605"/>
+      <path class="edge" id="e-iupd-icheck"   d="M240 625 H175 V460 H220"/>
+      <path class="edge" id="e-icheck-oupd"   d="M380 460 H495 V725 H360"/>
+      <path class="edge" id="e-oupd-ocheck"   d="M240 725 H80 V270 H220"/>
+      <path class="edge" id="e-ocheck-print"  d="M380 270 H585 V795 H384"/>
+      <path class="edge" id="e-print-end"     d="M300 815 V845"/>
+
+      <text class="elabel" data-edge="e-ocheck-iinit" x="322" y="326">True</text>
+      <text class="elabel" data-edge="e-icheck-body"  x="322" y="518">True</text>
+      <text class="elabel" data-edge="e-iupd-icheck"  x="162" y="545" transform="rotate(-90 162 545)">loop back</text>
+      <text class="elabel" data-edge="e-icheck-oupd"  x="420" y="448">False</text>
+      <text class="elabel" data-edge="e-oupd-ocheck"  x="66"  y="500" transform="rotate(-90 66 500)">loop back</text>
+      <text class="elabel" data-edge="e-ocheck-print" x="420" y="258">False</text>
+
+      <g class="node" id="n-start"><rect x="240" y="20" width="120" height="40" rx="20"/><text x="300" y="40">Start</text></g>
+      <g class="node" id="n-declare"><rect x="190" y="85" width="220" height="50" rx="4"/>
+        <text x="300" y="101">Declare variables:</text><text class="code" x="300" y="120"><tspan class="kw">int</tspan> i, j, count = 0</text></g>
+      <g class="node" id="n-oinit"><rect x="240" y="160" width="120" height="40" rx="4"/><text class="code" x="300" y="180" id="oinit-text">i = 3</text></g>
+      <g class="node" id="n-ocheck"><polygon points="300,230 380,270 300,310 220,270"/>
+        <text class="code" x="300" y="270">i &gt;= 1?</text></g>
+      <g class="node" id="n-iinit"><rect x="240" y="355" width="120" height="40" rx="4"/><text class="code" x="300" y="375">j = 1</text></g>
+      <g class="node" id="n-icheck"><polygon points="300,420 380,460 300,500 220,460"/>
+        <text class="code" x="300" y="460">j &lt; i?</text></g>
+      <g class="node" id="n-body"><rect x="205" y="535" width="190" height="40" rx="4"/><text class="code" x="300" y="555">count = count + j</text></g>
+      <g class="node" id="n-iupd"><rect x="240" y="605" width="120" height="40" rx="4"/><text class="code" x="300" y="625">j = j + 1</text></g>
+      <g class="node" id="n-oupd"><rect x="240" y="705" width="120" height="40" rx="4"/><text class="code" x="300" y="725">i = i - 1</text></g>
+      <g class="node" id="n-print"><polygon points="222,775 390,775 378,815 210,815"/>
+        <text x="300" y="795">Print <tspan class="code" style="font-family:ui-monospace,Menlo,Consolas,monospace">count</tspan></text></g>
+      <g class="node" id="n-end"><rect x="245" y="845" width="110" height="40" rx="20"/><text x="300" y="865">Stop</text></g>
+
+      <g class="badge" id="badge" style="display:none">
+        <rect x="0" y="0" width="54" height="22" rx="11"/>
+        <text x="27" y="11">True</text>
+      </g>
+    </svg>
+  </section>
+
+  <div class="side">
+    <section class="card">
+      <h2>Inner loop runs</h2>
+      <div class="wordbar">
+        <label for="st">Outer loop starts at <span class="mono">i =</span></label>
+        <select id="st"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select>
+        <span class="hint">Lecture 7, Problem 7 uses 3.</span>
+      </div>
+      <div class="gridwrap"><table class="grid" id="grid"></table></div>
+      <div class="note">Each row is one pass of the <b style="color:var(--left)">outer</b> loop.
+        Each box is one run of <span class="mono">count = count + j</span>, showing the <b style="color:var(--right)">j</b> that was added.
+        Because the inner test is <span class="mono">j &lt; i</span>, row <span class="mono">i</span> gets only <span class="mono">i - 1</span> boxes.</div>
+    </section>
+
+    <section class="card">
+      <h2>Variables</h2>
+      <div class="vars" id="vars"></div>
+    </section>
+
+    <section class="card explain" aria-live="polite">
+      <h2>What's happening</h2>
+      <div class="where" id="where"></div>
+      <div class="msg" id="msg"></div>
+      <div class="output"><div class="prompt">output</div><pre id="out"></pre></div>
+      <div class="controls">
+        <button id="reset" title="Reset (R)">⟲ Reset</button>
+        <button id="prev" title="Back (←)">◀ Back</button>
+        <button id="next" class="primary" title="Next (→ or Space)">Next ▶</button>
+        <button id="play">▶ Auto-play</button>
+        <select id="speed" aria-label="Auto-play speed">
+          <option value="2200">Slow</option>
+          <option value="1400" selected>Normal</option>
+          <option value="600">Fast</option>
+        </select>
+        <span class="counter" id="counter"></span>
+      </div>
+      <div class="progress"><div id="bar"></div></div>
+    </section>
+
+    <section class="card">
+      <h2>Trace table</h2>
+      <div class="trace-wrap" id="traceWrap">
+        <table>
+          <thead id="traceHead"></thead>
+          <tbody id="trace"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const tf = b => b ? '<span class="t">True</span>' : '<span class="f">False</span>';
+
+  /* cells: items = [{text, cls, idx}] */
+  function buildCells(wrapId, cellsId, items) {
+    $(cellsId).innerHTML = items.map((it, k) =>
+      `<div class="col"><div class="cell ${it.cls || ''}" data-k="${k}">${it.text}</div><div class="idx">${it.idx ?? ''}</div></div>`).join('');
+    $(wrapId).dataset.k = items.length;
+    sizeCells($(wrapId));
+  }
+  function sizeCells(wrap) {
+    const k = +wrap.dataset.k, gap = 6;
+    if (!k) return;
+    const avail = wrap.parentElement.clientWidth - 8;
+    const cell = Math.max(24, Math.min(54, Math.floor((avail - gap * (k - 1)) / k)));
+    wrap.style.setProperty('--cell', cell + 'px');
+    wrap.style.setProperty('--gap', gap + 'px');
+    wrap.style.width = (k * cell + (k - 1) * gap) + 'px';
+  }
+  window.addEventListener('resize', () => document.querySelectorAll('.array-wrap').forEach(sizeCells));
+
+  function makeDemo(cfg) {
+    let steps = [], cur = 0, timer = null;
+    $('vars').style.gridTemplateColumns = `repeat(${cfg.vars.length}, minmax(0, 1fr))`;
+    $('vars').innerHTML = cfg.vars.map(v =>
+      `<div class="var ${v.cls || ''}" id="v-${v.id}"><div class="name">${v.label}</div><div class="val">—</div><div class="sub"></div></div>`).join('');
+    $('traceHead').innerHTML = '<tr>' + cfg.traceCols.map(c => `<th>${c}</th>`).join('') + '</tr>';
+
+    function render(animate) {
+      const s = steps[cur], prev = animate && cur > 0 ? steps[cur - 1] : null;
+
+      document.querySelectorAll('.flow .node, .flow .edge, .flow .elabel').forEach(e => e.classList.remove('active', 'visited'));
+      for (let k = 0; k < cur; k++) {
+        $('n-' + steps[k].node).classList.add('visited');
+        if (steps[k].edge) $(steps[k].edge).classList.add('visited');
+      }
+      $('n-' + s.node).classList.add('active');
+      if (s.edge) {
+        $(s.edge).classList.add('active');
+        document.querySelectorAll(`.elabel[data-edge="${s.edge}"]`).forEach(l => l.classList.add('active'));
+      }
+      const badge = $('badge');
+      if (s.badge === true || s.badge === false) {
+        const pos = cfg.badgePos[s.node];
+        badge.style.display = '';
+        badge.setAttribute('transform', `translate(${pos[0]} ${pos[1]})`);
+        badge.classList.toggle('false', !s.badge);
+        badge.querySelector('text').textContent = s.badge ? 'True' : 'False';
+      } else badge.style.display = 'none';
+
+      cfg.vars.forEach(v => {
+        const box = $('v-' + v.id), val = s.vars[v.id], sub = (s.subs && s.subs[v.id]) || '';
+        box.querySelector('.val').innerHTML = (val === null || val === undefined) ? '—' : val;
+        box.querySelector('.sub').innerHTML = sub;
+        if (prev && prev.vars[v.id] !== val && val !== null && val !== undefined) {
+          box.classList.remove('changed'); void box.offsetWidth; box.classList.add('changed');
+        }
+      });
+
+      $('where').textContent = s.where || cfg.names[s.node];
+      $('msg').innerHTML = s.msg;
+      const out = $('out');
+      out.textContent = s.out || '';
+      out.parentElement.scrollTop = out.parentElement.scrollHeight;
+      $('counter').textContent = `Step ${cur + 1} / ${steps.length}`;
+      $('bar').style.width = (100 * cur / Math.max(1, steps.length - 1)) + '%';
+      $('prev').disabled = cur === 0;
+      $('next').disabled = cur === steps.length - 1;
+
+      const tb = $('trace');
+      tb.innerHTML = !s.trace.length
+        ? `<tr><td colspan="${cfg.traceCols.length}" class="empty">${cfg.traceEmpty}</td></tr>`
+        : s.trace.map((r, k) => `<tr${k === s.trace.length - 1 && s.traceLatest ? ' class="latest"' : ''}>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('');
+      const tw = $('traceWrap');
+      tw.scrollTop = tw.scrollHeight;
+
+      cfg.renderExtra(s);
+    }
+
+    const speed = () => +$('speed').value;
+    function go(k) { cur = Math.max(0, Math.min(steps.length - 1, k)); render(true); if (cur === steps.length - 1) stop(); }
+    function stop() { clearInterval(timer); timer = null; $('play').textContent = '▶ Auto-play'; }
+    function play() {
+      if (timer) return stop();
+      if (cur === steps.length - 1) go(0);
+      $('play').textContent = '⏸ Pause';
+      timer = setInterval(() => go(cur + 1), speed());
+    }
+    $('speed').onchange = () => { if (timer) { stop(); play(); } };
+    $('next').onclick = () => { stop(); go(cur + 1); };
+    $('prev').onclick = () => { stop(); go(cur - 1); };
+    $('reset').onclick = () => { stop(); go(0); };
+    $('play').onclick = play;
+    document.addEventListener('keydown', e => {
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); stop(); go(cur + 1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); stop(); go(cur - 1); }
+      else if (e.key === 'r' || e.key === 'R') { stop(); go(0); }
+    });
+
+    return {
+      load(params) {
+        stop();
+        steps = cfg.build(params);
+        cur = 0;
+        cfg.onLoad(params);
+        render(false);
+      }
+    };
+  }
+
+
+  let START = 3;
+  const demo = makeDemo({
+    names: { start: 'Start', declare: 'Declare variables', oinit: 'Initialize outer counter', ocheck: 'Outer loop test',
+             iinit: 'Initialize (reset) inner counter', icheck: 'Inner loop test', body: 'Inner loop body: add j to count',
+             iupd: 'Update inner counter', oupd: 'Update outer counter (count down)', print: 'Output: print count', end: 'Stop' },
+    vars: [{ id: 'i', label: 'i', cls: 'p' }, { id: 'j', label: 'j', cls: 'q' }, { id: 'count', label: 'count' }, { id: 'runs', label: 'inner body runs' }],
+    traceCols: ['#', 'i', 'j', 'count'],
+    traceEmpty: 'The count box has not run yet',
+    badgePos: { ocheck: [372, 226], icheck: [372, 416] },
+    build({ start }) {
+      const steps = [];
+      let i = null, j = null, count = null, runs = 0, out = '', trace = [], filled = [], zero = [];
+      const push = s => steps.push(Object.assign({ vars: { i, j, count, runs }, out, trace: trace.slice(), filled: filled.slice(), zero: zero.slice(), now: null, row: null }, s));
+
+      push({ node: 'start', msg: `<b>Start</b>. The outer loop counts <i>down</i> from ${start} to 1. For each <b>i</b>, the inner loop adds 1, 2, … up to (but not including) <b>i</b>.` });
+      count = 0;
+      push({ node: 'declare', edge: 'e-start-declare', msg: `Reserve boxes for <b>i</b>, <b>j</b> and <b>count</b>. Only <b>count</b> gets a value here: <b>0</b>.` });
+      i = start;
+      push({ node: 'oinit', edge: 'e-declare-oinit', row: i, msg: `The outer counter starts at <b>i = ${start}</b>.` });
+
+      let eo = 'e-oinit-ocheck';
+      for (;;) {
+        const co = i >= 1;
+        push({ node: 'ocheck', edge: eo, badge: co, row: co ? i : null,
+          msg: `Outer test: is i &gt;= 1? &nbsp;${i} &gt;= 1 → <b>${co ? 'True' : 'False'}</b>. ` +
+               (co ? `Start the row for i = ${i}.` : `i has counted down past 1, so leave the outer loop.`) });
+        if (!co) break;
+
+        j = 1;
+        push({ node: 'iinit', edge: 'e-ocheck-iinit', row: i,
+          msg: i === start ? `Start the inner loop at <b>j = 1</b>.`
+                           : `<b>j is reset to 1</b>. This box is inside the outer loop, so it runs again for every value of i.` });
+
+        let ei = 'e-iinit-icheck';
+        for (;;) {
+          const ci = j < i;
+          let msg = `Inner test: is j &lt; i? &nbsp;${j} &lt; ${i} → <b>${ci ? 'True' : 'False'}</b>. `;
+          if (ci) msg += `Run the inner loop body.`;
+          else if (j === 1) { zero.push(i); msg += `False on the <i>very first</i> inner test, so the inner loop body runs <b>zero</b> times for i = ${i}. Nothing goes in the trace table for this row.`; }
+          else msg += `This row is finished, so leave the <i>inner</i> loop. We are still inside the outer loop.`;
+          push({ node: 'icheck', edge: ei, badge: ci, row: i, now: ci ? [i, j] : null, msg });
+          if (!ci) break;
+
+          const before = count;
+          count = count + j; runs++; filled.push(`${i},${j}`);
+          trace.push([runs, i, j, count]);
+          push({ node: 'body', edge: 'e-icheck-body', row: i, now: [i, j], traceLatest: true,
+            msg: `<b>count = count + j</b>: ${before} + ${j} → <b>${count}</b>. Write a row: i = ${i}, j = ${j}, count = ${count}.` });
+          j = j + 1;
+          push({ node: 'iupd', edge: 'e-body-iupd', row: i,
+            msg: `<b>j = j + 1</b>: ${j - 1} → <b>${j}</b>. Loop back to the inner test.` });
+          ei = 'e-iupd-icheck';
+        }
+
+        i = i - 1;
+        push({ node: 'oupd', edge: 'e-icheck-oupd', row: i + 1,
+          msg: `<b>i = i - 1</b>: ${i + 1} → <b>${i}</b>. The outer loop counts <i>down</i>. Loop back to the outer test.` });
+        eo = 'e-oupd-ocheck';
+      }
+      out += `${count}\n`;
+      push({ node: 'print', edge: 'e-ocheck-print', msg: `Print <b>${count}</b>.` });
+      push({ node: 'end', edge: 'e-print-end',
+        msg: `<b>Stop</b>. The inner loop body ran <b>${runs}</b> time${runs === 1 ? '' : 's'} in total, and the program printed <b>${count}</b>.` });
+      return steps;
+    },
+    onLoad({ start }) {
+      START = start;
+      $('oinit-text').textContent = `i = ${start}`;
+      const cols = Math.max(1, start - 1);
+      let h = '<tr><th></th>';
+      for (let c = 1; c <= cols; c++) h += `<th class="colh" data-c="${c}">j=${c}</th>`;
+      h += '<th></th></tr>';
+      for (let r = start; r >= 1; r--) {
+        h += `<tr data-r="${r}"><th class="rowh">i=${r}</th>`;
+        for (let c = 1; c <= cols; c++) h += c < r ? `<td data-rc="${r},${c}"></td>` : '<td class="na"></td>';
+        h += `<th class="zero" data-z="${r}"></th></tr>`;
+      }
+      $('grid').innerHTML = h;
+    },
+    renderExtra(s) {
+      const now = s.now ? s.now.join(',') : null;
+      document.querySelectorAll('#grid td[data-rc]').forEach(td => {
+        const f = s.filled.includes(td.dataset.rc);
+        td.textContent = f ? '+' + td.dataset.rc.split(',')[1] : '';
+        td.classList.toggle('filled', f);
+        td.classList.toggle('now', td.dataset.rc === now);
+      });
+      document.querySelectorAll('#grid th.zero').forEach(th => th.textContent = s.zero.includes(+th.dataset.z) ? '0 runs' : '');
+      document.querySelectorAll('#grid tr[data-r]').forEach(tr => tr.classList.toggle('rowcur', +tr.dataset.r === s.row));
+      document.querySelectorAll('#grid th.colh').forEach(th => th.classList.toggle('now', !!s.now && +th.dataset.c === s.now[1]));
+    }
+  });
+
+  const load = () => demo.load({ start: +$('st').value });
+  $('st').onchange = load;
+  load();
+})();
+</script>
+<script>
+  // light/dark toggle: an explicit choice wins over the system setting
+  (function () {
+    var b = document.getElementById('theme-toggle'), r = document.documentElement;
+    function current() {
+      var t = r.getAttribute('data-theme');
+      return t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    function show() {
+      var dark = current() === 'dark';
+      b.textContent = dark ? '☀ Light' : '☾ Dark';
+      b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    b.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      r.setAttribute('data-theme', next);
+      try { localStorage.setItem('cpsc100-theme', next); } catch (e) {}
+      show();
+      b.blur();   // so Space goes back to the demo's "next step"
+    });
+    show();
+  })();
+</script>
+</body>
+</html>
