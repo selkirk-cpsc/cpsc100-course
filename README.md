@@ -51,7 +51,7 @@ Each demo steps through a flow diagram one box at a time. As you follow the arro
 
 | Demo | What it shows |
 |---|---|
-| [Tracing a Loop](https://selkirk-cpsc.github.io/cpsc100-course/demos/review-loop-trace/) | Check your trace table for a `for`-style loop with a decision inside: even values of `i` are added to `total`, odd values take 1 away. Change the loop limit to see the body run zero times. |
+| [Tracing a Loop](https://selkirk-cpsc.github.io/cpsc100-course/demos/review-loop-trace/) | A new loop to trace, built like Problem 4: multiples of 3 are subtracted from `total`, other values of `i` add 2. Fill in your trace table on the page and it checks each row as the program reaches the test. Change the loop limit to see the body run zero times. |
 | [Tracing Nested Loops](https://selkirk-cpsc.github.io/cpsc100-course/demos/review-nested-trace/) | Check your trace table for an outer loop that counts down and an inner loop with the test `j < i`. When `i` is 1, the inner loop runs zero times. |
 
 ### Other Topics

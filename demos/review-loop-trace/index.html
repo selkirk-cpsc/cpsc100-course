@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tracing a Loop Walkthrough</title>
+<title>Tracing a Loop Practice</title>
 <style>
   :root {
     --bg: #f6f6f3;
@@ -237,6 +237,22 @@
   .theme-toggle { font: inherit; font-size: .85rem; line-height: 1.2; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
   .theme-toggle:hover { border-color: var(--ink); }
   header .theme-toggle { float: right; margin: 0 0 8px 12px; }
+
+  /* the student's own trace table */
+  .trace-wrap.mine { max-height: none; overflow-x: auto; }
+  .mine td { padding: 4px 6px; vertical-align: middle; }
+  .mine input, .mine select {
+    font: 15px ui-monospace, Menlo, Consolas, monospace; width: 4.6em; padding: 4px 6px; text-align: center;
+    border-radius: 6px; border: 1.5px solid var(--line); background: var(--node); color: var(--ink);
+  }
+  .mine select { width: 5.6em; font-family: inherit; }
+  .mine :is(input, select):focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .mine :is(input, select).ok { border-color: var(--ok); background: var(--ok-soft); }
+  .mine :is(input, select).bad { border-color: var(--bad); background: var(--bad-soft); }
+  .mine td.verdict { text-align: left; font-size: .85rem; min-width: 9em; }
+  .mine td.verdict .yes { color: var(--ok); font-weight: 700; }
+  .mine td.verdict .no { color: var(--bad); font-weight: 700; }
+  .mine tr.latest { background: var(--accent-soft); }
 </style>
 <script>
   // apply a saved light/dark choice before the page draws (no flash)
@@ -246,8 +262,8 @@
 <body>
 <header>
   <button type="button" class="theme-toggle" id="theme-toggle">☾ Dark</button>
-  <h1>Tracing a Loop: Even Add, Odd Subtract</h1>
-  <p>Step through the diagram from Lecture 7, Problem 4 and check your trace table. A row is written <i>every</i> time the program reaches the <span class="mono">i &lt;= 6</span> test, including the last check, which is False.
+  <h1>Tracing a Loop: Practice Trace</h1>
+  <p>A new loop to practise on, built like Lecture 7, Problem 4. Fill in your trace table first, then step through the diagram: each time the program reaches the <span class="mono">i &lt;= 5</span> test, it checks that row of your table. Write a row <i>every</i> time the test runs, including the last check, which is False.
      Keys: <kbd>→</kbd>/<kbd>Space</kbd> next, <kbd>←</kbd> back, <kbd>R</kbd> reset.</p>
 </header>
 
@@ -270,30 +286,30 @@
       <path class="edge" id="e-declare-init"  d="M280 140 V165"/>
       <path class="edge" id="e-init-check"    d="M280 205 V235"/>
       <path class="edge" id="e-check-ifd"     d="M280 315 V348"/>
-      <path class="edge" id="e-ifd-add"       d="M190 390 H155 V455"/>
-      <path class="edge" id="e-ifd-sub"       d="M370 390 H405 V455"/>
-      <path class="edge" id="e-add-update"    d="M155 495 V520 H280 V545"/>
-      <path class="edge" id="e-sub-update"    d="M405 495 V520 H280 V545"/>
+      <path class="edge" id="e-ifd-mult"       d="M190 390 H155 V455"/>
+      <path class="edge" id="e-ifd-other"       d="M370 390 H405 V455"/>
+      <path class="edge" id="e-mult-update"    d="M155 495 V520 H280 V545"/>
+      <path class="edge" id="e-other-update"    d="M405 495 V520 H280 V545"/>
       <path class="edge" id="e-update-check"  d="M220 565 H38 V275 H200"/>
       <path class="edge" id="e-check-print"   d="M360 275 H530 V635 H364"/>
       <path class="edge" id="e-print-end"     d="M280 655 V690"/>
 
       <text class="elabel" data-edge="e-check-ifd"    x="302" y="327">True</text>
-      <text class="elabel" data-edge="e-ifd-add"      x="166" y="378">True</text>
-      <text class="elabel" data-edge="e-ifd-sub"      x="396" y="378">False</text>
+      <text class="elabel" data-edge="e-ifd-mult"      x="166" y="378">True</text>
+      <text class="elabel" data-edge="e-ifd-other"      x="396" y="378">False</text>
       <text class="elabel" data-edge="e-update-check" x="24"  y="430" transform="rotate(-90 24 430)">loop back</text>
       <text class="elabel" data-edge="e-check-print"  x="410" y="263">False</text>
 
       <g class="node" id="n-start"><rect x="220" y="20" width="120" height="40" rx="20"/><text x="280" y="40">Start</text></g>
       <g class="node" id="n-declare"><rect x="170" y="90" width="220" height="50" rx="4"/>
-        <text x="280" y="106">Declare variables:</text><text class="code" x="280" y="125"><tspan class="kw">int</tspan> i, total = 0</text></g>
+        <text x="280" y="106">Declare variables:</text><text class="code" x="280" y="125"><tspan class="kw">int</tspan> i, total = 10</text></g>
       <g class="node" id="n-init"><rect x="220" y="165" width="120" height="40" rx="4"/><text class="code" x="280" y="185">i = 1</text></g>
       <g class="node" id="n-check"><polygon points="280,235 360,275 280,315 200,275"/>
-        <text class="code" x="280" y="275" id="check-text">i &lt;= 6?</text></g>
+        <text class="code" x="280" y="275" id="check-text">i &lt;= 5?</text></g>
       <g class="node" id="n-ifd"><polygon points="280,348 370,390 280,432 190,390"/>
-        <text class="code" x="280" y="390">i % 2 == 0?</text></g>
-      <g class="node" id="n-add"><rect x="70" y="455" width="170" height="40" rx="4"/><text class="code" x="155" y="475">total = total + i</text></g>
-      <g class="node" id="n-sub"><rect x="320" y="455" width="170" height="40" rx="4"/><text class="code" x="405" y="475">total = total - 1</text></g>
+        <text class="code" x="280" y="390">i % 3 == 0?</text></g>
+      <g class="node" id="n-mult"><rect x="70" y="455" width="170" height="40" rx="4"/><text class="code" x="155" y="475">total = total - i</text></g>
+      <g class="node" id="n-other"><rect x="320" y="455" width="170" height="40" rx="4"/><text class="code" x="405" y="475">total = total + 2</text></g>
       <g class="node" id="n-update"><rect x="220" y="545" width="120" height="40" rx="4"/><text class="code" x="280" y="565">i = i + 1</text></g>
       <g class="node" id="n-print"><polygon points="202,615 370,615 358,655 190,655"/>
         <text x="280" y="635">Print <tspan class="code" style="font-family:ui-monospace,Menlo,Consolas,monospace">total</tspan></text></g>
@@ -311,16 +327,16 @@
       <h2>The counter i</h2>
       <div class="wordbar">
         <label for="lim">Test is <span class="mono">i &lt;=</span></label>
-        <select id="lim"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option selected>6</option><option>7</option><option>8</option></select>
-        <span class="hint">Lecture 7, Problem 4 uses 6.</span>
+        <select id="lim"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option><option>8</option></select>
+        <span class="hint">The practice loop uses 5.</span>
       </div>
       <div class="array-wrap" id="lineWrap">
         <div class="ptr p hidden" id="ptr"><span>i</span><span class="tri">▼</span></div>
         <div class="cells" id="line"></div>
       </div>
       <div class="legend">
-        <span><span class="sw" style="background:var(--ok-soft);border-color:var(--ok)"></span>even: <span class="mono">total + i</span></span>
-        <span><span class="sw" style="background:var(--bad-soft);border-color:var(--bad)"></span>odd: <span class="mono">total - 1</span></span>
+        <span><span class="sw" style="background:var(--bad-soft);border-color:var(--bad)"></span>multiple of 3: <span class="mono">total - i</span></span>
+        <span><span class="sw" style="background:var(--ok-soft);border-color:var(--ok)"></span>otherwise: <span class="mono">total + 2</span></span>
         <span><span class="sw" style="background:var(--term);border-color:var(--line);border-style:dashed"></span>the test becomes False here</span>
       </div>
     </section>
@@ -351,12 +367,17 @@
     </section>
 
     <section class="card">
-      <h2>Trace table</h2>
-      <div class="trace-wrap" id="traceWrap">
+      <h2>Your trace table</h2>
+      <p class="note" style="margin-top:0">Fill in a row for each time the program reaches the test, then press <b>Next</b>. Each row is checked when the program gets to it. You can fix a row at any time.</p>
+      <div class="trace-wrap mine">
         <table>
           <thead id="traceHead"></thead>
-          <tbody id="trace"></tbody>
+          <tbody id="mine"></tbody>
         </table>
+      </div>
+      <div class="controls">
+        <button id="clear">Clear my table</button>
+        <span class="counter" id="score"></span>
       </div>
     </section>
   </div>
@@ -391,7 +412,6 @@
     $('vars').style.gridTemplateColumns = `repeat(${cfg.vars.length}, minmax(0, 1fr))`;
     $('vars').innerHTML = cfg.vars.map(v =>
       `<div class="var ${v.cls || ''}" id="v-${v.id}"><div class="name">${v.label}</div><div class="val">—</div><div class="sub"></div></div>`).join('');
-    $('traceHead').innerHTML = '<tr>' + cfg.traceCols.map(c => `<th>${c}</th>`).join('') + '</tr>';
 
     function render(animate) {
       const s = steps[cur], prev = animate && cur > 0 ? steps[cur - 1] : null;
@@ -434,13 +454,6 @@
       $('prev').disabled = cur === 0;
       $('next').disabled = cur === steps.length - 1;
 
-      const tb = $('trace');
-      tb.innerHTML = !s.trace.length
-        ? `<tr><td colspan="${cfg.traceCols.length}" class="empty">${cfg.traceEmpty}</td></tr>`
-        : s.trace.map((r, k) => `<tr${k === s.trace.length - 1 && s.traceLatest ? ' class="latest"' : ''}>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('');
-      const tw = $('traceWrap');
-      tw.scrollTop = tw.scrollHeight;
-
       cfg.renderExtra(s);
     }
 
@@ -477,64 +490,64 @@
   }
 
 
-  let LIM = 6;
+  const ROWS = 9;   // blank rows in the student's table: enough for the largest limit (8)
+  let LIM = 5, last = null;
+
   const demo = makeDemo({
     names: { start: 'Start', declare: 'Declare variables', init: 'Initialize counter', check: 'Loop test',
-             ifd: 'Decision inside the loop body', add: 'Even: add i to total', sub: 'Odd: subtract 1 from total',
+             ifd: 'Decision inside the loop body', mult: 'Multiple of 3: subtract i', other: 'Otherwise: add 2',
              update: 'Update counter', print: 'Output: print total', end: 'Stop' },
     vars: [{ id: 'i', label: 'i', cls: 'p' }, { id: 'total', label: 'total', cls: 'q' }, { id: 'runs', label: 'loop body runs' }],
-    traceCols: ['#', 'i', 'total', 'i &lt;= 6?'],
-    traceEmpty: 'The loop test has not run yet',
     badgePos: { check: [352, 233], ifd: [362, 346] },
     build({ lim }) {
       const steps = [];
-      let i = null, total = null, runs = 0, out = '', trace = [], done = {};
-      const push = s => steps.push(Object.assign({ vars: { i, total, runs }, out, trace: trace.slice(), done: Object.assign({}, done), cur: null }, s));
+      let i = null, total = null, runs = 0, out = '', rows = [], done = {};
+      const push = s => steps.push(Object.assign({ vars: { i, total, runs }, out, rows: rows.slice(), done: Object.assign({}, done), cur: null }, s));
 
-      push({ node: 'start', msg: `<b>Start</b>. There is no input. Each time around the loop, an even <b>i</b> is added to <b>total</b> and an odd <b>i</b> takes 1 away.` });
-      total = 0;
+      push({ node: 'start', msg: `<b>Start</b>. There is no input. Each time around the loop, if <b>i</b> is a multiple of 3 it is subtracted from <b>total</b>; otherwise <b>total</b> goes up by 2.` });
+      total = 10;
       push({ node: 'declare', edge: 'e-start-declare',
-        msg: `Reserve boxes for <b>i</b> and <b>total</b>. <b>total</b> starts at <b>0</b>; <b>i</b> gets its value in the next box.` });
+        msg: `Reserve boxes for <b>i</b> and <b>total</b>. <b>total</b> starts at <b>10</b>; <b>i</b> gets its value in the next box.` });
       i = 1;
       push({ node: 'init', edge: 'e-declare-init', cur: i, msg: `The counter starts at <b>i = 1</b>.` });
 
       let edge = 'e-init-check';
       for (;;) {
         const c = i <= lim;
-        trace.push([trace.length + 1, i, total, tf(c)]);
-        let msg = `Is i &lt;= ${lim}? &nbsp;${i} &lt;= ${lim} → <b>${c ? 'True' : 'False'}</b>. Write a row in the trace table. `;
+        rows.push({ i, total, c });
+        let msg = `Is i &lt;= ${lim}? &nbsp;${i} &lt;= ${lim} → <b>${c ? 'True' : 'False'}</b>. This is row ${rows.length} of the trace table. `;
         if (c) msg += `Enter the loop body.`;
         else if (runs === 0) msg += `False the very first time, so the loop body never runs.`;
         else msg += `This last row is the check that ends the loop, so it belongs in the table too. Leave the loop.`;
-        push({ node: 'check', edge, badge: c, cur: i, traceLatest: true, stopHere: !c, msg });
+        push({ node: 'check', edge, badge: c, cur: i, rowHere: true, stopHere: !c, msg });
         if (!c) break;
 
-        const even = i % 2 === 0;
-        push({ node: 'ifd', edge: 'e-check-ifd', badge: even, cur: i,
-          msg: `Is i % 2 == 0? &nbsp;${i} % 2 is ${i % 2} → <b>${even ? 'True' : 'False'}</b>: ${i} is ${even ? 'even' : 'odd'}.` });
+        const mult = i % 3 === 0;
+        push({ node: 'ifd', edge: 'e-check-ifd', badge: mult, cur: i,
+          msg: `Is i % 3 == 0? &nbsp;${i} % 3 is ${i % 3} → <b>${mult ? 'True' : 'False'}</b>: ${i} is ${mult ? '' : 'not '}a multiple of 3.` });
         const before = total;
-        if (even) {
-          total = total + i; done[i] = 'plus';
-          push({ node: 'add', edge: 'e-ifd-add', cur: i, msg: `<b>total = total + i</b>: ${before} + ${i} → <b>${total}</b>.` });
+        if (mult) {
+          total = total - i; done[i] = 'mult';
+          push({ node: 'mult', edge: 'e-ifd-mult', cur: i, msg: `<b>total = total - i</b>: ${before} − ${i} → <b>${total}</b>.` });
         } else {
-          total = total - 1; done[i] = 'minus';
-          push({ node: 'sub', edge: 'e-ifd-sub', cur: i, msg: `<b>total = total - 1</b>: ${before} − 1 → <b>${total}</b>.` });
+          total = total + 2; done[i] = 'other';
+          push({ node: 'other', edge: 'e-ifd-other', cur: i, msg: `<b>total = total + 2</b>: ${before} + 2 → <b>${total}</b>.` });
         }
         runs++; i = i + 1;
-        push({ node: 'update', edge: even ? 'e-add-update' : 'e-sub-update', cur: i,
+        push({ node: 'update', edge: mult ? 'e-mult-update' : 'e-other-update', cur: i,
           msg: `<b>i = i + 1</b>: ${i - 1} → <b>${i}</b>. Follow the loop-back arrow up to the test again.` });
         edge = 'e-update-check';
       }
       out += `${total}\n`;
-      push({ node: 'print', edge: 'e-check-print', msg: `Print <b>${total}</b>.` });
-      push({ node: 'end', edge: 'e-print-end',
-        msg: `<b>Stop</b>. The loop body ran <b>${runs}</b> time${runs === 1 ? '' : 's'}, the trace table has <b>${trace.length}</b> row${trace.length === 1 ? '' : 's'} (one extra for the final False check), and the program printed <b>${total}</b>.` });
+      push({ node: 'print', edge: 'e-check-print', finished: true, msg: `Print <b>${total}</b>.` });
+      push({ node: 'end', edge: 'e-print-end', finished: true,
+        msg: `<b>Stop</b>. The loop body ran <b>${runs}</b> time${runs === 1 ? '' : 's'}, the trace table has <b>${rows.length}</b> row${rows.length === 1 ? '' : 's'} (one extra for the final False check), and the program printed <b>${total}</b>.` });
       return steps;
     },
     onLoad({ lim }) {
       LIM = lim;
       $('check-text').textContent = `i <= ${lim}?`;
-      $('traceHead').innerHTML = '<tr>' + ['#', 'i', 'total', `i &lt;= ${lim}?`].map(c => `<th>${c}</th>`).join('') + '</tr>';
+      $('traceHead').innerHTML = '<tr>' + ['#', 'i', 'total', `i &lt;= ${lim}?`, 'Check'].map(c => `<th>${c}</th>`).join('') + '</tr>';
       const items = [];
       for (let v = 1; v <= lim + 1; v++) items.push({ text: v, cls: v === lim + 1 ? 'zone' : '', idx: v === lim + 1 ? 'stop' : '' });
       buildCells('lineWrap', 'line', items);
@@ -543,15 +556,70 @@
       document.querySelectorAll('#line .col').forEach(col => {
         const c = col.querySelector('.cell'), idx = col.querySelector('.idx'), v = 1 + +c.dataset.k;
         c.classList.remove('hit', 'bad', 'current', 'stopcell');
-        if (s.done[v] === 'plus') { c.classList.add('hit'); idx.textContent = '+' + v; }
-        else if (s.done[v] === 'minus') { c.classList.add('bad'); idx.textContent = '−1'; }
+        if (s.done[v] === 'mult') { c.classList.add('bad'); idx.textContent = '−' + v; }
+        else if (s.done[v] === 'other') { c.classList.add('hit'); idx.textContent = '+2'; }
         else idx.textContent = v === LIM + 1 ? 'stop' : '';
         if (s.cur === v) c.classList.add(s.stopHere ? 'stopcell' : 'current');
       });
       $('ptr').classList.toggle('hidden', s.vars.i === null);
       if (s.vars.i !== null) $('ptr').style.setProperty('--i', s.vars.i - 1);
+      last = s;
+      checkTable();
     }
   });
+
+  /* ---------- the student's trace table ---------- */
+  $('mine').innerHTML = Array.from({ length: ROWS }, (_, k) => `<tr>
+      <td>${k + 1}</td>
+      <td><input data-c="i" inputmode="numeric" autocomplete="off" aria-label="Row ${k + 1}, i"></td>
+      <td><input data-c="total" inputmode="numeric" autocomplete="off" aria-label="Row ${k + 1}, total"></td>
+      <td><select data-c="c" aria-label="Row ${k + 1}, test"><option value=""></option><option>True</option><option>False</option></select></td>
+      <td class="verdict"></td></tr>`).join('');
+  const myRows = [...$('mine').rows];
+  const num = v => { v = v.trim().replace(/[−–]/g, '-'); return /^-?\d+$/.test(v) ? +v : NaN; };
+  const read = tr => ({ i: tr.querySelector('[data-c=i]'), total: tr.querySelector('[data-c=total]'), c: tr.querySelector('[data-c=c]') });
+  const filled = f => f.i.value.trim() || f.total.value.trim() || f.c.value;
+
+  // mark the rows the program has reached so far; return what to say about them
+  function checkTable() {
+    const s = last;
+    if (!s) return;
+    let right = 0, extra = 0;
+    myRows.forEach((tr, k) => {
+      const f = read(tr), want = s.rows[k], v = tr.querySelector('.verdict');
+      tr.classList.toggle('latest', !!s.rowHere && k === s.rows.length - 1);
+      [f.i, f.total, f.c].forEach(e => e.classList.remove('ok', 'bad'));
+      v.innerHTML = '';
+      if (want) {
+        const ok = { i: num(f.i.value) === want.i, total: num(f.total.value) === want.total, c: f.c.value === (want.c ? 'True' : 'False') };
+        for (const key in ok) f[key].classList.add(ok[key] ? 'ok' : 'bad');
+        if (ok.i && ok.total && ok.c) { right++; v.innerHTML = '<span class="yes">✓</span>'; }
+        else v.innerHTML = `<span class="no">✗</span> should be ${want.i}, ${want.total}, ${want.c ? 'True' : 'False'}`;
+      } else if (s.finished && filled(f)) {
+        extra++;
+        [f.i, f.total, f.c].forEach(e => e.classList.add('bad'));
+        v.innerHTML = '<span class="no">✗</span> the loop had already ended';
+      }
+    });
+
+    const n = s.rows.length;
+    $('score').textContent = n ? `${right} of ${n} row${n === 1 ? '' : 's'} right so far` : '';
+    let note = '';
+    if (s.rowHere) {
+      const f = read(myRows[n - 1]);
+      note = !filled(f) ? `Your row ${n} is empty.`
+           : myRows[n - 1].querySelector('.yes') ? `Your row ${n} matches. ✓`
+           : `Your row ${n} doesn't match. Compare it with the variables above.`;
+    } else if (s.node === 'end') {
+      note = `You got <b>${right} of ${n}</b> rows right.` + (extra ? ` ${extra} row${extra === 1 ? '' : 's'} after row ${n} should be blank.` : '');
+    }
+    $('msg').innerHTML = s.msg + (note ? `<div class="note">${note}</div>` : '');
+  }
+  $('mine').addEventListener('input', checkTable);
+  $('clear').onclick = () => {
+    myRows.forEach(tr => { const f = read(tr); f.i.value = f.total.value = f.c.value = ''; });
+    checkTable();
+  };
 
   const load = () => demo.load({ lim: +$('lim').value });
   $('lim').onchange = load;
