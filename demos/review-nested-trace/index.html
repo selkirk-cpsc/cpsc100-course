@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tracing Nested Loops Walkthrough</title>
+<title>Tracing Nested Loops Practice</title>
 <style>
   :root {
     --bg: #f6f6f3;
@@ -253,6 +253,21 @@
   .theme-toggle { font: inherit; font-size: .85rem; line-height: 1.2; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
   .theme-toggle:hover { border-color: var(--ink); }
   header .theme-toggle { float: right; margin: 0 0 8px 12px; }
+  /* the student's own trace table */
+  .trace-wrap.mine { max-height: none; overflow-x: auto; }
+  .mine td { padding: 4px 6px; vertical-align: middle; }
+  .mine input, .mine select {
+    font: 15px ui-monospace, Menlo, Consolas, monospace; width: 4.6em; padding: 4px 6px; text-align: center;
+    border-radius: 6px; border: 1.5px solid var(--line); background: var(--node); color: var(--ink);
+  }
+  .mine select { width: 5.6em; font-family: inherit; }
+  .mine :is(input, select):focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .mine :is(input, select).ok { border-color: var(--ok); background: var(--ok-soft); }
+  .mine :is(input, select).bad { border-color: var(--bad); background: var(--bad-soft); }
+  .mine td.verdict { text-align: left; font-size: .85rem; min-width: 9em; }
+  .mine td.verdict .yes { color: var(--ok); font-weight: 700; }
+  .mine td.verdict .no { color: var(--bad); font-weight: 700; }
+  .mine tr.latest { background: var(--accent-soft); }
 </style>
 <script>
   // apply a saved light/dark choice before the page draws (no flash)
@@ -262,8 +277,8 @@
 <body>
 <header>
   <button type="button" class="theme-toggle" id="theme-toggle">☾ Dark</button>
-  <h1>Tracing Nested Loops: Counting Down</h1>
-  <p>Step through the diagram from Lecture 7, Problem 7 and check your trace table. The outer loop counts <i>down</i>, and the inner test is <span class="mono">j &lt; i</span>, so when <span class="mono">i</span> is 1 the inner loop runs zero times.
+  <h1>Tracing Nested Loops: Practice Trace</h1>
+  <p>A new pair of nested loops to practise on, built like Lecture 7, Problem 7. Fill in your trace table first, then step through the diagram: each time the <span class="mono">sum</span> box runs, it checks that row of your table. Watch where the inner loop <i>starts</i>, and what gets added.
      Keys: <kbd>→</kbd>/<kbd>Space</kbd> next, <kbd>←</kbd> back, <kbd>R</kbd> reset.</p>
 </header>
 
@@ -306,18 +321,18 @@
 
       <g class="node" id="n-start"><rect x="240" y="20" width="120" height="40" rx="20"/><text x="300" y="40">Start</text></g>
       <g class="node" id="n-declare"><rect x="190" y="85" width="220" height="50" rx="4"/>
-        <text x="300" y="101">Declare variables:</text><text class="code" x="300" y="120"><tspan class="kw">int</tspan> i, j, count = 0</text></g>
-      <g class="node" id="n-oinit"><rect x="240" y="160" width="120" height="40" rx="4"/><text class="code" x="300" y="180" id="oinit-text">i = 3</text></g>
+        <text x="300" y="101">Declare variables:</text><text class="code" x="300" y="120"><tspan class="kw">int</tspan> i, j, sum = 0</text></g>
+      <g class="node" id="n-oinit"><rect x="240" y="160" width="120" height="40" rx="4"/><text class="code" x="300" y="180" id="oinit-text">i = 1</text></g>
       <g class="node" id="n-ocheck"><polygon points="300,230 380,270 300,310 220,270"/>
-        <text class="code" x="300" y="270">i &gt;= 1?</text></g>
-      <g class="node" id="n-iinit"><rect x="240" y="355" width="120" height="40" rx="4"/><text class="code" x="300" y="375">j = 1</text></g>
+        <text class="code" x="300" y="270" id="ocheck-text">i &lt;= 3?</text></g>
+      <g class="node" id="n-iinit"><rect x="240" y="355" width="120" height="40" rx="4"/><text class="code" x="300" y="375">j = i</text></g>
       <g class="node" id="n-icheck"><polygon points="300,420 380,460 300,500 220,460"/>
-        <text class="code" x="300" y="460">j &lt; i?</text></g>
-      <g class="node" id="n-body"><rect x="205" y="535" width="190" height="40" rx="4"/><text class="code" x="300" y="555">count = count + j</text></g>
+        <text class="code" x="300" y="460" id="icheck-text">j &lt;= 3?</text></g>
+      <g class="node" id="n-body"><rect x="205" y="535" width="190" height="40" rx="4"/><text class="code" x="300" y="555">sum = sum + i</text></g>
       <g class="node" id="n-iupd"><rect x="240" y="605" width="120" height="40" rx="4"/><text class="code" x="300" y="625">j = j + 1</text></g>
-      <g class="node" id="n-oupd"><rect x="240" y="705" width="120" height="40" rx="4"/><text class="code" x="300" y="725">i = i - 1</text></g>
+      <g class="node" id="n-oupd"><rect x="240" y="705" width="120" height="40" rx="4"/><text class="code" x="300" y="725">i = i + 1</text></g>
       <g class="node" id="n-print"><polygon points="222,775 390,775 378,815 210,815"/>
-        <text x="300" y="795">Print <tspan class="code" style="font-family:ui-monospace,Menlo,Consolas,monospace">count</tspan></text></g>
+        <text x="300" y="795">Print <tspan class="code" style="font-family:ui-monospace,Menlo,Consolas,monospace">sum</tspan></text></g>
       <g class="node" id="n-end"><rect x="245" y="845" width="110" height="40" rx="20"/><text x="300" y="865">Stop</text></g>
 
       <g class="badge" id="badge" style="display:none">
@@ -331,14 +346,14 @@
     <section class="card">
       <h2>Inner loop runs</h2>
       <div class="wordbar">
-        <label for="st">Outer loop starts at <span class="mono">i =</span></label>
-        <select id="st"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select>
-        <span class="hint">Lecture 7, Problem 7 uses 3.</span>
+        <label for="st">Both tests use <span class="mono">&lt;=</span></label>
+        <select id="st"><option>1</option><option>2</option><option selected>3</option><option>4</option></select>
+        <span class="hint">The practice loops use 3.</span>
       </div>
       <div class="gridwrap"><table class="grid" id="grid"></table></div>
       <div class="note">Each row is one pass of the <b style="color:var(--left)">outer</b> loop.
-        Each box is one run of <span class="mono">count = count + j</span>, showing the <b style="color:var(--right)">j</b> that was added.
-        Because the inner test is <span class="mono">j &lt; i</span>, row <span class="mono">i</span> gets only <span class="mono">i - 1</span> boxes.</div>
+        Each box is one run of <span class="mono">sum = sum + i</span>, showing what was added.
+        Because the inner loop starts at <span class="mono">j = i</span>, each row starts one box further right than the one above.</div>
     </section>
 
     <section class="card">
@@ -367,12 +382,17 @@
     </section>
 
     <section class="card">
-      <h2>Trace table</h2>
-      <div class="trace-wrap" id="traceWrap">
+      <h2>Your trace table</h2>
+      <p class="note" style="margin-top:0">Fill in a row for each time the <span class="mono">sum</span> box runs: <span class="mono">i</span>, <span class="mono">j</span>, and <span class="mono">sum</span> <i>after</i> the box. Then press <b>Next</b>. Each row is checked when the program gets to it. You can fix a row at any time.</p>
+      <div class="trace-wrap mine">
         <table>
           <thead id="traceHead"></thead>
-          <tbody id="trace"></tbody>
+          <tbody id="mine"></tbody>
         </table>
+      </div>
+      <div class="controls">
+        <button id="clear">Clear my table</button>
+        <span class="counter" id="score"></span>
       </div>
     </section>
   </div>
@@ -407,7 +427,6 @@
     $('vars').style.gridTemplateColumns = `repeat(${cfg.vars.length}, minmax(0, 1fr))`;
     $('vars').innerHTML = cfg.vars.map(v =>
       `<div class="var ${v.cls || ''}" id="v-${v.id}"><div class="name">${v.label}</div><div class="val">—</div><div class="sub"></div></div>`).join('');
-    $('traceHead').innerHTML = '<tr>' + cfg.traceCols.map(c => `<th>${c}</th>`).join('') + '</tr>';
 
     function render(animate) {
       const s = steps[cur], prev = animate && cur > 0 ? steps[cur - 1] : null;
@@ -450,13 +469,6 @@
       $('prev').disabled = cur === 0;
       $('next').disabled = cur === steps.length - 1;
 
-      const tb = $('trace');
-      tb.innerHTML = !s.trace.length
-        ? `<tr><td colspan="${cfg.traceCols.length}" class="empty">${cfg.traceEmpty}</td></tr>`
-        : s.trace.map((r, k) => `<tr${k === s.trace.length - 1 && s.traceLatest ? ' class="latest"' : ''}>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('');
-      const tw = $('traceWrap');
-      tw.scrollTop = tw.scrollHeight;
-
       cfg.renderExtra(s);
     }
 
@@ -493,82 +505,81 @@
   }
 
 
-  let START = 3;
+  const ROWS = 10;   // blank rows in the student's table: enough for the largest limit (4)
+  let LIM = 3, last = null;
+
   const demo = makeDemo({
     names: { start: 'Start', declare: 'Declare variables', oinit: 'Initialize outer counter', ocheck: 'Outer loop test',
-             iinit: 'Initialize (reset) inner counter', icheck: 'Inner loop test', body: 'Inner loop body: add j to count',
-             iupd: 'Update inner counter', oupd: 'Update outer counter (count down)', print: 'Output: print count', end: 'Stop' },
-    vars: [{ id: 'i', label: 'i', cls: 'p' }, { id: 'j', label: 'j', cls: 'q' }, { id: 'count', label: 'count' }, { id: 'runs', label: 'inner body runs' }],
-    traceCols: ['#', 'i', 'j', 'count'],
-    traceEmpty: 'The count box has not run yet',
+             iinit: 'Initialize (reset) inner counter', icheck: 'Inner loop test', body: 'Inner loop body: add i to sum',
+             iupd: 'Update inner counter', oupd: 'Update outer counter', print: 'Output: print sum', end: 'Stop' },
+    vars: [{ id: 'i', label: 'i', cls: 'p' }, { id: 'j', label: 'j', cls: 'q' }, { id: 'sum', label: 'sum' }, { id: 'runs', label: 'inner body runs' }],
     badgePos: { ocheck: [372, 226], icheck: [372, 416] },
-    build({ start }) {
+    build({ lim }) {
       const steps = [];
-      let i = null, j = null, count = null, runs = 0, out = '', trace = [], filled = [], zero = [];
-      const push = s => steps.push(Object.assign({ vars: { i, j, count, runs }, out, trace: trace.slice(), filled: filled.slice(), zero: zero.slice(), now: null, row: null }, s));
+      let i = null, j = null, sum = null, runs = 0, out = '', rows = [], filled = [];
+      const push = s => steps.push(Object.assign({ vars: { i, j, sum, runs }, out, rows: rows.slice(), filled: filled.slice(), now: null, row: null }, s));
 
-      push({ node: 'start', msg: `<b>Start</b>. The outer loop counts <i>down</i> from ${start} to 1. For each <b>i</b>, the inner loop adds 1, 2, … up to (but not including) <b>i</b>.` });
-      count = 0;
-      push({ node: 'declare', edge: 'e-start-declare', msg: `Reserve boxes for <b>i</b>, <b>j</b> and <b>count</b>. Only <b>count</b> gets a value here: <b>0</b>.` });
-      i = start;
-      push({ node: 'oinit', edge: 'e-declare-oinit', row: i, msg: `The outer counter starts at <b>i = ${start}</b>.` });
+      push({ node: 'start', msg: `<b>Start</b>. The outer loop counts <b>i</b> up from 1 to ${lim}. For each <b>i</b>, the inner loop starts <b>j</b> at <b>i</b> (not at 1) and counts up to ${lim}, adding <b>i</b> to <b>sum</b> each time.` });
+      sum = 0;
+      push({ node: 'declare', edge: 'e-start-declare', msg: `Reserve boxes for <b>i</b>, <b>j</b> and <b>sum</b>. Only <b>sum</b> gets a value here: <b>0</b>.` });
+      i = 1;
+      push({ node: 'oinit', edge: 'e-declare-oinit', row: i, msg: `The outer counter starts at <b>i = 1</b>.` });
 
       let eo = 'e-oinit-ocheck';
       for (;;) {
-        const co = i >= 1;
+        const co = i <= lim;
         push({ node: 'ocheck', edge: eo, badge: co, row: co ? i : null,
-          msg: `Outer test: is i &gt;= 1? &nbsp;${i} &gt;= 1 → <b>${co ? 'True' : 'False'}</b>. ` +
-               (co ? `Start the row for i = ${i}.` : `i has counted down past 1, so leave the outer loop.`) });
+          msg: `Outer test: is i &lt;= ${lim}? &nbsp;${i} &lt;= ${lim} → <b>${co ? 'True' : 'False'}</b>. ` +
+               (co ? `Start the row for i = ${i}.` : `i has gone past ${lim}, so leave the outer loop.`) });
         if (!co) break;
 
-        j = 1;
+        j = i;
         push({ node: 'iinit', edge: 'e-ocheck-iinit', row: i,
-          msg: i === start ? `Start the inner loop at <b>j = 1</b>.`
-                           : `<b>j is reset to 1</b>. This box is inside the outer loop, so it runs again for every value of i.` });
+          msg: `<b>j = i</b>, so the inner loop starts at <b>j = ${i}</b>` +
+               (i === 1 ? `.` : `, not 1. This box is inside the outer loop, so it runs again for every value of i.`) });
 
         let ei = 'e-iinit-icheck';
         for (;;) {
-          const ci = j < i;
-          let msg = `Inner test: is j &lt; i? &nbsp;${j} &lt; ${i} → <b>${ci ? 'True' : 'False'}</b>. `;
-          if (ci) msg += `Run the inner loop body.`;
-          else if (j === 1) { zero.push(i); msg += `False on the <i>very first</i> inner test, so the inner loop body runs <b>zero</b> times for i = ${i}. Nothing goes in the trace table for this row.`; }
-          else msg += `This row is finished, so leave the <i>inner</i> loop. We are still inside the outer loop.`;
-          push({ node: 'icheck', edge: ei, badge: ci, row: i, now: ci ? [i, j] : null, msg });
+          const ci = j <= lim;
+          push({ node: 'icheck', edge: ei, badge: ci, row: i, now: ci ? [i, j] : null,
+            msg: `Inner test: is j &lt;= ${lim}? &nbsp;${j} &lt;= ${lim} → <b>${ci ? 'True' : 'False'}</b>. ` +
+                 (ci ? `Run the inner loop body.` : `This row is finished, so leave the <i>inner</i> loop. We are still inside the outer loop.`) });
           if (!ci) break;
 
-          const before = count;
-          count = count + j; runs++; filled.push(`${i},${j}`);
-          trace.push([runs, i, j, count]);
-          push({ node: 'body', edge: 'e-icheck-body', row: i, now: [i, j], traceLatest: true,
-            msg: `<b>count = count + j</b>: ${before} + ${j} → <b>${count}</b>. Write a row: i = ${i}, j = ${j}, count = ${count}.` });
+          const before = sum;
+          sum = sum + i; runs++; filled.push(`${i},${j}`);
+          rows.push({ i, j, sum });
+          push({ node: 'body', edge: 'e-icheck-body', row: i, now: [i, j], rowHere: true,
+            msg: `<b>sum = sum + i</b>: ${before} + ${i} → <b>${sum}</b>. It adds <b>i</b>, not j. This is row ${rows.length} of the trace table: i = ${i}, j = ${j}, sum = ${sum}.` });
           j = j + 1;
           push({ node: 'iupd', edge: 'e-body-iupd', row: i,
             msg: `<b>j = j + 1</b>: ${j - 1} → <b>${j}</b>. Loop back to the inner test.` });
           ei = 'e-iupd-icheck';
         }
 
-        i = i - 1;
-        push({ node: 'oupd', edge: 'e-icheck-oupd', row: i + 1,
-          msg: `<b>i = i - 1</b>: ${i + 1} → <b>${i}</b>. The outer loop counts <i>down</i>. Loop back to the outer test.` });
+        i = i + 1;
+        push({ node: 'oupd', edge: 'e-icheck-oupd', row: i - 1,
+          msg: `<b>i = i + 1</b>: ${i - 1} → <b>${i}</b>. Loop back to the outer test.` });
         eo = 'e-oupd-ocheck';
       }
-      out += `${count}\n`;
-      push({ node: 'print', edge: 'e-ocheck-print', msg: `Print <b>${count}</b>.` });
-      push({ node: 'end', edge: 'e-print-end',
-        msg: `<b>Stop</b>. The inner loop body ran <b>${runs}</b> time${runs === 1 ? '' : 's'} in total, and the program printed <b>${count}</b>.` });
+      out += `${sum}\n`;
+      push({ node: 'print', edge: 'e-ocheck-print', finished: true, msg: `Print <b>${sum}</b>.` });
+      push({ node: 'end', edge: 'e-print-end', finished: true,
+        msg: `<b>Stop</b>. The inner loop body ran <b>${runs}</b> time${runs === 1 ? '' : 's'} in total, so the trace table has <b>${rows.length}</b> row${rows.length === 1 ? '' : 's'}, and the program printed <b>${sum}</b>.` });
       return steps;
     },
-    onLoad({ start }) {
-      START = start;
-      $('oinit-text').textContent = `i = ${start}`;
-      const cols = Math.max(1, start - 1);
+    onLoad({ lim }) {
+      LIM = lim;
+      $('ocheck-text').textContent = `i <= ${lim}?`;
+      $('icheck-text').textContent = `j <= ${lim}?`;
+      $('traceHead').innerHTML = '<tr>' + ['#', 'i', 'j', 'sum', 'Check'].map(c => `<th>${c}</th>`).join('') + '</tr>';
       let h = '<tr><th></th>';
-      for (let c = 1; c <= cols; c++) h += `<th class="colh" data-c="${c}">j=${c}</th>`;
-      h += '<th></th></tr>';
-      for (let r = start; r >= 1; r--) {
+      for (let c = 1; c <= lim; c++) h += `<th class="colh" data-c="${c}">j=${c}</th>`;
+      h += '</tr>';
+      for (let r = 1; r <= lim; r++) {
         h += `<tr data-r="${r}"><th class="rowh">i=${r}</th>`;
-        for (let c = 1; c <= cols; c++) h += c < r ? `<td data-rc="${r},${c}"></td>` : '<td class="na"></td>';
-        h += `<th class="zero" data-z="${r}"></th></tr>`;
+        for (let c = 1; c <= lim; c++) h += c >= r ? `<td data-rc="${r},${c}"></td>` : '<td class="na"></td>';
+        h += '</tr>';
       }
       $('grid').innerHTML = h;
     },
@@ -576,17 +587,70 @@
       const now = s.now ? s.now.join(',') : null;
       document.querySelectorAll('#grid td[data-rc]').forEach(td => {
         const f = s.filled.includes(td.dataset.rc);
-        td.textContent = f ? '+' + td.dataset.rc.split(',')[1] : '';
+        td.textContent = f ? '+' + td.dataset.rc.split(',')[0] : '';
         td.classList.toggle('filled', f);
         td.classList.toggle('now', td.dataset.rc === now);
       });
-      document.querySelectorAll('#grid th.zero').forEach(th => th.textContent = s.zero.includes(+th.dataset.z) ? '0 runs' : '');
       document.querySelectorAll('#grid tr[data-r]').forEach(tr => tr.classList.toggle('rowcur', +tr.dataset.r === s.row));
       document.querySelectorAll('#grid th.colh').forEach(th => th.classList.toggle('now', !!s.now && +th.dataset.c === s.now[1]));
+      last = s;
+      checkTable();
     }
   });
 
-  const load = () => demo.load({ start: +$('st').value });
+  /* ---------- the student's trace table ---------- */
+  const COLS = ['i', 'j', 'sum'];
+  $('mine').innerHTML = Array.from({ length: ROWS }, (_, k) => `<tr>
+      <td>${k + 1}</td>
+      ${COLS.map(c => `<td><input data-c="${c}" inputmode="numeric" autocomplete="off" aria-label="Row ${k + 1}, ${c}"></td>`).join('')}
+      <td class="verdict"></td></tr>`).join('');
+  const myRows = [...$('mine').rows];
+  const num = v => { v = v.trim().replace(/[−–]/g, '-'); return /^-?\d+$/.test(v) ? +v : NaN; };
+  const read = tr => Object.fromEntries(COLS.map(c => [c, tr.querySelector(`[data-c=${c}]`)]));
+  const filled = f => COLS.some(c => f[c].value.trim());
+
+  // mark the rows the program has reached so far; say how the newest one went
+  function checkTable() {
+    const s = last;
+    if (!s) return;
+    let right = 0, extra = 0;
+    myRows.forEach((tr, k) => {
+      const f = read(tr), want = s.rows[k], v = tr.querySelector('.verdict');
+      tr.classList.toggle('latest', !!s.rowHere && k === s.rows.length - 1);
+      COLS.forEach(c => f[c].classList.remove('ok', 'bad'));
+      v.innerHTML = '';
+      if (want) {
+        let all = true;
+        COLS.forEach(c => { const ok = num(f[c].value) === want[c]; all = all && ok; f[c].classList.add(ok ? 'ok' : 'bad'); });
+        if (all) { right++; v.innerHTML = '<span class="yes">✓</span>'; }
+        else v.innerHTML = `<span class="no">✗</span> should be ${want.i}, ${want.j}, ${want.sum}`;
+      } else if (s.finished && filled(f)) {
+        extra++;
+        COLS.forEach(c => f[c].classList.add('bad'));
+        v.innerHTML = '<span class="no">✗</span> the loops had already ended';
+      }
+    });
+
+    const n = s.rows.length;
+    $('score').textContent = n ? `${right} of ${n} row${n === 1 ? '' : 's'} right so far` : '';
+    let note = '';
+    if (s.rowHere) {
+      const tr = myRows[n - 1];
+      note = !filled(read(tr)) ? `Your row ${n} is empty.`
+           : tr.querySelector('.yes') ? `Your row ${n} matches. ✓`
+           : `Your row ${n} doesn't match. Compare it with the variables above.`;
+    } else if (s.node === 'end') {
+      note = `You got <b>${right} of ${n}</b> rows right.` + (extra ? ` ${extra} row${extra === 1 ? '' : 's'} after row ${n} should be blank.` : '');
+    }
+    $('msg').innerHTML = s.msg + (note ? `<div class="note">${note}</div>` : '');
+  }
+  $('mine').addEventListener('input', checkTable);
+  $('clear').onclick = () => {
+    myRows.forEach(tr => { const f = read(tr); COLS.forEach(c => f[c].value = ''); });
+    checkTable();
+  };
+
+  const load = () => demo.load({ lim: +$('st').value });
   $('st').onchange = load;
   load();
 })();
