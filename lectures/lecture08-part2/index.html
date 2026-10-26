@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Functions and Scope → Part 2: Scope · CPSC 100 Notes</title>
+<style>
+  :root {
+    --bg: #f6f6f3;
+    --panel: #ffffff;
+    --ink: #1d1d1f;
+    --muted: #6b6b72;
+    --line: #d6d6db;
+    --accent: #2f6fde;
+    --accent-soft: #dce8fd;
+    --alert: #911a28;
+    --code-bg: #f1f1ee;
+    --tok-kw: #7048e8; --tok-type: #0e7178; --tok-num: #b35a00;
+    --tok-str: #2b8a3e; --tok-com: #8a8a93; --tok-pre: #c2255c; --tok-fn: #1c4fb8;
+    --term-bg: #ffffff; --term-ink: #1d1d1f; --term-line: #c9c9cf; --term-in: #1a7f37;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5;
+      --line: #3a3b42; --accent: #6ea0ff; --accent-soft: #1d3157; --alert: #ff8f9c;
+      --code-bg: #25262b;
+      --tok-kw: #b197fc; --tok-type: #3bc9db; --tok-num: #ffa94d;
+      --tok-str: #69db7c; --tok-com: #868e96; --tok-pre: #f783ac; --tok-fn: #74c0fc;
+      --term-bg: #1d1f23; --term-ink: #e6e6e9; --term-line: #33363d; --term-in: #7ee787;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5;
+    --line: #3a3b42; --accent: #6ea0ff; --accent-soft: #1d3157; --alert: #ff8f9c;
+    --code-bg: #25262b;
+    --tok-kw: #b197fc; --tok-type: #3bc9db; --tok-num: #ffa94d;
+    --tok-str: #69db7c; --tok-com: #868e96; --tok-pre: #f783ac; --tok-fn: #74c0fc;
+    --term-bg: #1d1f23; --term-ink: #e6e6e9; --term-line: #33363d; --term-in: #7ee787;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 17px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  a { color: var(--accent); }
+  code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .9em; }
+
+  .topbar { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .topbar .in { max-width: 820px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 16px; align-items: center; }
+  .topbar a { text-decoration: none; font-weight: 600; }
+  .topbar .crumb { color: var(--muted); font-size: .9rem; }
+
+  main { max-width: 820px; margin: 0 auto; padding: 8px 16px 48px; }
+  header.title { margin: 28px 0 8px; }
+  header.title .week { color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: .85rem; }
+  header.title h1 { margin: 4px 0 0; font-size: 2.1rem; line-height: 1.2; }
+
+  nav#TOC { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 18px; margin: 20px 0 8px; }
+  nav#TOC::before { content: "In this chapter"; display: block; font-weight: 700; margin-bottom: 4px; }
+  nav#TOC ul { margin: 0; padding-left: 1.2em; }
+
+  h2 { font-size: 1.6rem; margin: 2.4em 0 .4em; padding-bottom: .2em; border-bottom: 2px solid var(--line); }
+  h3 { font-size: 1.2rem; margin: 1.8em 0 .3em; }
+  p, li { max-width: 72ch; }
+  li { margin: .2em 0; }
+  li > p { margin: 0; }
+  .alert { color: var(--alert); font-weight: 600; }
+  :not(pre) > code { background: var(--code-bg); padding: .08em .3em; border-radius: 4px; overflow-wrap: anywhere; }
+  math[display="block"] { overflow-x: auto; max-width: 100%; }
+
+  div.sourceCode { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; margin: 1em 0; overflow-x: auto; }
+  pre.sourceCode { margin: 0; padding: 12px 14px; line-height: 1.5; }
+  /* program output and shell sessions (minted text blocks) */
+  pre:not(.sourceCode) { background: var(--panel); border: 1px dashed var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; line-height: 1.5; }
+  /* sample runs of a program (make_notes.py compiles and runs it): a terminal
+     box in the page's theme, with what the user typed highlighted in green */
+  .runoutput { margin: -.3em 0 1.2em; }
+  .run-label { color: var(--muted); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin: .7em 0 .25em; }
+  pre.terminal { background: var(--term-bg); color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 8px; padding: 10px 14px; margin: 0 0 .5em; overflow-x: auto; line-height: 1.5; }
+  pre.terminal .in { color: var(--term-in); font-weight: 700; }
+  .run-label .run-setup { text-transform: none; letter-spacing: 0; font-weight: 400; }
+  pre.numberSource code > span { position: relative; left: -4em; }
+  pre.numberSource { margin-left: 3em; border-left: 1px solid var(--line); padding-left: 4px; }
+  pre.numberSource code > span > a:first-child::before {
+    content: counter(source-line); counter-increment: source-line; position: relative; left: -1em;
+    text-align: right; vertical-align: baseline; display: inline-block; width: 4em; color: var(--tok-com);
+  }
+  pre.numberSource code { counter-reset: source-line 0; }
+  pre > code.sourceCode > span { display: inline-block; line-height: 1.5; }
+  code.sourceCode > span > a:first-child { text-decoration: none; }
+  code span.kw, code span.cf { color: var(--tok-kw); font-weight: 600; }
+  code span.dt { color: var(--tok-type); }
+  code span.dv, code span.fl, code span.bn, code span.cn { color: var(--tok-num); }
+  code span.st, code span.ch, code span.sc, code span.ss, code span.vs { color: var(--tok-str); }
+  code span.co, code span.cv, code span.do, code span.an { color: var(--tok-com); font-style: italic; }
+  code span.pp, code span.im { color: var(--tok-pre); }
+  code span.fu, code span.bu { color: var(--tok-fn); }
+
+  img { max-width: 100%; height: auto; }
+  img.diagram { background: #fff; border-radius: 8px; padding: 8px; display: block; margin: 0 auto; }
+  /* PNGs are drawings (some with transparent backgrounds): same white card, so dark lines stay visible in dark mode */
+  img[src*=".png"] { background: #fff; border-radius: 8px; padding: 8px; }
+  .center, figure { text-align: center; }
+  figure { margin: 1em 0; }
+  figcaption { color: var(--muted); font-size: .9rem; }
+  .credit { text-align: center; color: var(--muted); font-size: .78rem; margin-top: -.6em; }
+  .credit p { max-width: none; }
+
+  /* slide columns: a figure keeps its natural width and the other column
+     fills the rest; when both can't fit, they stack (see notes.lua) */
+  .columns { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .columns > .column { flex: 1 1 280px; min-width: 0; }
+  .columns > .column.figure-col { flex: 0 1 auto; max-width: 100%; margin: 0 auto; }
+  .columns > .column.figure-col img:not(.diagram) { width: 320px; }
+
+  .multicol ul { columns: 4 8em; list-style: none; padding-left: 0; }
+
+  .callout { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 4px 16px; margin: 1em 0; }
+  .tryit { background: var(--accent-soft); border-radius: 10px; padding: 6px 18px; margin: 1.2em 0; }
+  .tryit .center { text-align: left; }
+  a.demo-link { display: inline-block; background: var(--accent); color: var(--bg); padding: 6px 14px; border-radius: 8px; text-decoration: none; }
+  a.demo-link code { background: none; color: inherit; }
+
+  table { border-collapse: collapse; margin: 1em auto; display: block; overflow-x: auto; max-width: 100%; width: fit-content; }
+  th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--panel); }
+
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .pager a { text-decoration: none; max-width: 48%; }
+  .pager .label { display: block; color: var(--muted); font-size: .85rem; }
+  .pager .next { margin-left: auto; text-align: right; }
+  .pager.top { margin-top: 16px; padding: 0 0 12px; border-top: none; border-bottom: 1px solid var(--line); font-size: .95rem; }
+  .pager.top + header.title { margin-top: 18px; }
+  .theme-toggle { font: inherit; font-size: .85rem; line-height: 1.2; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
+  .theme-toggle:hover { border-color: var(--ink); }
+  .topbar .theme-toggle { margin-left: auto; }
+  .topbar .print-btn + .theme-toggle { margin-left: 0; }
+  .topbar a { white-space: nowrap; }
+  @media (max-width: 480px) { .topbar .in:has(.print-btn) .crumb { display: none; } }
+
+  /* printing (the Print / PDF button, or the browser's own Print): light colours
+     on white, no site navigation, code wrapped instead of scrolling, and
+     headings, figures and code kept off page breaks where they fit */
+  @media print {
+    :root:not([data-print]), :root[data-theme] {   /* outranks the dark-mode rules */
+      --bg: #ffffff; --panel: #ffffff; --ink: #1d1d1f; --muted: #6b6b72;
+      --line: #d6d6db; --accent: #2f6fde; --accent-soft: #eef3fd; --alert: #911a28;
+      --code-bg: #f6f6f3;
+      --tok-kw: #7048e8; --tok-type: #0e7178; --tok-num: #b35a00;
+      --tok-str: #2b8a3e; --tok-com: #8a8a93; --tok-pre: #c2255c; --tok-fn: #1c4fb8;
+      --term-bg: #ffffff; --term-ink: #1d1d1f; --term-line: #c9c9cf; --term-in: #1a7f37;
+    }
+    @page { margin: 15mm 14mm; }
+    body { background: #fff; font-size: 11pt; line-height: 1.5; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .topbar, .pager, .theme-toggle, .print-btn { display: none !important; }
+    main { max-width: none; padding: 0; }
+    header.title { margin-top: 0; }
+    h1, h2, h3, h4, .run-label, .label { break-after: avoid; page-break-after: avoid; }
+    figure, img, svg, .columns, .callout, .tryit, table, nav#TOC,
+    div.sourceCode, pre, .runoutput { break-inside: avoid; page-break-inside: avoid; }
+    div.sourceCode, pre, pre.terminal, table, .animation { overflow: visible !important; }
+    pre, pre code, pre.terminal { white-space: pre-wrap !important; overflow-wrap: anywhere; }
+    pre > code.sourceCode > span { display: inline; }
+    a { text-decoration: none; }
+  }
+</style>
+<script>
+  // apply a saved light/dark choice before the page draws (no flash)
+  try { var t = localStorage.getItem('cpsc100-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+</head>
+<body>
+<div class="topbar"><div class="in">
+  <a href="../../">CPSC 100</a>
+  <span class="crumb">Lecture notes</span>
+  <button type="button" class="theme-toggle print-btn" onclick="window.print()" title="Print this page, or choose Save as PDF in the print dialog">⎙ Print / PDF</button>
+  <button type="button" class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</div></div>
+<main>
+<nav class="pager top" aria-label="Previous and next lecture">
+<a class="prev" href="../lecture08-part1/"><span class="label">← Previous</span>Week
+8: Functions and Scope → Part 1: Functions</a>
+
+</nav>
+<header class="title">
+<div class="week">Week 8</div>
+<h1>Functions and Scope → Part 2: Scope</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#scope" id="toc-scope">Scope</a></li>
+<li><a href="#storage-duration-and-static"
+id="toc-storage-duration-and-static">Storage Duration and
+<code>static</code></a></li>
+<li><a href="#summary" id="toc-summary">Summary</a></li>
+</ul>
+</nav>
+<section id="scope" class="level2">
+<h2>Scope</h2>
+<section id="variables-and-scope" class="level3">
+<h3>Variables and Scope</h3>
+<p><strong>What is scope?</strong></p>
+<ul>
+<li><p>The <span class="alert">scope</span> of a variable is the region
+of a program where that variable can be <em>seen</em> or
+<em>used</em></p></li>
+<li><p>Once execution leaves that region, the variable no longer exists
+or cannot be accessed</p></li>
+</ul>
+<p><strong>Local vs. Global Variables</strong></p>
+<ul>
+<li><p>A variable declared <strong>inside a function or block of
+code</strong> (between braces) is <span class="alert">local</span> to
+that block</p></li>
+<li><p>Local variables are created when the block starts and destroyed
+when it ends</p></li>
+<li><p>A variable declared <strong>outside of all functions</strong> is
+<span class="alert">global</span>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+it can be accessed and modified by any function in the same
+file</p></li>
+<li><p>Global variables exist for the entire lifetime of the
+program</p></li>
+</ul>
+</section>
+<section id="example-visibility-of-variables" class="level3">
+<h3>Example: Visibility of Variables</h3>
+<div class="columns">
+<div class="column">
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="dt">void</span> test<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a></span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-6"><a href="#cb1-6"></a>    <span class="dt">int</span> a <span class="op">=</span> <span class="dv">10</span><span class="op">;</span> <span class="co">// main&#39;s own variable</span></span>
+<span id="cb1-7"><a href="#cb1-7"></a>    printf<span class="op">(</span><span class="st">&quot;main: a = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> a<span class="op">);</span></span>
+<span id="cb1-8"><a href="#cb1-8"></a>    test<span class="op">();</span></span>
+<span id="cb1-9"><a href="#cb1-9"></a>    printf<span class="op">(</span><span class="st">&quot;test: b = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> b<span class="op">);</span></span>
+<span id="cb1-10"><a href="#cb1-10"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-11"><a href="#cb1-11"></a><span class="op">}</span></span>
+<span id="cb1-12"><a href="#cb1-12"></a></span>
+<span id="cb1-13"><a href="#cb1-13"></a><span class="dt">void</span> test<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-14"><a href="#cb1-14"></a>    <span class="dt">int</span> b <span class="op">=</span> <span class="dv">20</span><span class="op">;</span> <span class="co">// test&#39;s own variable</span></span>
+<span id="cb1-15"><a href="#cb1-15"></a>    printf<span class="op">(</span><span class="st">&quot;test: b = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> b<span class="op">);</span></span>
+<span id="cb1-16"><a href="#cb1-16"></a><span class="op">}</span></span></code></pre></div>
+</div><div class="column">
+<p><strong>Compiler output:</strong></p>
+<pre class="text"><code>line 9: error: &#39;b&#39; undeclared
+(first use in this function)</code></pre>
+<p><strong>Key Ideas:</strong></p>
+<ul>
+<li><p><code class="sourceCode c">a</code> can be used only inside <code
+class="sourceCode c">main<span class="op">()</span></code>.</p></li>
+<li><p><code class="sourceCode c">b</code> can be used only inside <code
+class="sourceCode c">test<span class="op">()</span></code>.</p></li>
+<li><p>Line 9 uses <code class="sourceCode c">b</code> inside <code
+class="sourceCode c">main<span class="op">()</span></code>, so the
+program doesn’t compile.</p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="example-local-variables-with-the-same-name" class="level3">
+<h3>Example: Local Variables With the Same Name</h3>
+<div class="columns">
+<div class="column">
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="dt">void</span> alpha<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="dt">void</span> beta<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a></span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a>    alpha<span class="op">();</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a>    beta<span class="op">();</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a>    alpha<span class="op">();</span></span>
+<span id="cb3-10"><a href="#cb3-10"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb3-11"><a href="#cb3-11"></a><span class="op">}</span></span>
+<span id="cb3-12"><a href="#cb3-12"></a></span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="dt">void</span> alpha<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-14"><a href="#cb3-14"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">10</span><span class="op">;</span> <span class="co">// local to alpha</span></span>
+<span id="cb3-15"><a href="#cb3-15"></a>    printf<span class="op">(</span><span class="st">&quot;alpha: x = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span></span>
+<span id="cb3-16"><a href="#cb3-16"></a>    x<span class="op">++;</span></span>
+<span id="cb3-17"><a href="#cb3-17"></a><span class="op">}</span></span>
+<span id="cb3-18"><a href="#cb3-18"></a></span>
+<span id="cb3-19"><a href="#cb3-19"></a><span class="dt">void</span> beta<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-20"><a href="#cb3-20"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">100</span><span class="op">;</span> <span class="co">// local to beta</span></span>
+<span id="cb3-21"><a href="#cb3-21"></a>    printf<span class="op">(</span><span class="st">&quot;beta:  x = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span></span>
+<span id="cb3-22"><a href="#cb3-22"></a><span class="op">}</span></span></code></pre></div>
+</div><div class="column">
+<p><strong>Output:</strong></p>
+<pre class="text"><code>alpha: x = 10
+beta:  x = 100
+alpha: x = 10</code></pre>
+<p><strong>Key Ideas:</strong></p>
+<ul>
+<li><p>Each function has its own <code
+class="sourceCode c">x</code>.</p></li>
+<li><p>Changing <code class="sourceCode c">x</code> in <code
+class="sourceCode c">alpha<span class="op">()</span></code> does not
+affect <code class="sourceCode c">x</code> in <code
+class="sourceCode c">beta<span class="op">()</span></code>.</p></li>
+<li><p>This is <em>why</em> one function can’t see another function’s
+variables
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+<strong>each call gets its own private set of local variables</strong>,
+separate from every other call.</p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="try-it-each-call-gets-its-own-variables" class="level3">
+<h3>Try It: Each Call Gets Its Own Variables</h3>
+<div class="tryit">
+<p>Step through <code
+class="sourceCode c">alpha<span class="op">()</span></code>, <code
+class="sourceCode c">beta<span class="op">()</span></code>, <code
+class="sourceCode c">alpha<span class="op">()</span></code> and watch a
+new box of variables appear for each call, then disappear when it
+returns:</p>
+<div class="center">
+<p><span><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/scope-calls/"
+class="demo-link" target="_blank"
+rel="noopener"><code>selkirk-cpsc.github.io/cpsc100-course/demos/scope-calls/</code></a></span></p>
+</div>
+<ul>
+<li><p>Try <strong>alpha, alpha, alpha</strong>: the second call does
+<span class="alert">not</span> remember that <code
+class="sourceCode c">x</code> reached 11</p></li>
+</ul>
+</div>
+</section>
+<section id="example-global-scope" class="level3">
+<h3>Example: Global Scope</h3>
+<div class="columns">
+<div class="column">
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb5-1"><a href="#cb5-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="dt">int</span> counter <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// global variable</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="dt">void</span> alpha<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="dt">void</span> beta<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a></span>
+<span id="cb5-8"><a href="#cb5-8"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-9"><a href="#cb5-9"></a>    alpha<span class="op">();</span> beta<span class="op">();</span> alpha<span class="op">();</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a>    printf<span class="op">(</span><span class="st">&quot;Final counter = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> counter<span class="op">);</span></span>
+<span id="cb5-11"><a href="#cb5-11"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb5-12"><a href="#cb5-12"></a><span class="op">}</span></span>
+<span id="cb5-13"><a href="#cb5-13"></a></span>
+<span id="cb5-14"><a href="#cb5-14"></a><span class="dt">void</span> alpha<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-15"><a href="#cb5-15"></a>    printf<span class="op">(</span><span class="st">&quot;alpha: counter = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">++</span>counter<span class="op">);</span></span>
+<span id="cb5-16"><a href="#cb5-16"></a><span class="op">}</span></span>
+<span id="cb5-17"><a href="#cb5-17"></a></span>
+<span id="cb5-18"><a href="#cb5-18"></a><span class="dt">void</span> beta<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-19"><a href="#cb5-19"></a>    printf<span class="op">(</span><span class="st">&quot;beta:  counter = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> counter <span class="op">+=</span> <span class="dv">10</span><span class="op">);</span></span>
+<span id="cb5-20"><a href="#cb5-20"></a><span class="op">}</span></span></code></pre></div>
+</div><div class="column">
+<p><strong>Output:</strong></p>
+<pre class="text"><code>alpha: counter = 1
+beta:  counter = 11
+alpha: counter = 12
+Final counter = 12</code></pre>
+<p><strong>Key Idea:</strong> <code class="sourceCode c">counter</code>
+is declared outside all functions
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+it has <strong>global scope</strong>, visible to every function, and any
+function can modify it.</p>
+</div>
+</div>
+</section>
+<section id="why-global-variables-are-usually-a-bad-idea"
+class="level3">
+<h3>Why Global Variables Are Usually a Bad Idea</h3>
+<p>Globals feel convenient; no need to pass anything around. But they
+create <span class="alert">hidden connections</span> between
+functions:</p>
+<ul>
+<li><p>Any function can change a global at any time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+there’s no record of who touched it, or when</p></li>
+<li><p>Reading a function’s code no longer tells you everything it
+depends on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+you have to check every other function too</p></li>
+<li><p>Bugs caused by an unexpected global change are some of the
+hardest to track down, because the change could have come from
+<em>anywhere</em> in the file</p></li>
+</ul>
+<p>Prefer passing values as parameters and returning results
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+keep a function’s dependencies visible in its signature.</p>
+</section>
+<section id="example-scope-errors" class="level3">
+<h3>Example: Scope Errors</h3>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb7-1"><a href="#cb7-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="dt">void</span> print_square<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span> <span class="co">// local to main</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a>    print_square<span class="op">();</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a>    printf<span class="op">(</span><span class="st">&quot;Done!</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a><span class="op">}</span></span>
+<span id="cb7-11"><a href="#cb7-11"></a></span>
+<span id="cb7-12"><a href="#cb7-12"></a><span class="dt">void</span> print_square<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-13"><a href="#cb7-13"></a>    <span class="dt">int</span> result <span class="op">=</span> x <span class="op">*</span> x<span class="op">;</span> <span class="co">// &#39;x&#39; not visible here</span></span>
+<span id="cb7-14"><a href="#cb7-14"></a>    printf<span class="op">(</span><span class="st">&quot;Square = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> result<span class="op">);</span></span>
+<span id="cb7-15"><a href="#cb7-15"></a><span class="op">}</span></span></code></pre></div>
+<p>Compiler output:</p>
+<pre class="text"><code>error: &#39;x&#39; undeclared (first use in this function)
+    int result = x * x;
+                 ^</code></pre>
+<p>Declare <code class="sourceCode c">x</code> outside all functions
+instead:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb9-1"><a href="#cb9-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="dt">int</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span> <span class="co">// global variable</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="dt">void</span> print_square<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a>    print_square<span class="op">();</span></span>
+<span id="cb9-9"><a href="#cb9-9"></a>    printf<span class="op">(</span><span class="st">&quot;Done!</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb9-10"><a href="#cb9-10"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb9-11"><a href="#cb9-11"></a><span class="op">}</span></span>
+<span id="cb9-12"><a href="#cb9-12"></a></span>
+<span id="cb9-13"><a href="#cb9-13"></a><span class="dt">void</span> print_square<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-14"><a href="#cb9-14"></a>    <span class="dt">int</span> result <span class="op">=</span> x <span class="op">*</span> x<span class="op">;</span> <span class="co">// &#39;x&#39; is now visible (global)</span></span>
+<span id="cb9-15"><a href="#cb9-15"></a>    printf<span class="op">(</span><span class="st">&quot;Square = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> result<span class="op">);</span></span>
+<span id="cb9-16"><a href="#cb9-16"></a><span class="op">}</span></span></code></pre></div>
+<p>Output:</p>
+<pre class="text"><code>Square = 25
+Done!</code></pre>
+</section>
+<section id="example-block-scope" class="level3">
+<h3>Example: Block Scope</h3>
+<div class="columns">
+<div class="column">
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb11-1"><a href="#cb11-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a>    <span class="dt">int</span> total <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a></span>
+<span id="cb11-6"><a href="#cb11-6"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> i <span class="op">&lt;=</span> <span class="dv">3</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb11-7"><a href="#cb11-7"></a>        <span class="dt">int</span> square <span class="op">=</span> i <span class="op">*</span> i<span class="op">;</span></span>
+<span id="cb11-8"><a href="#cb11-8"></a>        total <span class="op">+=</span> square<span class="op">;</span></span>
+<span id="cb11-9"><a href="#cb11-9"></a>    <span class="op">}</span></span>
+<span id="cb11-10"><a href="#cb11-10"></a></span>
+<span id="cb11-11"><a href="#cb11-11"></a>    printf<span class="op">(</span><span class="st">&quot;total = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> total<span class="op">);</span></span>
+<span id="cb11-12"><a href="#cb11-12"></a>    <span class="co">// printf(&quot;%d&quot;, square); invalid</span></span>
+<span id="cb11-13"><a href="#cb11-13"></a>    <span class="co">// printf(&quot;%d&quot;, i);      invalid</span></span>
+<span id="cb11-14"><a href="#cb11-14"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb11-15"><a href="#cb11-15"></a><span class="op">}</span></span></code></pre></div>
+</div><div class="column">
+<p><strong>Output:</strong></p>
+<pre class="text"><code>total = 14</code></pre>
+<p><strong>Key Ideas:</strong></p>
+<ul>
+<li><p>Any pair of braces makes a <strong>block</strong>; a variable
+declared inside one exists only inside it.</p></li>
+<li><p><code class="sourceCode c">square</code> and the loop’s <code
+class="sourceCode c">i</code> are gone after the loop’s closing brace
+(line 9).</p></li>
+<li><p><code class="sourceCode c">total</code> is declared in <code
+class="sourceCode c">main<span class="op">()</span></code>’s own block,
+so it can be used inside the loop <em>and</em> after it.</p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="try-it-scope-explorer" class="level3">
+<h3>Try It: Scope Explorer</h3>
+<div class="tryit">
+<p>Run this week’s examples one line at a time, and click any variable
+to shade every line where it can be used, or to see why a use isn’t
+allowed:</p>
+<div class="center">
+<p><span><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/scope-explorer/"
+class="demo-link" target="_blank"
+rel="noopener"><code>selkirk-cpsc.github.io/cpsc100-course/demos/scope-explorer/</code></a></span></p>
+</div>
+<ul>
+<li><p>On the <strong>Scope error</strong> tab, click the <code
+class="sourceCode c">x</code> on line 13</p></li>
+<li><p>On the <strong>Block scope</strong> tab, click <code
+class="sourceCode c">square</code> on line 7, then on line 12</p></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="storage-duration-and-static" class="level2">
+<h2>Storage Duration and <code>static</code></h2>
+<section id="storage-duration" class="level3">
+<h3>Storage Duration</h3>
+<p>Scope tells you <em>where</em> a variable can be seen. <span
+class="alert">Storage duration</span> tells you <em>how long</em> it
+exists.</p>
+<ul>
+<li><p>By default, a local variable is created when its block starts and
+<strong>destroyed when the block ends</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+every call to a function starts with fresh, uninitialized
+locals</p></li>
+<li><p>A <code
+class="sourceCode c"><span class="dt">static</span></code> local
+variable is different: it is created <strong>once</strong>, keeps its
+value between calls, and is only destroyed when the program
+ends</p></li>
+</ul>
+</section>
+<section id="example-a-static-call-counter" class="level3">
+<h3>Example: A <code>static</code> Call Counter</h3>
+<div class="columns">
+<div class="column">
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a></span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="dt">void</span> count_calls<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
+<span id="cb13-4"><a href="#cb13-4"></a></span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-6"><a href="#cb13-6"></a>    count_calls<span class="op">();</span></span>
+<span id="cb13-7"><a href="#cb13-7"></a>    count_calls<span class="op">();</span></span>
+<span id="cb13-8"><a href="#cb13-8"></a>    count_calls<span class="op">();</span></span>
+<span id="cb13-9"><a href="#cb13-9"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb13-10"><a href="#cb13-10"></a><span class="op">}</span></span>
+<span id="cb13-11"><a href="#cb13-11"></a></span>
+<span id="cb13-12"><a href="#cb13-12"></a><span class="dt">void</span> count_calls<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-13"><a href="#cb13-13"></a>    <span class="dt">static</span> <span class="dt">int</span> calls <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> </span>
+<span id="cb13-14"><a href="#cb13-14"></a>    <span class="co">// initialized once</span></span>
+<span id="cb13-15"><a href="#cb13-15"></a>    calls<span class="op">++;</span></span>
+<span id="cb13-16"><a href="#cb13-16"></a>    printf<span class="op">(</span><span class="st">&quot;Called </span><span class="sc">%d</span><span class="st"> time(s)</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> calls<span class="op">);</span></span>
+<span id="cb13-17"><a href="#cb13-17"></a><span class="op">}</span></span></code></pre></div>
+</div><div class="column">
+<p><strong>Output:</strong></p>
+<pre class="text"><code>Called 1 time(s)
+Called 2 time(s)
+Called 3 time(s)</code></pre>
+<p><strong>Key Ideas:</strong></p>
+<ul>
+<li><p><code class="sourceCode c">calls</code> is initialized to <code
+class="sourceCode c"><span class="dv">0</span></code> only on the
+<strong>first</strong> call.</p></li>
+<li><p>Every later call reuses the <strong>same</strong> <code
+class="sourceCode c">calls</code>; an ordinary local would reset to
+<code class="sourceCode c"><span class="dv">0</span></code> every
+time.</p></li>
+<li><p>This is what "persists between calls" means.</p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="try-it-ordinary-local-vs.-static" class="level3">
+<h3>Try It: Ordinary Local vs. <code>static</code></h3>
+<div class="tryit">
+<p>Run <code
+class="sourceCode c">count_calls<span class="op">()</span></code> three
+times, with <code class="sourceCode c">calls</code> declared <code
+class="sourceCode c"><span class="dt">static</span></code> and then as
+an ordinary local:</p>
+<div class="center">
+<p><span><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/static-local/"
+class="demo-link" target="_blank"
+rel="noopener"><code>selkirk-cpsc.github.io/cpsc100-course/demos/static-local/</code></a></span></p>
+</div>
+<ul>
+<li><p>Watch where <code class="sourceCode c">calls</code> lives in each
+version, and which one is destroyed when the call returns</p></li>
+</ul>
+</div>
+</section>
+<section id="why-this-matters-private-locals-revisited" class="level3">
+<h3>Why This Matters: Private Locals, Revisited</h3>
+<p>Put scope and storage duration together, and you get the rule this
+whole section has been building toward:</p>
+<div class="callout">
+<p><strong></strong></p>
+<p>Each function call gets its own <strong>private</strong> set of local
+variables, completely separate from every other call (to that same
+function, or to any other). <code
+class="sourceCode c"><span class="dt">static</span></code> is the one
+exception: it opts a single variable out of "destroyed when the block
+ends," without changing who can <em>see</em> it.</p>
+</div>
+<p>This is exactly why <code
+class="sourceCode c">alpha<span class="op">()</span></code>’s <code
+class="sourceCode c">x</code> and <code
+class="sourceCode c">beta<span class="op">()</span></code>’s <code
+class="sourceCode c">x</code> didn’t collide earlier, and why two calls
+to the same function never interfere with each other, either.</p>
+</section>
+</section>
+<section id="summary" class="level2">
+<h2>Summary</h2>
+<section id="summary-1" class="level3">
+<h3>Summary</h3>
+<ul>
+<li><p><strong>Decomposition</strong>: break a large task into smaller,
+named subtasks</p></li>
+<li><p>A function is a <strong>contract</strong>: given these inputs
+(parameters), produce this output (return value)</p></li>
+<li><p><strong>Prototypes</strong> let the compiler check a call before
+it sees the definition
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+declare every function you call <em>before</em> <code
+class="sourceCode c">main<span class="op">()</span></code></p></li>
+<li><p><strong>Pass-by-value</strong>: C always copies the argument into
+the parameter; a function can’t change the caller’s variable this
+way</p></li>
+<li><p>The <strong>function-call box</strong> (rectangle with a bar at
+each end): a function call in a top-level diagram, whose internals live
+in a separate diagram</p></li>
+<li><p><strong>Scope</strong>: local, block, and global, and why globals
+create hidden, hard-to-debug connections</p></li>
+<li><p><strong>Storage duration</strong>: locals die with their block;
+<code class="sourceCode c"><span class="dt">static</span></code> locals
+persist between calls</p></li>
+<li><p>Each call gets its own <strong>private</strong> locals
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+this is why one function can’t see another’s variables</p></li>
+</ul>
+</section>
+</section>
+<nav class="pager" aria-label="Previous and next lecture">
+<a class="prev" href="../lecture08-part1/"><span class="label">← Previous</span>Week
+8: Functions and Scope → Part 1: Functions</a>
+
+</nav>
+</main>
+<script>
+  // light/dark toggle: an explicit choice wins over the system setting
+  (function () {
+    var b = document.getElementById('theme-toggle'), r = document.documentElement;
+    function current() {
+      var t = r.getAttribute('data-theme');
+      return t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    function show() {
+      var dark = current() === 'dark';
+      b.textContent = dark ? '☀ Light' : '☾ Dark';
+      b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    b.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      r.setAttribute('data-theme', next);
+      try { localStorage.setItem('cpsc100-theme', next); } catch (e) {}
+      show();
+      b.blur();   // so Space goes back to the demo's "next step"
+    });
+    show();
+  })();
+</script>
+</body>
+</html>

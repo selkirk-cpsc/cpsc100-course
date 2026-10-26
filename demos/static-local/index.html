@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ordinary vs Static Locals</title>
+<style>
+  :root {
+    --bg: #f6f6f3;
+    --panel: #ffffff;
+    --ink: #1d1d1f;
+    --muted: #6b6b72;
+    --line: #a9aab2;
+    --node: #ffffff;
+    --visited: #eef1f6;
+    --accent: #2f6fde;
+    --accent-soft: #dce8fd;
+    --left: #d9480f;
+    --right: #7048e8;
+    --ok: #2b8a3e;
+    --ok-soft: #d3f9d8;
+    --bad: #c92a2a;
+    --bad-soft: #ffe0e0;
+    --term: #e9e9ec;
+    --out-bg: #ffffff; --out-ink: #1d1d1f; --out-line: #c9c9cf; --out-dim: #6b6b72;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141518;
+      --panel: #1e1f23;
+      --ink: #ececf0;
+      --muted: #9b9ca5;
+      --line: #5a5b63;
+      --node: #25262b;
+      --visited: #2b2e36;
+      --accent: #6ea0ff;
+      --accent-soft: #1d3157;
+      --left: #ff8a50;
+      --right: #a98bff;
+      --ok: #69db7c;
+      --ok-soft: #1c3a24;
+      --bad: #ff8787;
+      --bad-soft: #4a1f22;
+      --term: #2c2d33;
+      --out-bg: #111111; --out-ink: #e6e6e6; --out-line: #2c2d33; --out-dim: #8a8a8a;
+      --shadow: 0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5; --line: #5a5b63;
+    --node: #25262b; --visited: #2b2e36; --accent: #6ea0ff; --accent-soft: #1d3157;
+    --left: #ff8a50; --right: #a98bff; --ok: #69db7c; --ok-soft: #1c3a24;
+    --bad: #ff8787; --bad-soft: #4a1f22; --term: #2c2d33; --out-bg: #111111; --out-ink: #e6e6e6; --out-line: #2c2d33; --out-dim: #8a8a8a; --shadow: 0 1px 3px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .mono, code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+  header { max-width: 1280px; margin: 0 auto; padding: 20px 16px 4px; }
+  h1 { font-size: 1.45rem; margin: 0 0 4px; letter-spacing: -.01em; }
+  header p { margin: 0; color: var(--muted); }
+
+  main {
+    max-width: 1280px; margin: 0 auto; padding: 12px 16px 32px;
+    display: grid; gap: 16px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    align-items: start;
+  }
+  @media (max-width: 920px) { main { grid-template-columns: minmax(0, 1fr); } }
+
+  .card {
+    background: var(--panel); border-radius: 14px; box-shadow: var(--shadow);
+    padding: 16px;
+  }
+  .card h2 {
+    font-size: .78rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); margin: 0 0 10px;
+  }
+
+  /* ---------- Flow diagram ---------- */
+  .diagram { position: sticky; top: 12px; }
+  @media (max-width: 920px) { .diagram { position: static; } }
+  svg.flow { width: 100%; height: auto; display: block; max-height: calc(100vh - 60px); }
+  .flow text { fill: var(--ink); font-size: 14px; text-anchor: middle; dominant-baseline: central; }
+  .flow text.code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13.5px; }
+  .flow .node > :is(rect, polygon, circle) {
+    fill: var(--node); stroke: var(--line); stroke-width: 1.6;
+    transition: fill .25s, stroke .25s, stroke-width .25s;
+  }
+  .flow .node.visited > :is(rect, polygon, circle) { fill: var(--visited); }
+  .flow .node.active > :is(rect, polygon, circle) {
+    fill: var(--accent-soft); stroke: var(--accent); stroke-width: 3.2;
+    filter: drop-shadow(0 0 6px var(--accent));
+  }
+  .flow .edge { fill: none; stroke: var(--line); stroke-width: 1.6; marker-end: url(#arrow); transition: stroke .25s; }
+  .flow .edge.visited { stroke: var(--muted); }
+  .flow .edge.active {
+    stroke: var(--accent); stroke-width: 3.2; marker-end: url(#arrow-active);
+    stroke-dasharray: 8 6; animation: flow 0.6s linear infinite;
+  }
+  @keyframes flow { to { stroke-dashoffset: -14; } }
+  .flow .arrowhead { fill: var(--line); }
+  .flow .arrowhead-active { fill: var(--accent); }
+  .flow .elabel { font-size: 12.5px; font-weight: 600; fill: var(--muted); }
+  .flow .elabel.active { fill: var(--accent); }
+  .flow .bodybox { fill: none; stroke: var(--muted); stroke-dasharray: 6 5; stroke-width: 1.3; }
+  .flow .bodylabel { font-size: 13px; font-weight: 700; text-anchor: start; fill: var(--muted); }
+  .flow .badge rect { fill: var(--accent); }
+  .flow .badge text { fill: #fff; font-size: 12px; font-weight: 700; }
+  .flow .badge.false rect { fill: var(--muted); }
+
+  /* ---------- Right column ---------- */
+  .side { display: grid; gap: 16px; }
+
+  .wordbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .wordbar label { font-weight: 600; margin-right: 2px; }
+  .wordbar input {
+    font: inherit; font-family: ui-monospace, Menlo, Consolas, monospace;
+    padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--line);
+    background: var(--node); color: var(--ink); width: 9.5em;
+  }
+  .wordbar input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button {
+    font: inherit; cursor: pointer; border-radius: 8px; border: 1.5px solid var(--line);
+    background: var(--node); color: var(--ink); padding: 6px 12px;
+  }
+  button:hover { border-color: var(--accent); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button:disabled { opacity: .4; cursor: default; border-color: var(--line); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .preset { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9rem; padding: 4px 10px; }
+  .hint { color: var(--muted); font-size: .85rem; }
+
+  /* array */
+  .array-wrap { position: relative; padding: 52px 0 52px; margin: 0 auto; }
+  .cells { display: flex; gap: var(--gap); }
+  .col { width: var(--cell); display: flex; flex-direction: column; align-items: center; }
+  .cell {
+    width: var(--cell); height: var(--cell); border-radius: 8px;
+    border: 2px solid var(--line); background: var(--node);
+    display: grid; place-items: center;
+    font: 700 calc(var(--cell) * .48) ui-monospace, Menlo, Consolas, monospace;
+    transition: background .3s, border-color .3s, transform .3s;
+  }
+  .cell.term { background: var(--term); color: var(--muted); font-size: calc(var(--cell) * .32); border-style: dashed; }
+  .cell.done { background: var(--ok-soft); border-color: var(--ok); }
+  .cell.cmp-ok { background: var(--ok-soft); border-color: var(--ok); transform: translateY(-3px); box-shadow: 0 0 0 3px var(--ok-soft); }
+  .cell.cmp-bad { background: var(--bad-soft); border-color: var(--bad); transform: translateY(-3px); box-shadow: 0 0 0 3px var(--bad-soft); }
+  .idx { font: 12px ui-monospace, Menlo, Consolas, monospace; color: var(--muted); margin-top: 3px; }
+  .ptr {
+    position: absolute; transform: translateX(-50%);
+    left: calc(var(--i) * (var(--cell) + var(--gap)) + var(--cell) / 2);
+    display: flex; flex-direction: column; align-items: center;
+    font-weight: 700; font-size: 14px; line-height: 1.1;
+    transition: left .5s cubic-bezier(.4,.1,.2,1), opacity .3s;
+  }
+  .ptr.hidden { opacity: 0; }
+  .ptr .tri { font-size: 18px; }
+  .ptr.left { top: 6px; color: var(--left); }
+  .ptr.right { bottom: 4px; color: var(--right); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .82rem; color: var(--muted); justify-content: center; }
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; border: 1.5px solid; }
+
+  /* variables */
+  .vars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .var { border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 10px; text-align: center; }
+  .var .name { font: 600 13px ui-monospace, Menlo, Consolas, monospace; }
+  .var .val { font: 700 28px ui-monospace, Menlo, Consolas, monospace; line-height: 1.25; }
+  .var .sub { font-size: 12px; color: var(--muted); min-height: 1.3em; }
+  .var.left .name { color: var(--left); }
+  .var.right .name { color: var(--right); }
+  .var.changed { animation: pulse .9s ease-out; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--accent); background: var(--accent-soft); } 100% { box-shadow: 0 0 0 10px transparent; } }
+
+  /* explanation */
+  .explain .where { font-weight: 700; font-size: 1.05rem; margin-bottom: 4px; }
+  .explain .msg { min-height: 4.5em; }
+  .explain b { color: var(--accent); }
+  .output {
+    margin-top: 10px; font: 14px ui-monospace, Menlo, Consolas, monospace;
+    background: var(--out-bg); color: var(--out-ink); border: 1px solid var(--out-line); border-radius: 8px; padding: 8px 12px; min-height: 2.4em;
+  }
+  .output .prompt { color: var(--out-dim); }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+  .counter { margin-left: auto; color: var(--muted); font-size: .9rem; }
+  .progress { height: 4px; background: var(--visited); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+  .progress > div { height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+
+  /* trace */
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  th, td { padding: 5px 8px; text-align: center; border-bottom: 1px solid var(--visited); }
+  th { color: var(--muted); font-weight: 600; font-size: .8rem; }
+  td.mono { white-space: nowrap; }
+  td.yes { color: var(--ok); font-weight: 700; }
+  td.no { color: var(--bad); font-weight: 700; }
+  tr.latest { background: var(--accent-soft); }
+  .empty { color: var(--muted); font-style: italic; text-align: center; padding: 8px; }
+
+  /* shared additions */
+  .output { max-height: 10.5em; overflow: auto; }
+  .output .prompt { font-size: 12px; margin-bottom: 2px; }
+  .output pre { margin: 0; font: inherit; white-space: pre-wrap; }
+  .trace-wrap { max-height: 330px; overflow: auto; }
+  .t { color: var(--ok); font-weight: 700; }
+  .f { color: var(--muted); font-weight: 600; }
+  .cell.small { font-size: calc(var(--cell) * .3); }
+  .cell.hit { background: var(--ok-soft); border-color: var(--ok); }
+  .cell.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .cell.zone { background: var(--term); color: var(--muted); border-style: dashed; }
+  .cell.current { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .cell.stopcell { border-color: var(--accent); border-style: solid; color: var(--accent); transform: translateY(-3px); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .ptr.p { top: 6px; color: var(--left); }
+  .array-wrap { padding-bottom: 8px; }
+  .var.p .name { color: var(--left); }
+  .var.q .name { color: var(--right); }
+  .wordbar input[type=number] { width: 6em; }
+  .wordbar input.wide { width: 12em; }
+  .wordbar select { font: inherit; padding: 5px 8px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--node); color: var(--ink); }
+  .controls select { font: inherit; font-size: .9rem; padding: 5px 6px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--node); color: var(--ink); }
+  .side, .side > .card { min-width: 0; }
+  .note { font-size: .88rem; color: var(--muted); margin-top: 10px; }
+  kbd { font: 12px ui-monospace, Menlo, Consolas, monospace; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+
+  /* data-type keywords in the flow diagram */
+  :root { --type: #0c8599; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --type: #3bc9db; } }
+  :root[data-theme="dark"] { --type: #3bc9db; }
+  .flow .kw { fill: var(--type); font-weight: 700; }
+  .theme-toggle { font: inherit; font-size: .85rem; line-height: 1.2; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
+  .theme-toggle:hover { border-color: var(--ink); }
+  header .theme-toggle { float: right; margin: 0 0 8px 12px; }
+
+  /* function diagrams: lanes, column titles, function-call boxes */
+  .flow .lane { fill: var(--visited); opacity: .45; stroke: none; }
+  .flow .coltitle { font-size: 13px; font-weight: 700; fill: var(--muted); }
+  .flow .node > line { stroke: var(--line); stroke-width: 1.6; transition: stroke .25s; }
+  .flow .node.active > line { stroke: var(--accent); stroke-width: 2.4; }
+  .flow .node.waiting > rect { fill: var(--visited); stroke: var(--right); stroke-width: 2.8; }
+  .flow .node.waiting > line { stroke: var(--right); stroke-width: 2.2; }
+  .frame.paused { border-color: var(--right); }
+  .frame .wait { color: var(--right); font-size: .85rem; font-weight: 600; }
+
+  /* "Variables that exist right now": one box per function call */
+  .zone-title { font-size: .8rem; color: var(--muted); font-weight: 600; margin: 0 0 6px; }
+  .zone + .zone { margin-top: 14px; }
+  .frames { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
+  .frame { border: 2px solid var(--line); border-radius: 12px; padding: 8px 14px; min-width: 9.5em; background: var(--node); }
+  .frame .fh { font: 700 14px ui-monospace, Menlo, Consolas, monospace; margin-bottom: 4px; }
+  .frame .fh .n { font: 600 12px system-ui, sans-serif; color: var(--muted); margin-left: 4px; }
+  .frame .fv { font: 700 24px ui-monospace, Menlo, Consolas, monospace; line-height: 1.3; }
+  .frame .fv .nm { color: var(--left); }
+  .frame .none { color: var(--muted); font-size: .85rem; font-style: italic; }
+  .frame.call { border-color: var(--accent); }
+  .frame.prog { border-color: var(--right); }
+  .frame.prog .fv .nm { color: var(--right); }
+  .frame.ending { border-style: dashed; border-color: var(--bad); }
+  .frame.ending .fv { text-decoration: line-through; color: var(--muted); }
+  .frame.ending .gone { color: var(--bad); font-size: .8rem; font-weight: 700; }
+  .frame.changed { animation: pulse .9s ease-out; }
+  .ghosts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ghost { border: 1.5px dashed var(--line); border-radius: 8px; padding: 2px 8px; color: var(--muted); font: 13px ui-monospace, Menlo, Consolas, monospace; }
+  .ghost s { color: var(--muted); }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .presets button.on { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+  .mode { display: flex; flex-wrap: wrap; gap: 8px; }
+  .mode button { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9rem; }
+  .mode button.on { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+  .flow .node .skip { font-size: 11.5px; font-weight: 700; fill: var(--muted); }
+</style>
+<script>
+  // apply a saved light/dark choice before the page draws (no flash)
+  try { var t = localStorage.getItem('cpsc100-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+</head>
+<body>
+<header>
+  <button type="button" class="theme-toggle" id="theme-toggle">☾ Dark</button>
+  <h1>Ordinary Local vs. <code>static</code> Local</h1>
+  <p><code>main()</code> calls <code>count_calls()</code> three times. Switch between an ordinary local <code>calls</code> and a <code>static</code> one, and watch where <code>calls</code> lives and how long it lasts.
+     Keys: <kbd>→</kbd>/<kbd>Space</kbd> next, <kbd>←</kbd> back, <kbd>R</kbd> reset.</p>
+</header>
+
+<main>
+  <section class="card diagram" aria-label="Flow diagrams">
+    <svg class="flow" viewBox="0 0 660 430" role="img" aria-label="Flow diagrams for main and count_calls">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path class="arrowhead" d="M0,0 L10,5 L0,10 z"/>
+        </marker>
+        <marker id="arrow-active" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <path class="arrowhead-active" d="M0,0 L10,5 L0,10 z"/>
+        </marker>
+      </defs>
+
+      <rect class="lane" x="40"  y="6" width="220" height="418" rx="12"/>
+      <rect class="lane" x="340" y="6" width="280" height="418" rx="12"/>
+      <text class="coltitle" x="150" y="24">main</text>
+      <text class="coltitle" x="480" y="24">inside count_calls()</text>
+
+      <!-- main -->
+      <path class="edge" id="e-m0-c1" d="M150 80 V120"/>
+      <path class="edge" id="e-c1-c2" d="M150 164 V204"/>
+      <path class="edge" id="e-c2-c3" d="M150 248 V288"/>
+      <path class="edge" id="e-c3-m4" d="M150 332 V372"/>
+      <g class="node" id="n-m0"><rect x="85" y="40" width="130" height="40" rx="20"/><text x="150" y="60">Start</text></g>
+      <g class="node" id="n-c1"><rect x="60" y="120" width="180" height="44" rx="2"/><line x1="70" y1="120" x2="70" y2="164"/><line x1="230" y1="120" x2="230" y2="164"/><text class="code" x="150" y="142">count_calls()</text></g>
+      <g class="node" id="n-c2"><rect x="60" y="204" width="180" height="44" rx="2"/><line x1="70" y1="204" x2="70" y2="248"/><line x1="230" y1="204" x2="230" y2="248"/><text class="code" x="150" y="226">count_calls()</text></g>
+      <g class="node" id="n-c3"><rect x="60" y="288" width="180" height="44" rx="2"/><line x1="70" y1="288" x2="70" y2="332"/><line x1="230" y1="288" x2="230" y2="332"/><text class="code" x="150" y="310">count_calls()</text></g>
+      <g class="node" id="n-m4"><rect x="85" y="372" width="130" height="40" rx="20"/><text x="150" y="392">Stop</text></g>
+
+      <!-- count_calls -->
+      <path class="edge" id="e-f1-f2" d="M480 80 V112"/>
+      <path class="edge" id="e-f2-f3" d="M480 166 V196"/>
+      <path class="edge" id="e-f3-f4" d="M480 242 V272"/>
+      <path class="edge" id="e-f4-f5" d="M480 318 V350"/>
+      <g class="node" id="n-f1"><rect x="400" y="40" width="160" height="40" rx="20"/><text class="code" x="480" y="60">count_calls()</text></g>
+      <g class="node" id="n-f2"><rect x="370" y="112" width="220" height="54" rx="4"/>
+        <text x="480" y="129">Declare:</text><text class="code" id="t-decl" x="480" y="149"></text></g>
+      <g class="node" id="n-f3"><rect x="400" y="196" width="160" height="46" rx="4"/><text class="code" x="480" y="219">calls++</text></g>
+      <g class="node" id="n-f4"><polygon points="412,272 560,272 548,318 400,318"/><text x="480" y="295">print <tspan class="code" style="font-family:ui-monospace,Menlo,Consolas,monospace">calls</tspan></text></g>
+      <g class="node" id="n-f5"><rect x="415" y="350" width="130" height="40" rx="20"/><text class="code" x="480" y="370">return</text></g>
+
+      <g class="badge" id="badge" style="display:none">
+        <rect x="0" y="0" width="54" height="22" rx="11"/>
+        <text x="27" y="11">True</text>
+      </g>
+    </svg>
+  </section>
+
+  <div class="side">
+    <section class="card">
+      <h2>How is <code>calls</code> declared?</h2>
+      <div class="mode">
+        <button data-mode="static" class="on">static int calls = 0</button>
+        <button data-mode="local">int calls = 0</button>
+      </div>
+      <p class="note">The <code>static</code> version is the one on the lecture slide. Step through it, then switch to the ordinary local and compare the output.</p>
+    </section>
+
+    <section class="card">
+      <h2>Variables that exist right now</h2>
+      <div class="zone">
+        <div class="zone-title">Exists for the whole program (<code>static</code>)</div>
+        <div class="frames" id="prog"></div>
+      </div>
+      <div class="zone">
+        <div class="zone-title">One box per function call that hasn't returned yet</div>
+        <div class="frames" id="frames"></div>
+      </div>
+    </section>
+
+    <section class="card explain" aria-live="polite">
+      <h2>What's happening</h2>
+      <div class="where" id="where"></div>
+      <div class="msg" id="msg"></div>
+      <div class="output"><div class="prompt">output</div><pre id="out"></pre></div>
+      <div class="controls">
+        <button id="reset" title="Reset (R)">⟲ Reset</button>
+        <button id="prev" title="Back (←)">◀ Back</button>
+        <button id="next" class="primary" title="Next (→ or Space)">Next ▶</button>
+        <button id="play">▶ Auto-play</button>
+        <select id="speed" aria-label="Auto-play speed">
+          <option value="2200">Slow</option>
+          <option value="1400" selected>Normal</option>
+          <option value="600">Fast</option>
+        </select>
+        <span class="counter" id="counter"></span>
+      </div>
+      <div class="progress"><div id="bar"></div></div>
+    </section>
+
+    <section class="card">
+      <h2>Trace table: one row per call</h2>
+      <div class="trace-wrap" id="traceWrap">
+        <table>
+          <thead id="traceHead"></thead>
+          <tbody id="trace"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const tf = b => b ? '<span class="t">True</span>' : '<span class="f">False</span>';
+
+  /* cells: items = [{text, cls, idx}] */
+  function buildCells(wrapId, cellsId, items) {
+    $(cellsId).innerHTML = items.map((it, k) =>
+      `<div class="col"><div class="cell ${it.cls || ''}" data-k="${k}">${it.text}</div><div class="idx">${it.idx ?? ''}</div></div>`).join('');
+    $(wrapId).dataset.k = items.length;
+    sizeCells($(wrapId));
+  }
+  function sizeCells(wrap) {
+    const k = +wrap.dataset.k, gap = 6;
+    if (!k) return;
+    const avail = wrap.parentElement.clientWidth - 8;
+    const cell = Math.max(24, Math.min(54, Math.floor((avail - gap * (k - 1)) / k)));
+    wrap.style.setProperty('--cell', cell + 'px');
+    wrap.style.setProperty('--gap', gap + 'px');
+    wrap.style.width = (k * cell + (k - 1) * gap) + 'px';
+  }
+  window.addEventListener('resize', () => document.querySelectorAll('.array-wrap').forEach(sizeCells));
+
+  function makeDemo(cfg) {
+    let steps = [], cur = 0, timer = null;
+    if ($('vars')) $('vars').style.gridTemplateColumns = `repeat(${cfg.vars.length}, minmax(0, 1fr))`;
+    if ($('vars')) $('vars').innerHTML = cfg.vars.map(v =>
+      `<div class="var ${v.cls || ''}" id="v-${v.id}"><div class="name">${v.label}</div><div class="val">—</div><div class="sub"></div></div>`).join('');
+    $('traceHead').innerHTML = '<tr>' + cfg.traceCols.map(c => `<th>${c}</th>`).join('') + '</tr>';
+
+    function render(animate) {
+      const s = steps[cur], prev = animate && cur > 0 ? steps[cur - 1] : null;
+
+      document.querySelectorAll('.flow .node, .flow .edge, .flow .elabel').forEach(e => e.classList.remove('active', 'visited'));
+      for (let k = 0; k < cur; k++) {
+        $('n-' + steps[k].node).classList.add('visited');
+        if (steps[k].edge) $(steps[k].edge).classList.add('visited');
+      }
+      $('n-' + s.node).classList.add('active');
+      if (s.edge) {
+        $(s.edge).classList.add('active');
+        document.querySelectorAll(`.elabel[data-edge="${s.edge}"]`).forEach(l => l.classList.add('active'));
+      }
+      const badge = $('badge');
+      if (s.badge === true || s.badge === false) {
+        const pos = cfg.badgePos[s.node];
+        badge.style.display = '';
+        badge.setAttribute('transform', `translate(${pos[0]} ${pos[1]})`);
+        badge.classList.toggle('false', !s.badge);
+        badge.querySelector('text').textContent = s.badge ? 'True' : 'False';
+      } else badge.style.display = 'none';
+
+      cfg.vars.forEach(v => {
+        const box = $('v-' + v.id), val = s.vars[v.id], sub = (s.subs && s.subs[v.id]) || '';
+        box.querySelector('.val').innerHTML = (val === null || val === undefined) ? '—' : val;
+        box.querySelector('.sub').innerHTML = sub;
+        if (prev && prev.vars[v.id] !== val && val !== null && val !== undefined) {
+          box.classList.remove('changed'); void box.offsetWidth; box.classList.add('changed');
+        }
+      });
+
+      $('where').textContent = s.where || cfg.names[s.node];
+      $('msg').innerHTML = s.msg;
+      const out = $('out');
+      out.textContent = s.out || '';
+      out.parentElement.scrollTop = out.parentElement.scrollHeight;
+      $('counter').textContent = `Step ${cur + 1} / ${steps.length}`;
+      $('bar').style.width = (100 * cur / Math.max(1, steps.length - 1)) + '%';
+      $('prev').disabled = cur === 0;
+      $('next').disabled = cur === steps.length - 1;
+
+      const tb = $('trace');
+      tb.innerHTML = !s.trace.length
+        ? `<tr><td colspan="${cfg.traceCols.length}" class="empty">${cfg.traceEmpty}</td></tr>`
+        : s.trace.map((r, k) => `<tr${k === s.trace.length - 1 && s.traceLatest ? ' class="latest"' : ''}>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('');
+      const tw = $('traceWrap');
+      tw.scrollTop = tw.scrollHeight;
+
+      cfg.renderExtra(s);
+    }
+
+    const speed = () => +$('speed').value;
+    function go(k) { cur = Math.max(0, Math.min(steps.length - 1, k)); render(true); if (cur === steps.length - 1) stop(); }
+    function stop() { clearInterval(timer); timer = null; $('play').textContent = '▶ Auto-play'; }
+    function play() {
+      if (timer) return stop();
+      if (cur === steps.length - 1) go(0);
+      $('play').textContent = '⏸ Pause';
+      timer = setInterval(() => go(cur + 1), speed());
+    }
+    $('speed').onchange = () => { if (timer) { stop(); play(); } };
+    $('next').onclick = () => { stop(); go(cur + 1); };
+    $('prev').onclick = () => { stop(); go(cur - 1); };
+    $('reset').onclick = () => { stop(); go(0); };
+    $('play').onclick = play;
+    document.addEventListener('keydown', e => {
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); stop(); go(cur + 1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); stop(); go(cur - 1); }
+      else if (e.key === 'r' || e.key === 'R') { stop(); go(0); }
+    });
+
+    return {
+      load(params) {
+        stop();
+        steps = cfg.build(params);
+        cur = 0;
+        cfg.onLoad(params);
+        render(false);
+      }
+    };
+  }
+
+  const ord = n => ['first', 'second', 'third'][n - 1] || `${n}th`;
+  const DECL = {
+    static: '<tspan class="kw">static int</tspan> calls = 0',
+    local:  '<tspan class="kw">int</tspan> calls = 0',
+  };
+  let mode = 'static';
+
+  function drawFrame(f, k, all) {
+    if (f.fn === 'main') {
+      const paused = all.length > 1 ? `<div class="wait">paused at a count_calls() box</div>` : '';
+      return `<div class="frame${paused ? ' paused' : ''}"><div class="fh">main()</div><div class="none">no local variables</div>${paused}</div>`;
+    }
+    const v = f.calls === undefined
+      ? `<div class="none">${mode === 'static' ? 'no ordinary locals: calls is static' : 'nothing yet'}</div>`
+      : `<div class="fv"><span class="nm">calls</span> = ${f.calls}</div>`;
+    const gone = f.ending && f.calls !== undefined ? `<div class="gone">destroyed on return</div>` : '';
+    return `<div class="frame call${f.ending ? ' ending' : ''}"><div class="fh">count_calls()<span class="n">call ${f.n}</span></div>${v}${gone}</div>`;
+  }
+
+  let lastLen = 0;
+  const demo = makeDemo({
+    names: { m0: 'Start (entering main)', c1: 'main: function-call box', c2: 'main: function-call box', c3: 'main: function-call box',
+             m4: 'Stop (main returns 0)', f1: 'count_calls() begins', f2: 'count_calls: declare calls',
+             f3: 'count_calls: calls++', f4: 'count_calls: print calls', f5: 'count_calls: return' },
+    vars: [],
+    traceCols: ['Call', '<code>calls</code> at the declare box', '<code>calls</code> printed'],
+    traceEmpty: 'count_calls() has not run yet',
+    badgePos: {},
+    build({ mode }) {
+      const isStatic = mode === 'static', steps = [];
+      let out = '', trace = [], frames = [{ fn: 'main' }], prog = null, waiting = null;
+      const push = s => steps.push(Object.assign({ vars: {}, out, trace: trace.slice(), prog,
+        frames: frames.map(f => Object.assign({}, f)), waiting }, s));
+
+      if (isStatic) {
+        prog = 0;
+        push({ node: 'm0', msg: `<b>Start</b>. Because <b>calls</b> is <code>static</code>, it is created <b>once</b>, when the program starts, and set to 0, before count_calls() has even been called. It sits in the "whole program" area above, not in any call's box.` });
+      } else {
+        push({ node: 'm0', msg: `<b>Start</b>. <b>calls</b> is an ordinary local variable, so it doesn't exist yet: it will be created inside count_calls(), each time count_calls() is called.` });
+      }
+
+      for (let n = 1; n <= 3; n++) {
+        const c = 'c' + n;
+        waiting = null;
+        push({ node: c, edge: n > 1 ? `e-c${n - 1}-c${n}` : 'e-m0-c1',
+          msg: (n > 1 ? `Back in main, which carries on to its next box. ` : '') +
+               `This function-call box calls <b>count_calls()</b> for the ${ord(n)} time. main pauses here.` });
+
+        waiting = c;
+        const fr = { fn: 'count_calls', n };
+        frames.push(fr);
+        push({ node: 'f1', where: `count_calls() begins (call ${n})`,
+          msg: `Enter <b>count_calls()</b>. This call gets its own new box for its ordinary local variables.` +
+               (isStatic ? ` It stays empty: the only variable, calls, is static, so it isn't kept in a call's box.` : '') });
+
+        let before;
+        if (isStatic) {
+          before = prog;
+          push({ node: 'f2', edge: 'e-f1-f2',
+            msg: n === 1
+              ? `The declare box. calls was already created and set to 0 when the program started, so nothing new happens here. calls is <b>${prog}</b>.`
+              : `The declare box does <b>nothing</b> this time. calls already exists, and its <code>= 0</code> ran only once, when the program started. calls is still <b>${prog}</b> from the last call.` });
+        } else {
+          fr.calls = 0;
+          before = 0;
+          push({ node: 'f2', edge: 'e-f1-f2',
+            msg: `Create a <b>new</b> calls in this call's box and set it to <b>0</b>.` +
+                 (n > 1 ? ` The calls from the last call was destroyed when that call returned, so this is a fresh one.` : '') });
+        }
+
+        if (isStatic) prog++; else fr.calls++;
+        const now = isStatic ? prog : fr.calls;
+        push({ node: 'f3', edge: 'e-f2-f3',
+          msg: `<b>calls++</b>: ${now - 1} → <b>${now}</b>.` +
+               (isStatic ? ` This changes the one static calls, which every call shares.` : ` This changes only this call's calls.`) });
+
+        out += `Called ${now} time(s)\n`;
+        trace.push([n, before, now]);
+        push({ node: 'f4', edge: 'e-f3-f4', traceLatest: true, msg: `Print <b>Called ${now} time(s)</b>.` });
+
+        fr.ending = true;
+        push({ node: 'f5', edge: 'e-f4-f5',
+          msg: isStatic
+            ? `<b>return</b>: this call's box is destroyed, but it was empty. calls is static, so it is <b>not</b> destroyed: it stays at <b>${prog}</b>, ready for the next call.`
+            : `<b>return</b>: this call's box is destroyed, and <b>calls</b> (${fr.calls}) goes with it. The next call will have to start over.` });
+        frames.pop();
+      }
+
+      waiting = null;
+      push({ node: 'm4', edge: 'e-c3-m4',
+        msg: `<b>Stop</b>: main reaches its <code>return 0</code>. ` + (isStatic
+          ? `The output counts 1, 2, 3: every call used the <b>same</b> calls, which lasted for the whole program.`
+          : `The output is 1, 1, 1: every call made a <b>new</b> calls that started at 0, so the count never carried over.`) });
+      return steps;
+    },
+    onLoad(p) {
+      mode = p.mode;
+      $('t-decl').innerHTML = DECL[mode];
+      lastLen = 0;
+    },
+    renderExtra(s) {
+      document.querySelectorAll('.flow .node.waiting').forEach(n => n.classList.remove('waiting'));
+      if (s.waiting) {
+        const n = $('n-' + s.waiting);
+        n.classList.remove('visited');
+        n.classList.add('waiting');
+      }
+      $('prog').innerHTML = s.prog === null
+        ? `<span class="hint">nothing: calls is an ordinary local</span>`
+        : `<div class="frame prog"><div class="fh">static</div><div class="fv"><span class="nm">calls</span> = ${s.prog}</div></div>`;
+      $('frames').innerHTML = s.frames.map(drawFrame).join('');
+      if (s.frames.length > lastLen) {
+        const box = $('frames').lastElementChild;
+        if (box) box.classList.add('changed');
+      }
+      lastLen = s.frames.length;
+    }
+  });
+
+  function load(btn) {
+    document.querySelectorAll('.mode button').forEach(b => b.classList.toggle('on', b === btn));
+    demo.load({ mode: btn.dataset.mode });
+  }
+  document.querySelectorAll('.mode button').forEach(b => b.onclick = () => { load(b); b.blur(); });
+  load(document.querySelector('.mode button.on'));
+})();
+</script>
+<script>
+  // light/dark toggle: an explicit choice wins over the system setting
+  (function () {
+    var b = document.getElementById('theme-toggle'), r = document.documentElement;
+    function current() {
+      var t = r.getAttribute('data-theme');
+      return t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    function show() {
+      var dark = current() === 'dark';
+      b.textContent = dark ? '☀ Light' : '☾ Dark';
+      b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    b.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      r.setAttribute('data-theme', next);
+      try { localStorage.setItem('cpsc100-theme', next); } catch (e) {}
+      show();
+      b.blur();   // so Space goes back to the demo's "next step"
+    });
+    show();
+  })();
+</script>
+</body>
+</html>

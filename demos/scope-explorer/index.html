@@ -1,0 +1,936 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scope Explorer</title>
+<style>
+  :root {
+    --bg: #f6f6f3;
+    --panel: #ffffff;
+    --ink: #1d1d1f;
+    --muted: #6b6b72;
+    --line: #a9aab2;
+    --node: #ffffff;
+    --visited: #eef1f6;
+    --accent: #2f6fde;
+    --accent-soft: #dce8fd;
+    --left: #d9480f;
+    --right: #7048e8;
+    --ok: #2b8a3e;
+    --ok-soft: #d3f9d8;
+    --bad: #c92a2a;
+    --bad-soft: #ffe0e0;
+    --term: #e9e9ec;
+    --out-bg: #ffffff; --out-ink: #1d1d1f; --out-line: #c9c9cf; --out-dim: #6b6b72;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141518;
+      --panel: #1e1f23;
+      --ink: #ececf0;
+      --muted: #9b9ca5;
+      --line: #5a5b63;
+      --node: #25262b;
+      --visited: #2b2e36;
+      --accent: #6ea0ff;
+      --accent-soft: #1d3157;
+      --left: #ff8a50;
+      --right: #a98bff;
+      --ok: #69db7c;
+      --ok-soft: #1c3a24;
+      --bad: #ff8787;
+      --bad-soft: #4a1f22;
+      --term: #2c2d33;
+      --out-bg: #111111; --out-ink: #e6e6e6; --out-line: #2c2d33; --out-dim: #8a8a8a;
+      --shadow: 0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5; --line: #5a5b63;
+    --node: #25262b; --visited: #2b2e36; --accent: #6ea0ff; --accent-soft: #1d3157;
+    --left: #ff8a50; --right: #a98bff; --ok: #69db7c; --ok-soft: #1c3a24;
+    --bad: #ff8787; --bad-soft: #4a1f22; --term: #2c2d33; --out-bg: #111111; --out-ink: #e6e6e6; --out-line: #2c2d33; --out-dim: #8a8a8a; --shadow: 0 1px 3px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .mono, code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+  header { max-width: 1280px; margin: 0 auto; padding: 20px 16px 4px; }
+  h1 { font-size: 1.45rem; margin: 0 0 4px; letter-spacing: -.01em; }
+  header p { margin: 0; color: var(--muted); }
+
+  main {
+    max-width: 1280px; margin: 0 auto; padding: 12px 16px 32px;
+    display: grid; gap: 16px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    align-items: start;
+  }
+  @media (max-width: 920px) { main { grid-template-columns: minmax(0, 1fr); } }
+
+  .card {
+    background: var(--panel); border-radius: 14px; box-shadow: var(--shadow);
+    padding: 16px;
+  }
+  .card h2 {
+    font-size: .78rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); margin: 0 0 10px;
+  }
+
+  /* ---------- Flow diagram ---------- */
+  .diagram { position: sticky; top: 12px; }
+  @media (max-width: 920px) { .diagram { position: static; } }
+  svg.flow { width: 100%; height: auto; display: block; max-height: calc(100vh - 60px); }
+  .flow text { fill: var(--ink); font-size: 14px; text-anchor: middle; dominant-baseline: central; }
+  .flow text.code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13.5px; }
+  .flow .node > :is(rect, polygon, circle) {
+    fill: var(--node); stroke: var(--line); stroke-width: 1.6;
+    transition: fill .25s, stroke .25s, stroke-width .25s;
+  }
+  .flow .node.visited > :is(rect, polygon, circle) { fill: var(--visited); }
+  .flow .node.active > :is(rect, polygon, circle) {
+    fill: var(--accent-soft); stroke: var(--accent); stroke-width: 3.2;
+    filter: drop-shadow(0 0 6px var(--accent));
+  }
+  .flow .edge { fill: none; stroke: var(--line); stroke-width: 1.6; marker-end: url(#arrow); transition: stroke .25s; }
+  .flow .edge.visited { stroke: var(--muted); }
+  .flow .edge.active {
+    stroke: var(--accent); stroke-width: 3.2; marker-end: url(#arrow-active);
+    stroke-dasharray: 8 6; animation: flow 0.6s linear infinite;
+  }
+  @keyframes flow { to { stroke-dashoffset: -14; } }
+  .flow .arrowhead { fill: var(--line); }
+  .flow .arrowhead-active { fill: var(--accent); }
+  .flow .elabel { font-size: 12.5px; font-weight: 600; fill: var(--muted); }
+  .flow .elabel.active { fill: var(--accent); }
+  .flow .bodybox { fill: none; stroke: var(--muted); stroke-dasharray: 6 5; stroke-width: 1.3; }
+  .flow .bodylabel { font-size: 13px; font-weight: 700; text-anchor: start; fill: var(--muted); }
+  .flow .badge rect { fill: var(--accent); }
+  .flow .badge text { fill: #fff; font-size: 12px; font-weight: 700; }
+  .flow .badge.false rect { fill: var(--muted); }
+
+  /* ---------- Right column ---------- */
+  .side { display: grid; gap: 16px; }
+
+  .wordbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .wordbar label { font-weight: 600; margin-right: 2px; }
+  .wordbar input {
+    font: inherit; font-family: ui-monospace, Menlo, Consolas, monospace;
+    padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--line);
+    background: var(--node); color: var(--ink); width: 9.5em;
+  }
+  .wordbar input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button {
+    font: inherit; cursor: pointer; border-radius: 8px; border: 1.5px solid var(--line);
+    background: var(--node); color: var(--ink); padding: 6px 12px;
+  }
+  button:hover { border-color: var(--accent); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button:disabled { opacity: .4; cursor: default; border-color: var(--line); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .preset { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9rem; padding: 4px 10px; }
+  .hint { color: var(--muted); font-size: .85rem; }
+
+  /* array */
+  .array-wrap { position: relative; padding: 52px 0 52px; margin: 0 auto; }
+  .cells { display: flex; gap: var(--gap); }
+  .col { width: var(--cell); display: flex; flex-direction: column; align-items: center; }
+  .cell {
+    width: var(--cell); height: var(--cell); border-radius: 8px;
+    border: 2px solid var(--line); background: var(--node);
+    display: grid; place-items: center;
+    font: 700 calc(var(--cell) * .48) ui-monospace, Menlo, Consolas, monospace;
+    transition: background .3s, border-color .3s, transform .3s;
+  }
+  .cell.term { background: var(--term); color: var(--muted); font-size: calc(var(--cell) * .32); border-style: dashed; }
+  .cell.done { background: var(--ok-soft); border-color: var(--ok); }
+  .cell.cmp-ok { background: var(--ok-soft); border-color: var(--ok); transform: translateY(-3px); box-shadow: 0 0 0 3px var(--ok-soft); }
+  .cell.cmp-bad { background: var(--bad-soft); border-color: var(--bad); transform: translateY(-3px); box-shadow: 0 0 0 3px var(--bad-soft); }
+  .idx { font: 12px ui-monospace, Menlo, Consolas, monospace; color: var(--muted); margin-top: 3px; }
+  .ptr {
+    position: absolute; transform: translateX(-50%);
+    left: calc(var(--i) * (var(--cell) + var(--gap)) + var(--cell) / 2);
+    display: flex; flex-direction: column; align-items: center;
+    font-weight: 700; font-size: 14px; line-height: 1.1;
+    transition: left .5s cubic-bezier(.4,.1,.2,1), opacity .3s;
+  }
+  .ptr.hidden { opacity: 0; }
+  .ptr .tri { font-size: 18px; }
+  .ptr.left { top: 6px; color: var(--left); }
+  .ptr.right { bottom: 4px; color: var(--right); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .82rem; color: var(--muted); justify-content: center; }
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; border: 1.5px solid; }
+
+  /* variables */
+  .vars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .var { border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 10px; text-align: center; }
+  .var .name { font: 600 13px ui-monospace, Menlo, Consolas, monospace; }
+  .var .val { font: 700 28px ui-monospace, Menlo, Consolas, monospace; line-height: 1.25; }
+  .var .sub { font-size: 12px; color: var(--muted); min-height: 1.3em; }
+  .var.left .name { color: var(--left); }
+  .var.right .name { color: var(--right); }
+  .var.changed { animation: pulse .9s ease-out; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--accent); background: var(--accent-soft); } 100% { box-shadow: 0 0 0 10px transparent; } }
+
+  /* explanation */
+  .explain .where { font-weight: 700; font-size: 1.05rem; margin-bottom: 4px; }
+  .explain .msg { min-height: 4.5em; }
+  .explain b { color: var(--accent); }
+  .output {
+    margin-top: 10px; font: 14px ui-monospace, Menlo, Consolas, monospace;
+    background: var(--out-bg); color: var(--out-ink); border: 1px solid var(--out-line); border-radius: 8px; padding: 8px 12px; min-height: 2.4em;
+  }
+  .output .prompt { color: var(--out-dim); }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+  .counter { margin-left: auto; color: var(--muted); font-size: .9rem; }
+  .progress { height: 4px; background: var(--visited); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+  .progress > div { height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+
+  /* trace */
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  th, td { padding: 5px 8px; text-align: center; border-bottom: 1px solid var(--visited); }
+  th { color: var(--muted); font-weight: 600; font-size: .8rem; }
+  td.mono { white-space: nowrap; }
+  td.yes { color: var(--ok); font-weight: 700; }
+  td.no { color: var(--bad); font-weight: 700; }
+  tr.latest { background: var(--accent-soft); }
+  .empty { color: var(--muted); font-style: italic; text-align: center; padding: 8px; }
+
+  /* shared additions */
+  .output { max-height: 10.5em; overflow: auto; }
+  .output .prompt { font-size: 12px; margin-bottom: 2px; }
+  .output pre { margin: 0; font: inherit; white-space: pre-wrap; }
+  .trace-wrap { max-height: 330px; overflow: auto; }
+  .t { color: var(--ok); font-weight: 700; }
+  .f { color: var(--muted); font-weight: 600; }
+  .cell.small { font-size: calc(var(--cell) * .3); }
+  .cell.hit { background: var(--ok-soft); border-color: var(--ok); }
+  .cell.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .cell.zone { background: var(--term); color: var(--muted); border-style: dashed; }
+  .cell.current { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .cell.stopcell { border-color: var(--accent); border-style: solid; color: var(--accent); transform: translateY(-3px); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .ptr.p { top: 6px; color: var(--left); }
+  .array-wrap { padding-bottom: 8px; }
+  .var.p .name { color: var(--left); }
+  .var.q .name { color: var(--right); }
+  .wordbar input[type=number] { width: 6em; }
+  .wordbar input.wide { width: 12em; }
+  .wordbar select { font: inherit; padding: 5px 8px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--node); color: var(--ink); }
+  .controls select { font: inherit; font-size: .9rem; padding: 5px 6px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--node); color: var(--ink); }
+  .side, .side > .card { min-width: 0; }
+  .note { font-size: .88rem; color: var(--muted); margin-top: 10px; }
+  kbd { font: 12px ui-monospace, Menlo, Consolas, monospace; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+
+  /* data-type keywords in the flow diagram */
+  :root { --type: #0c8599; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --type: #3bc9db; } }
+  :root[data-theme="dark"] { --type: #3bc9db; }
+  .flow .kw { fill: var(--type); font-weight: 700; }
+  .theme-toggle { font: inherit; font-size: .85rem; line-height: 1.2; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
+  .theme-toggle:hover { border-color: var(--ink); }
+  header .theme-toggle { float: right; margin: 0 0 8px 12px; }
+
+  /* scope explorer */
+  :root { --scope: #e6f4ea; --scope-edge: #2b8a3e; --kwc: #0c8599; --str: #a6501a; --cmt: #868e96; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --scope: #1c3a24; --scope-edge: #69db7c; --kwc: #3bc9db; --str: #ffa94d; --cmt: #8a8f98; } }
+  :root[data-theme="dark"] { --scope: #1c3a24; --scope-edge: #69db7c; --kwc: #3bc9db; --str: #ffa94d; --cmt: #8a8f98; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .tabs button.on { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+  .from { color: var(--muted); font-size: .85rem; margin: 0 0 10px; }
+  .codewrap { overflow-x: auto; border: 1px solid var(--out-line); border-radius: 10px; background: var(--out-bg); }
+  .code { margin: 0; padding: 8px 0; font: 14px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--out-ink); min-width: max-content; }
+  .ln { display: block; padding: 0 14px 0 0; border-left: 4px solid transparent; transition: background .2s, opacity .2s; }
+  .ln .no { display: inline-block; width: 2.6em; padding-right: .9em; text-align: right; color: var(--out-dim); user-select: none; }
+  .ln.in { background: var(--scope); border-left-color: var(--scope-edge); }
+  .code.focus .ln:not(.in) { opacity: .55; }
+  .code .k { color: var(--kwc); font-weight: 700; }
+  .code .s { color: var(--str); }
+  .code .c, .code .c .k, .code .c .s { color: var(--cmt); font-weight: 400; }
+  .v { cursor: pointer; border-radius: 4px; padding: 0 1px; border-bottom: 2px dotted var(--accent); color: var(--out-ink); font-weight: 700; }
+  .code .c .v { color: var(--out-ink); }
+  .v:hover { background: var(--accent-soft); }
+  .v:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .v.decl { border-bottom-style: solid; }
+  .v.bad { border-bottom-color: var(--bad); }
+  .v.sel { background: var(--accent); color: #fff; }
+  .v.ref { background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent); }
+  .v.sel.bad { background: var(--bad); }
+  .explain .msg { min-height: 7em; }
+  .verdict { display: inline-block; font-weight: 700; border-radius: 999px; padding: 2px 10px; font-size: .85rem; margin-bottom: 8px; }
+  .verdict.ok { background: var(--ok-soft); color: var(--ok); }
+  .verdict.no { background: var(--bad-soft); color: var(--bad); }
+  .err { margin-top: 10px; font: 13px ui-monospace, Menlo, Consolas, monospace; background: var(--out-bg); color: var(--out-ink); border: 1px solid var(--out-line); border-radius: 8px; padding: 8px 12px; white-space: pre-wrap; }
+  .legend2 { display: grid; gap: 8px; font-size: .9rem; }
+  .legend2 .v { cursor: default; }
+  .legend2 .v:hover { background: none; }
+  .sw2 { display: inline-block; width: 26px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 6px; background: var(--scope); border-left: 4px solid var(--scope-edge); }
+  .diagram { position: static; }
+
+  /* stepping through the program */
+  .ln { position: relative; }
+  .ln .mark { display: inline-block; width: 1.4em; text-align: center; color: var(--accent); font-weight: 700; }
+  .ln.cur { box-shadow: inset 0 0 0 2px var(--accent); background: var(--accent-soft); }
+  .ln.in.cur { background: var(--scope); }
+  .ln.skip { box-shadow: inset 0 0 0 2px var(--bad); background: var(--bad-soft); }
+  .ln.skip .mark { color: var(--bad); }
+  .code.focus .ln.cur:not(.in) { opacity: 1; }
+  .banner { margin: 0 0 10px; padding: 8px 12px; border-radius: 8px; background: var(--bad-soft); color: var(--bad); font-weight: 600; }
+  .banner pre { margin: 6px 0 0; font: 13px ui-monospace, Menlo, Consolas, monospace; color: var(--out-ink); white-space: pre-wrap; }
+  .stepctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+  .stepctl input[type=range] { flex: 1 1 8em; min-width: 6em; accent-color: var(--accent); }
+  .stepctl .counter { margin-left: 0; }
+  .runmsg { margin-top: 12px; border: 1px solid var(--out-line); border-radius: 10px; padding: 10px 14px; }
+  .runmsg .status { font-weight: 700; margin-bottom: 2px; }
+  .runmsg .status.bad { color: var(--bad); }
+  .runmsg h2, .outbox h2 { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 6px; }
+  .outbox { margin-top: 12px; }
+  .outbox pre { margin: 0; min-height: 2.4em; font: 14px ui-monospace, Menlo, Consolas, monospace; background: var(--out-bg); color: var(--out-ink); border: 1px solid var(--out-line); border-radius: 8px; padding: 8px 12px; white-space: pre-wrap; }
+
+  /* variables that exist right now: one box per function call */
+  .frames { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
+  .frame { border: 2px solid var(--line); border-radius: 12px; padding: 8px 14px; min-width: 9.5em; background: var(--node); }
+  .frame .fh { font: 700 14px ui-monospace, Menlo, Consolas, monospace; margin-bottom: 4px; }
+  .frame .fh .n { font: 600 12px system-ui, sans-serif; color: var(--muted); margin-left: 4px; }
+  .frame.call { border-color: var(--accent); }
+  .frame.glob { border-color: var(--right); }
+  .frame.paused { border-color: var(--line); opacity: .85; }
+  .frame .wait { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 4px; }
+  .frame table { border-collapse: collapse; width: auto; font: 15px ui-monospace, Menlo, Consolas, monospace; }
+  .frame td { border: 0; padding: 2px 6px 2px 0; text-align: left; }
+  .frame td.k { font-weight: 700; color: var(--left); }
+  .frame.glob td.k { color: var(--right); }
+  .frame td.val { font-weight: 700; }
+  .frame td.tag { font: 600 11px system-ui, sans-serif; color: var(--muted); }
+  .frame tr.chg td { background: var(--accent-soft); }
+  .frame .none { color: var(--muted); font-size: .85rem; font-style: italic; }
+  .memhint { color: var(--muted); font-size: .85rem; margin: 10px 0 0; }
+  /* the clicked name wins over the highlight on its other uses */
+  .v.sel, .v.sel.ref { background: var(--accent); color: #fff; }
+  .v.sel.bad { background: var(--bad); }
+</style>
+<script>
+  // apply a saved light/dark choice before the page draws (no flash)
+  try { var t = localStorage.getItem('cpsc100-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+</head>
+<body>
+<header>
+  <button type="button" class="theme-toggle" id="theme-toggle">☾ Dark</button>
+  <h1>Scope Explorer: Where Can This Variable Be Seen?</h1>
+  <p>The examples from the lecture slides. Run each program one line at a time and watch its variables appear and disappear, and click any underlined variable name: a <b>declaration</b> shades every line where that variable can be used, and a <b>use</b> shows which declaration it belongs to, or why it isn't allowed there.
+     Keys: <kbd>→</kbd>/<kbd>Space</kbd> next, <kbd>←</kbd> back.</p>
+</header>
+
+<main>
+  <section class="card diagram" aria-label="Example code">
+    <div class="tabs" id="tabs"></div>
+    <p class="from" id="from"></p>
+    <div class="banner" id="banner" hidden></div>
+    <div class="codewrap"><pre class="code" id="code"></pre></div>
+    <div class="stepctl">
+      <button type="button" id="first" title="First step">⏮ First</button>
+      <button type="button" id="back" title="Back (←)">◀ Back</button>
+      <button type="button" id="next" class="primary" title="Next (→ or Space)">Next ▶</button>
+      <button type="button" id="last" title="Last step">Last ⏭</button>
+      <input type="range" id="slider" min="0" value="0" aria-label="Step">
+      <span class="counter" id="counter"></span>
+    </div>
+    <div class="runmsg" aria-live="polite">
+      <h2>What's happening</h2>
+      <div class="status" id="status"></div>
+      <div id="say"></div>
+    </div>
+    <div class="outbox"><h2>Output</h2><pre id="out"></pre></div>
+  </section>
+
+  <div class="side">
+    <section class="card">
+      <h2>Variables that exist right now</h2>
+      <div class="frames" id="frames"></div>
+      <p class="memhint">One box per function call that hasn't returned yet, plus a box for any global variables. Variables tagged <i>loop</i> or <i>loop body</i> belong to a block inside the function.</p>
+    </section>
+
+    <section class="card explain" aria-live="polite">
+      <h2>What you clicked</h2>
+      <div class="where" id="where"></div>
+      <div class="msg" id="msg"></div>
+    </section>
+
+    <section class="card">
+      <h2>Key</h2>
+      <div class="legend2">
+        <div><span class="v decl">name</span> &nbsp;a declaration: where the variable is created</div>
+        <div><span class="v">name</span> &nbsp;a use of a variable</div>
+        <div><span class="v bad">name</span> &nbsp;a use that is <b>not</b> allowed here: the program won't compile with it</div>
+        <div><span class="sw2"></span>the lines where the selected variable can be used: its <b>scope</b></div>
+      </div>
+      <p class="note">Rule of thumb: a variable can be used from the line where it's declared down to the <code>}</code> that closes the braces it was declared in. A variable declared outside every function (a global) can be used from its declaration to the end of the file.</p>
+    </section>
+  </div>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  /* Records the program one line at a time. Each snapshot is taken just after
+     its line runs: the variables that exist, the output so far, and what happened. */
+  function makeTracer() {
+    const steps = [], frames = [], globals = [], counts = {};
+    let out = '', changed = [];
+    const top = () => frames[frames.length - 1];
+    return {
+      steps,
+      snap(line, say, opt = {}) {
+        steps.push(Object.assign({
+          line, say, out, changed,
+          frames: frames.map(f => ({ fn: f.fn, n: f.n, vars: f.vars.map(v => Object.assign({}, v)) })),
+          globals: globals.map(v => Object.assign({}, v)),
+        }, opt));
+        changed = [];
+      },
+      call(fn) { counts[fn] = (counts[fn] || 0) + 1; frames.push({ fn, n: counts[fn], vars: [] }); },
+      ret() { frames.pop(); },
+      set(name, val, tag) {
+        const f = top(), v = f.vars.find(v => v.name === name);
+        if (v) v.val = val; else f.vars.push({ name, val, tag });
+        changed = changed.concat('L:' + name);
+      },
+      gset(name, val) {
+        const v = globals.find(v => v.name === name);
+        if (v) v.val = val; else globals.push({ name, val });
+        changed = changed.concat('G:' + name);
+      },
+      drop(name) { const f = top(); f.vars = f.vars.filter(v => v.name !== name); },
+      print(s) { out += s; },
+    };
+  }
+
+  /* Code is copied from the Lecture 8 Part 2 slides. Variable names are marked up as
+     {d:key:name} for a declaration, {u:key:name} for a use of declaration `key`, and
+     {x:key:name} for a use that is not in scope (explained by bad[key]). Lines the
+     slides comment out because they don't compile are shown here as code. */
+  const EXAMPLES = [
+    {
+      tab: 'Visibility',
+      from: 'From the slide "Example: Visibility of Variables".',
+      code: String.raw`#include <stdio.h>
+
+void test(void);
+
+int main(void) {
+    int {d:a:a} = 10; // main's own variable
+    printf("main: a = %d\n", {u:a:a});
+    test();
+    printf("test: b = %d\n", {x:b9:b});
+    return 0;
+}
+
+void test(void) {
+    int {d:b:b} = 20; // test's own variable
+    printf("test: b = %d\n", {u:b:b});
+}`,
+      decls: {
+        a: { line: 6, from: 6, to: 11, kind: 'a local variable of <code>main()</code>',
+             more: 'In particular, <code>test()</code> can\'t use it.' },
+        b: { line: 14, from: 14, to: 16, kind: 'a local variable of <code>test()</code>',
+             more: 'In particular, <code>main()</code> can\'t use it.' },
+      },
+      bad: {
+        b9: { show: 'a',
+              html: 'This line is inside <code>main()</code>, but <code>b</code> belongs to <code>test()</code>. Inside <code>main()</code> there is no variable named <code>b</code> at all. The shaded lines are what <code>main()</code> <i>can</i> use: its own <code>a</code>.',
+              err: "line 9: error: 'b' undeclared\n(first use in this function)" },
+      },
+      run(T) {
+        T.call('main');
+        T.snap(5, 'The program starts by calling <code>main()</code>. It gets its own box for its local variables, empty so far.');
+        T.set('a', 10);
+        T.snap(6, '<code>int a = 10;</code> creates <b>a</b> in main\'s box.');
+        T.print('main: a = 10\n');
+        T.snap(7, 'Prints <b>a</b>. That\'s allowed: a is main\'s own variable.');
+        T.snap(8, 'main calls <code>test()</code>, and pauses on this line until test() returns.');
+        T.call('test');
+        T.snap(13, 'Enter <code>test()</code>. It gets a new box of its own. main\'s box, with a in it, is still there, but test() can\'t see a.');
+        T.set('b', 20);
+        T.snap(14, '<code>int b = 20;</code> creates <b>b</b> in test\'s box.');
+        T.print('test: b = 20\n');
+        T.snap(15, 'Prints <b>b</b>, test\'s own variable.');
+        T.ret();
+        T.snap(16, 'test() reaches its closing brace and returns. Its box is destroyed, and <b>b</b> with it. The program goes back to main, just after line 8.');
+        T.snap(9, 'This line doesn\'t compile: it is in <code>main()</code>, but <b>b</b> can only be used inside <code>test()</code>. A real compiler would reject the whole program (see the slide); here the run skips the line so you can see the rest.', { skip: true });
+        T.ret();
+        T.snap(10, '<code>return 0;</code> main() is finished: its box is destroyed and the program ends.', { done: true });
+      },
+    },
+    {
+      tab: 'Same name',
+      from: 'From the slide "Example: Local Variables With the Same Name".',
+      code: String.raw`#include <stdio.h>
+
+void alpha(void);
+void beta(void);
+
+int main(void) {
+    alpha();
+    beta();
+    alpha();
+    return 0;
+}
+
+void alpha(void) {
+    int {d:xa:x} = 10; // local to alpha
+    printf("alpha: x = %d\n", {u:xa:x});
+    {u:xa:x}++;
+}
+
+void beta(void) {
+    int {d:xb:x} = 100; // local to beta
+    printf("beta:  x = %d\n", {u:xb:x});
+}`,
+      decls: {
+        xa: { line: 14, from: 14, to: 17, kind: '<code>alpha()</code>\'s local <code>x</code>',
+              more: 'Every call to <code>alpha()</code> creates a fresh one set to 10, so the <code>x++</code> on line 16 is lost when the call returns. Click <code>beta()</code>\'s <code>x</code> on line 20 to compare: the two scopes don\'t overlap, so the two <code>x</code>s can never be confused.' },
+        xb: { line: 20, from: 20, to: 22, kind: '<code>beta()</code>\'s local <code>x</code>',
+              more: 'It has the same name as <code>alpha()</code>\'s <code>x</code>, but it is a completely separate variable. Nothing in <code>alpha()</code> can see it.' },
+      },
+      bad: {},
+      run(T) {
+        const alpha = (n) => {
+          T.call('alpha');
+          T.snap(13, n === 1 ? 'Enter <code>alpha()</code>: a new, empty box for this call.'
+                             : 'Enter <code>alpha()</code> again: a <b>brand-new</b> box. Nothing is left over from the first call.');
+          T.set('x', 10);
+          T.snap(14, n === 1 ? '<code>int x = 10;</code> creates alpha\'s <b>x</b>.'
+                             : '<b>x</b> starts at 10 again, not 11: it\'s a new x, in a new box.');
+          T.print('alpha: x = 10\n');
+          T.snap(15, 'Prints this call\'s x: 10.');
+          T.set('x', 11);
+          T.snap(16, '<code>x++</code> makes this call\'s x 11.');
+          T.ret();
+          T.snap(17, 'alpha() returns: its box is destroyed, and x (11) goes with it.');
+        };
+        T.call('main');
+        T.snap(6, 'The program starts by calling <code>main()</code>, which gets its own box. main has no local variables.');
+        T.snap(7, 'main calls <code>alpha()</code> and pauses here until it returns.');
+        alpha(1);
+        T.snap(8, 'Back in main, which calls <code>beta()</code>.');
+        T.call('beta');
+        T.snap(19, 'Enter <code>beta()</code>: a new, empty box.');
+        T.set('x', 100);
+        T.snap(20, '<code>int x = 100;</code> creates beta\'s own <b>x</b>: the same name as alpha\'s, but a different variable.');
+        T.print('beta:  x = 100\n');
+        T.snap(21, 'Prints beta\'s x: 100.');
+        T.ret();
+        T.snap(22, 'beta() returns: its box, and its x, are destroyed.');
+        T.snap(9, 'Back in main, which calls <code>alpha()</code> a second time.');
+        alpha(2);
+        T.ret();
+        T.snap(10, '<code>return 0;</code> main() is finished and the program ends. alpha printed 10 both times: each call had its own x.', { done: true });
+      },
+    },
+    {
+      tab: 'Global',
+      from: 'From the slide "Example: Global Scope".',
+      code: String.raw`#include <stdio.h>
+
+int {d:g:counter} = 0; // global variable
+
+void alpha(void);
+void beta(void);
+
+int main(void) {
+    alpha(); beta(); alpha();
+    printf("Final counter = %d\n", {u:g:counter});
+    return 0;
+}
+
+void alpha(void) {
+    printf("alpha: counter = %d\n", ++{u:g:counter});
+}
+
+void beta(void) {
+    printf("beta:  counter = %d\n", {u:g:counter} += 10);
+}`,
+      decls: {
+        g: { line: 3, from: 3, to: 20, kind: 'a <b>global</b> variable',
+             more: 'It is declared outside every function, so every function below it can see it and change it, and it lasts for the whole program. That\'s why <code>alpha()</code> and <code>beta()</code> both change the same <code>counter</code>, and why bugs are hard to track: any function could have changed it.' },
+      },
+      bad: {},
+      run(T) {
+        let counter = 0;
+        const alpha = () => {
+          T.call('alpha');
+          T.snap(14, 'Enter <code>alpha()</code>. Its box is empty: alpha has no local variables, but it can still use the global <b>counter</b>.');
+          counter += 1;
+          T.gset('counter', counter);
+          T.print(`alpha: counter = ${counter}\n`);
+          T.snap(15, `<code>++counter</code> adds 1 to the global counter, making it ${counter}, and printf prints it.`);
+          T.ret();
+          T.snap(16, `alpha() returns and its (empty) box is destroyed. counter is global, so it keeps its value: ${counter}.`);
+        };
+        T.gset('counter', 0);
+        T.snap(3, 'Before <code>main()</code> even starts, the global <b>counter</b> is created and set to 0. It isn\'t in any function\'s box: it belongs to the whole program.');
+        T.call('main');
+        T.snap(8, 'The program calls <code>main()</code>, which gets its own box. main has no local variables.');
+        T.snap(9, 'main calls <code>alpha()</code>, the first of three calls on this line.');
+        alpha();
+        T.snap(9, 'Back on line 9, main calls <code>beta()</code>.');
+        T.call('beta');
+        T.snap(18, 'Enter <code>beta()</code>. Its box is empty too, and it can also use the global counter.');
+        counter += 10;
+        T.gset('counter', counter);
+        T.print(`beta:  counter = ${counter}\n`);
+        T.snap(19, `<code>counter += 10</code> changes the same global counter, making it ${counter}.`);
+        T.ret();
+        T.snap(20, 'beta() returns. The global counter keeps its value.');
+        T.snap(9, 'Back on line 9, main calls <code>alpha()</code> again.');
+        alpha();
+        T.print(`Final counter = ${counter}\n`);
+        T.snap(10, `main prints the global counter: ${counter}. Three different calls changed it.`);
+        T.ret();
+        T.snap(11, '<code>return 0;</code> main() is finished and the program ends. The global counter lasted until the very end.', { done: true });
+      },
+    },
+    {
+      tab: 'Scope error',
+      from: 'From the slide "Example: Scope Errors".',
+      code: String.raw`#include <stdio.h>
+
+void print_square(void);
+
+int main(void) {
+    int {d:x:x} = 5; // local to main
+    print_square();
+    printf("Done!\n");
+    return 0;
+}
+
+void print_square(void) {
+    int {d:r:result} = {x:x13:x} * {x:x13:x}; // 'x' not visible here
+    printf("Square = %d\n", {u:r:result});
+}`,
+      decls: {
+        x: { line: 6, from: 6, to: 10, kind: 'a local variable of <code>main()</code>',
+             more: 'Its scope ends at <code>main()</code>\'s closing brace on line 10, so <code>print_square()</code> can\'t use it, even though <code>main()</code> is the one that calls <code>print_square()</code>.' },
+        r: { line: 13, from: 13, to: 15, kind: 'a local variable of <code>print_square()</code>',
+             more: 'This line would be fine if the <code>x</code>s on the same line were in scope.' },
+      },
+      bad: {
+        x13: { show: 'x',
+               html: 'This <code>x</code> is inside <code>print_square()</code>, but the only <code>x</code> in the program is <code>main()</code>\'s, and its scope (shaded) ends on line 10. Being called from <code>main()</code> doesn\'t give a function access to <code>main()</code>\'s variables. The next slide fixes this by making <code>x</code> global. Passing <code>x</code> in as a parameter would also work, and is usually the better fix.',
+               err: "error: 'x' undeclared (first use in this function)\n    int result = x * x;\n                 ^" },
+      },
+      noRun: "error: 'x' undeclared (first use in this function)\n    int result = x * x;\n                 ^",
+    },
+    {
+      tab: 'Fixed with a global',
+      from: 'From the slide "Example: Scope Errors (Fix)".',
+      code: String.raw`#include <stdio.h>
+
+int {d:g:x} = 5; // global variable
+
+void print_square(void);
+
+int main(void) {
+    print_square();
+    printf("Done!\n");
+    return 0;
+}
+
+void print_square(void) {
+    int {d:r:result} = {u:g:x} * {u:g:x}; // 'x' is now visible (global)
+    printf("Square = %d\n", {u:r:result});
+}`,
+      decls: {
+        g: { line: 3, from: 3, to: 16, kind: 'a <b>global</b> variable',
+             more: 'It is declared outside every function, so <code>print_square()</code> can now use it. That fixes the error, but any other function could change <code>x</code> too. Passing <code>x</code> as a parameter keeps it private.' },
+        r: { line: 14, from: 14, to: 16, kind: 'a local variable of <code>print_square()</code>',
+             more: 'It is created each time <code>print_square()</code> runs this line, and destroyed when it returns.' },
+      },
+      bad: {},
+      run(T) {
+        T.gset('x', 5);
+        T.snap(3, 'Before <code>main()</code> starts, the global <b>x</b> is created and set to 5.');
+        T.call('main');
+        T.snap(7, 'The program calls <code>main()</code>, which gets its own box. main has no local variables now: x moved out of it.');
+        T.snap(8, 'main calls <code>print_square()</code> and pauses here until it returns.');
+        T.call('print_square');
+        T.snap(13, 'Enter <code>print_square()</code>: a new, empty box.');
+        T.set('result', 25);
+        T.snap(14, '<code>x * x</code> uses the <b>global</b> x (5), which every function can see, so <b>result</b> = 25.');
+        T.print('Square = 25\n');
+        T.snap(15, 'Prints result.');
+        T.ret();
+        T.snap(16, 'print_square() returns: its box and result are destroyed. The global x stays.');
+        T.print('Done!\n');
+        T.snap(9, 'Back in main, which prints <code>Done!</code>.');
+        T.ret();
+        T.snap(10, '<code>return 0;</code> main() is finished and the program ends.', { done: true });
+      },
+    },
+    {
+      tab: 'Block scope',
+      from: 'From the slide "Example: Block Scope". On the slide, lines 12 and 13 are commented out.',
+      code: String.raw`#include <stdio.h>
+
+int main(void) {
+    int {d:t:total} = 0;
+
+    for (int {d:i:i} = 1; {u:i:i} <= 3; {u:i:i}++) {
+        int {d:sq:square} = {u:i:i} * {u:i:i};
+        {u:t:total} += {u:sq:square};
+    }
+
+    printf("total = %d\n", {u:t:total});
+    printf("%d", {x:sq12:square}); // invalid
+    printf("%d", {x:i13:i});      // invalid
+    return 0;
+}`,
+      decls: {
+        t: { line: 4, from: 4, to: 15, kind: 'a local variable of <code>main()</code>',
+             more: 'It is declared in <code>main()</code>\'s own braces, so it can be used inside the loop <i>and</i> after it.' },
+        i: { line: 6, from: 6, to: 9, kind: 'the loop variable',
+             more: 'A variable declared in the <code>for</code> statement belongs to the loop: it exists only while the loop runs, and can\'t be used after the loop\'s closing brace on line 9.' },
+        sq: { line: 7, from: 7, to: 9, kind: 'a variable declared inside the loop body\'s braces',
+              more: 'It has <b>block scope</b>: it can only be used inside that block. A new <code>square</code> is created on every pass through the loop.' },
+      },
+      bad: {
+        sq12: { show: 'sq', slide: true,
+                html: 'This line is after the loop, but <code>square</code> was declared inside the loop body\'s braces, and its scope ended at the <code>}</code> on line 9.',
+                err: "error: 'square' undeclared (first use in this function)" },
+        i13: { show: 'i', slide: true,
+               html: 'This line is after the loop, but <code>i</code> was declared in the <code>for</code> statement, so it belongs to the loop. Its scope ended with the loop on line 9. If you need the value after the loop, declare the variable before the loop instead.',
+               err: "error: 'i' undeclared (first use in this function)" },
+      },
+      run(T) {
+        let total = 0, i = 1;
+        T.call('main');
+        T.snap(3, 'The program starts by calling <code>main()</code>, which gets its own box, empty so far.');
+        T.set('total', 0);
+        T.snap(4, '<code>int total = 0;</code> creates <b>total</b> in main\'s box.');
+        T.set('i', 1, 'loop');
+        T.snap(6, 'The <code>for</code> loop starts: <code>int i = 1</code> creates <b>i</b>, which belongs to the loop. Test <code>1 &lt;= 3</code>: True, so run the loop body.');
+        for (;;) {
+          const sq = i * i;
+          T.set('square', sq, 'loop body');
+          T.snap(7, `<code>int square = i * i;</code> creates <b>square</b> = ${sq} inside the loop body's block.`);
+          total += sq;
+          T.set('total', total);
+          T.snap(8, `<code>total += square;</code> makes total ${total}. total was declared outside the loop, so the loop can use it.`);
+          T.drop('square');
+          T.snap(9, 'The end of the loop body: <b>square</b> goes out of scope and is destroyed. If the loop runs again, a new square is created.');
+          i++;
+          if (i <= 3) {
+            T.set('i', i, 'loop');
+            T.snap(6, `<code>i++</code> makes i ${i}. Test <code>${i} &lt;= 3</code>: True, so run the body again.`);
+          } else {
+            T.drop('i');
+            T.snap(6, `<code>i++</code> makes i 4. Test <code>4 &lt;= 3</code>: False, so the loop ends, and <b>i</b>, which belongs to the loop, is destroyed.`);
+            break;
+          }
+        }
+        T.print(`total = ${total}\n`);
+        T.snap(11, `Prints total: ${total}. total is still in scope after the loop.`);
+        T.snap(12, 'This line doesn\'t compile: <b>square</b> was destroyed at the end of the loop body, and its scope ended on line 9. On the slide it\'s commented out, so the run skips it.', { skip: true });
+        T.snap(13, 'This line doesn\'t compile either: <b>i</b> belonged to the loop, which ended on line 9. On the slide it\'s commented out, so the run skips it.', { skip: true });
+        T.ret();
+        T.snap(14, '<code>return 0;</code> main() is finished: its box is destroyed and the program ends.', { done: true });
+      },
+    },
+  ];
+
+  const TOKEN = /\{([dux]):(\w+):(\w+)\}/g;
+  let ex = null, steps = [], cur = 0;
+
+  // highlight one piece of plain code (no markup tokens) as HTML
+  function hl(text) {
+    let html = '', m, rest = text;
+    const re = /("(?:[^"\\]|\\.)*")|\b(int|void|return|for|static|char|double|float)\b|(#include)/;
+    while ((m = rest.match(re))) {
+      html += esc(rest.slice(0, m.index));
+      html += m[1] ? `<span class="s">${esc(m[1])}</span>` : `<span class="k">${esc(m[0])}</span>`;
+      rest = rest.slice(m.index + m[0].length);
+    }
+    return html + esc(rest);
+  }
+
+  function renderLine(raw, no) {
+    const tokens = [];
+    const plain = raw.replace(TOKEN, (all, kind, key, name) => { tokens.push({ kind, key, name }); return `\u0000${tokens.length - 1}\u0000`; });
+    const cut = plain.indexOf('//');
+    const piece = s => hl(s).replace(/\u0000(\d+)\u0000/g, (_, k) => {
+      const t = tokens[+k];
+      const cls = t.kind === 'd' ? 'v decl' : t.kind === 'x' ? 'v bad' : 'v';
+      return `<span class="${cls}" tabindex="0" role="button" data-kind="${t.kind}" data-key="${t.key}" data-line="${no}">${esc(t.name)}</span>`;
+    });
+    const code = cut < 0 ? piece(plain) : piece(plain.slice(0, cut)) + `<span class="c">${piece(plain.slice(cut))}</span>`;
+    return `<span class="ln" data-no="${no}"><span class="mark"></span><span class="no">${no}</span>${code}</span>`;
+  }
+
+  /* ---------- running the program ---------- */
+  function frameHTML(f, k, all) {
+    const last = k === all.length - 1;
+    const rows = f.vars.map(v =>
+      `<tr${steps[cur].changed.includes('L:' + v.name) && last ? ' class="chg"' : ''}><td class="k">${esc(v.name)}</td><td>=</td><td class="val">${esc(v.val)}</td><td class="tag">${v.tag || ''}</td></tr>`).join('');
+    const callNo = f.fn !== 'main' ? `<span class="n">call ${f.n}</span>` : '';
+    const wait = last ? '' : `<div class="wait">paused until ${esc(all[k + 1].fn)}() returns</div>`;
+    return `<div class="frame ${last ? 'call' : 'paused'}"><div class="fh">${esc(f.fn)}()${callNo}</div>` +
+           (rows ? `<table>${rows}</table>` : `<div class="none">no local variables</div>`) + wait + `</div>`;
+  }
+
+  function showStep() {
+    const s = steps[cur];
+    document.querySelectorAll('#code .ln').forEach(l => {
+      const hit = +l.dataset.no === s.line;
+      l.classList.toggle('cur', hit && !s.skip);
+      l.classList.toggle('skip', hit && !!s.skip);
+      l.querySelector('.mark').textContent = hit ? (s.skip ? '✗' : '➜') : '';
+    });
+    const glob = s.globals.length
+      ? `<div class="frame glob"><div class="fh">global variables</div><table>${s.globals.map(v =>
+          `<tr${s.changed.includes('G:' + v.name) ? ' class="chg"' : ''}><td class="k">${esc(v.name)}</td><td>=</td><td class="val">${esc(v.val)}</td></tr>`).join('')}</table></div>`
+      : '';
+    const calls = s.frames.map(frameHTML).join('');
+    $('frames').innerHTML = (glob + calls) || `<span class="hint">${s.line === null ? 'nothing yet: the program hasn\'t started' : 'nothing: the program has ended'}</span>`;
+    const st = $('status');
+    st.classList.toggle('bad', !!s.skip);
+    st.textContent = s.line === null ? 'Ready to run'
+      : s.skip ? `✗ Line ${s.line} skipped: it doesn't compile`
+      : s.done ? `Line ${s.line} ran · the program has finished`
+      : `Line ${s.line} just ran`;
+    $('say').innerHTML = s.say;
+    $('out').textContent = s.out;
+    $('counter').textContent = `Step ${cur + 1} of ${steps.length}`;
+    $('slider').value = cur;
+    $('first').disabled = $('back').disabled = cur === 0;
+    $('next').disabled = $('last').disabled = cur === steps.length - 1;
+  }
+  function go(k) { if (!steps.length) return; cur = Math.max(0, Math.min(steps.length - 1, k)); showStep(); }
+
+  function loadRun() {
+    const canRun = !!ex.run;
+    $('banner').hidden = canRun;
+    ['first', 'back', 'next', 'last', 'slider'].forEach(id => $(id).disabled = !canRun);
+    if (!canRun) {
+      steps = [];
+      $('banner').innerHTML = `✗ This program doesn't compile, so it can't run.<pre>${esc(ex.noRun)}</pre>`;
+      $('status').textContent = 'Can\'t run';
+      $('status').classList.add('bad');
+      $('say').innerHTML = 'Click the red <b>x</b> on line 13 to see why, then try the <b>Fixed with a global</b> tab, which runs.';
+      $('out').textContent = '';
+      $('counter').textContent = '';
+      $('frames').innerHTML = '<span class="hint">nothing: the program never ran</span>';
+      return;
+    }
+    const T = makeTracer();
+    T.snap(null, 'Press <b>Next</b> to run the program one line at a time. The highlighted line is the one that just ran.');
+    ex.run(T);
+    steps = T.steps;
+    $('slider').max = steps.length - 1;
+    go(0);
+  }
+
+  /* ---------- clicking a variable ---------- */
+  function load(k) {
+    ex = EXAMPLES[k];
+    document.querySelectorAll('#tabs button').forEach((b, j) => b.classList.toggle('on', j === k));
+    $('from').textContent = ex.from;
+    $('code').innerHTML = ex.code.split('\n').map((l, j) => renderLine(l, j + 1)).join('');
+    $('code').classList.remove('focus');
+    $('where').textContent = 'Nothing selected yet';
+    $('msg').innerHTML = 'Click an underlined name in the code. A solid underline marks a <b>declaration</b>; a dotted one marks a <b>use</b>; a red one marks a use that isn\'t allowed.';
+    loadRun();
+  }
+
+  function shade(key) {
+    const d = ex.decls[key];
+    document.querySelectorAll('#code .ln').forEach(l => {
+      const no = +l.dataset.no;
+      l.classList.toggle('in', !!d && no >= d.from && no <= d.to);
+    });
+    $('code').classList.toggle('focus', !!d);
+    document.querySelectorAll('#code .v').forEach(v => v.classList.toggle('ref', !!d && v.dataset.key === key && v.dataset.kind !== 'x'));
+  }
+
+  const range = d => d.from === d.to ? `line ${d.from}` : `lines ${d.from}–${d.to}`;
+
+  function pick(el) {
+    document.querySelectorAll('#code .v.sel').forEach(v => v.classList.remove('sel'));
+    el.classList.add('sel');
+    const kind = el.dataset.kind, key = el.dataset.key, line = el.dataset.line, name = el.textContent;
+    if (kind === 'x') {
+      const b = ex.bad[key];
+      shade(b.show);
+      $('where').innerHTML = `<code>${esc(name)}</code> on line ${line}`;
+      $('msg').innerHTML = `<span class="verdict no">✗ not in scope here</span><div>${b.html}</div>` +
+        `<div class="err">${esc(b.err)}</div>` +
+        (b.slide ? `<div class="note">On the slide this line is commented out, because the program won't compile with it.</div>`
+                 : `<div class="note">This is the compiler error from the slide.</div>`);
+      return;
+    }
+    const d = ex.decls[key];
+    shade(key);
+    if (kind === 'd') {
+      $('where').innerHTML = `Declaration of <code>${esc(name)}</code> on line ${line}`;
+      $('msg').innerHTML = `<b>${esc(name)}</b> is ${d.kind}. Its scope is ${range(d)} (shaded): it can be used anywhere in those lines, and nowhere else. ${d.more}`;
+    } else {
+      $('where').innerHTML = `Use of <code>${esc(name)}</code> on line ${line}`;
+      $('msg').innerHTML = `<span class="verdict ok">✓ in scope</span><div>This <b>${esc(name)}</b> is the one declared on line ${d.line}: ${d.kind}. Line ${line} is inside its scope, ${range(d)} (shaded). ${d.more}</div>`;
+    }
+  }
+
+  $('tabs').innerHTML = EXAMPLES.map(e => `<button type="button">${e.tab}</button>`).join('');
+  document.querySelectorAll('#tabs button').forEach((b, k) => b.onclick = () => { load(k); b.blur(); });
+  $('code').addEventListener('click', e => { const v = e.target.closest('.v'); if (v) pick(v); });
+  $('code').addEventListener('keydown', e => {
+    const v = e.target.closest('.v');
+    if (v && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); pick(v); }
+  });
+  $('first').onclick = () => go(0);
+  $('back').onclick = () => go(cur - 1);
+  $('next').onclick = () => go(cur + 1);
+  $('last').onclick = () => go(steps.length - 1);
+  $('slider').oninput = e => go(+e.target.value);
+  document.addEventListener('keydown', e => {
+    if (['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON'].includes(e.target.tagName) && e.key === ' ') return;
+    if (e.target.closest && e.target.closest('.v')) return;
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); go(cur - 1); }
+  });
+  load(0);
+})();
+</script>
+<script>
+  // light/dark toggle: an explicit choice wins over the system setting
+  (function () {
+    var b = document.getElementById('theme-toggle'), r = document.documentElement;
+    function current() {
+      var t = r.getAttribute('data-theme');
+      return t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    function show() {
+      var dark = current() === 'dark';
+      b.textContent = dark ? '☀ Light' : '☾ Dark';
+      b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    b.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      r.setAttribute('data-theme', next);
+      try { localStorage.setItem('cpsc100-theme', next); } catch (e) {}
+      show();
+      b.blur();   // so Space goes back to the demo's "next step"
+    });
+    show();
+  })();
+</script>
+</body>
+</html>

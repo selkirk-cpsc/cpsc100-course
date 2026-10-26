@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Functions and Scope → Part 1: Functions · CPSC 100 Notes</title>
+<style>
+  :root {
+    --bg: #f6f6f3;
+    --panel: #ffffff;
+    --ink: #1d1d1f;
+    --muted: #6b6b72;
+    --line: #d6d6db;
+    --accent: #2f6fde;
+    --accent-soft: #dce8fd;
+    --alert: #911a28;
+    --code-bg: #f1f1ee;
+    --tok-kw: #7048e8; --tok-type: #0e7178; --tok-num: #b35a00;
+    --tok-str: #2b8a3e; --tok-com: #8a8a93; --tok-pre: #c2255c; --tok-fn: #1c4fb8;
+    --term-bg: #ffffff; --term-ink: #1d1d1f; --term-line: #c9c9cf; --term-in: #1a7f37;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5;
+      --line: #3a3b42; --accent: #6ea0ff; --accent-soft: #1d3157; --alert: #ff8f9c;
+      --code-bg: #25262b;
+      --tok-kw: #b197fc; --tok-type: #3bc9db; --tok-num: #ffa94d;
+      --tok-str: #69db7c; --tok-com: #868e96; --tok-pre: #f783ac; --tok-fn: #74c0fc;
+      --term-bg: #1d1f23; --term-ink: #e6e6e9; --term-line: #33363d; --term-in: #7ee787;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5;
+    --line: #3a3b42; --accent: #6ea0ff; --accent-soft: #1d3157; --alert: #ff8f9c;
+    --code-bg: #25262b;
+    --tok-kw: #b197fc; --tok-type: #3bc9db; --tok-num: #ffa94d;
+    --tok-str: #69db7c; --tok-com: #868e96; --tok-pre: #f783ac; --tok-fn: #74c0fc;
+    --term-bg: #1d1f23; --term-ink: #e6e6e9; --term-line: #33363d; --term-in: #7ee787;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 17px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  a { color: var(--accent); }
+  code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .9em; }
+
+  .topbar { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .topbar .in { max-width: 820px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 16px; align-items: center; }
+  .topbar a { text-decoration: none; font-weight: 600; }
+  .topbar .crumb { color: var(--muted); font-size: .9rem; }
+
+  main { max-width: 820px; margin: 0 auto; padding: 8px 16px 48px; }
+  header.title { margin: 28px 0 8px; }
+  header.title .week { color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: .85rem; }
+  header.title h1 { margin: 4px 0 0; font-size: 2.1rem; line-height: 1.2; }
+
+  nav#TOC { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 18px; margin: 20px 0 8px; }
+  nav#TOC::before { content: "In this chapter"; display: block; font-weight: 700; margin-bottom: 4px; }
+  nav#TOC ul { margin: 0; padding-left: 1.2em; }
+
+  h2 { font-size: 1.6rem; margin: 2.4em 0 .4em; padding-bottom: .2em; border-bottom: 2px solid var(--line); }
+  h3 { font-size: 1.2rem; margin: 1.8em 0 .3em; }
+  p, li { max-width: 72ch; }
+  li { margin: .2em 0; }
+  li > p { margin: 0; }
+  .alert { color: var(--alert); font-weight: 600; }
+  :not(pre) > code { background: var(--code-bg); padding: .08em .3em; border-radius: 4px; overflow-wrap: anywhere; }
+  math[display="block"] { overflow-x: auto; max-width: 100%; }
+
+  div.sourceCode { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; margin: 1em 0; overflow-x: auto; }
+  pre.sourceCode { margin: 0; padding: 12px 14px; line-height: 1.5; }
+  /* program output and shell sessions (minted text blocks) */
+  pre:not(.sourceCode) { background: var(--panel); border: 1px dashed var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; line-height: 1.5; }
+  /* sample runs of a program (make_notes.py compiles and runs it): a terminal
+     box in the page's theme, with what the user typed highlighted in green */
+  .runoutput { margin: -.3em 0 1.2em; }
+  .run-label { color: var(--muted); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin: .7em 0 .25em; }
+  pre.terminal { background: var(--term-bg); color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 8px; padding: 10px 14px; margin: 0 0 .5em; overflow-x: auto; line-height: 1.5; }
+  pre.terminal .in { color: var(--term-in); font-weight: 700; }
+  .run-label .run-setup { text-transform: none; letter-spacing: 0; font-weight: 400; }
+  pre.numberSource code > span { position: relative; left: -4em; }
+  pre.numberSource { margin-left: 3em; border-left: 1px solid var(--line); padding-left: 4px; }
+  pre.numberSource code > span > a:first-child::before {
+    content: counter(source-line); counter-increment: source-line; position: relative; left: -1em;
+    text-align: right; vertical-align: baseline; display: inline-block; width: 4em; color: var(--tok-com);
+  }
+  pre.numberSource code { counter-reset: source-line 0; }
+  pre > code.sourceCode > span { display: inline-block; line-height: 1.5; }
+  code.sourceCode > span > a:first-child { text-decoration: none; }
+  code span.kw, code span.cf { color: var(--tok-kw); font-weight: 600; }
+  code span.dt { color: var(--tok-type); }
+  code span.dv, code span.fl, code span.bn, code span.cn { color: var(--tok-num); }
+  code span.st, code span.ch, code span.sc, code span.ss, code span.vs { color: var(--tok-str); }
+  code span.co, code span.cv, code span.do, code span.an { color: var(--tok-com); font-style: italic; }
+  code span.pp, code span.im { color: var(--tok-pre); }
+  code span.fu, code span.bu { color: var(--tok-fn); }
+
+  img { max-width: 100%; height: auto; }
+  img.diagram { background: #fff; border-radius: 8px; padding: 8px; display: block; margin: 0 auto; }
+  /* PNGs are drawings (some with transparent backgrounds): same white card, so dark lines stay visible in dark mode */
+  img[src*=".png"] { background: #fff; border-radius: 8px; padding: 8px; }
+  .center, figure { text-align: center; }
+  figure { margin: 1em 0; }
+  figcaption { color: var(--muted); font-size: .9rem; }
+  .credit { text-align: center; color: var(--muted); font-size: .78rem; margin-top: -.6em; }
+  .credit p { max-width: none; }
+
+  /* slide columns: a figure keeps its natural width and the other column
+     fills the rest; when both can't fit, they stack (see notes.lua) */
+  .columns { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .columns > .column { flex: 1 1 280px; min-width: 0; }
+  .columns > .column.figure-col { flex: 0 1 auto; max-width: 100%; margin: 0 auto; }
+  .columns > .column.figure-col img:not(.diagram) { width: 320px; }
+
+  .multicol ul { columns: 4 8em; list-style: none; padding-left: 0; }
+
+  .callout { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 4px 16px; margin: 1em 0; }
+  .tryit { background: var(--accent-soft); border-radius: 10px; padding: 6px 18px; margin: 1.2em 0; }
+  .tryit .center { text-align: left; }
+  a.demo-link { display: inline-block; background: var(--accent); color: var(--bg); padding: 6px 14px; border-radius: 8px; text-decoration: none; }
+  a.demo-link code { background: none; color: inherit; }
+
+  table { border-collapse: collapse; margin: 1em auto; display: block; overflow-x: auto; max-width: 100%; width: fit-content; }
+  th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--panel); }
+
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .pager a { text-decoration: none; max-width: 48%; }
+  .pager .label { display: block; color: var(--muted); font-size: .85rem; }
+  .pager .next { margin-left: auto; text-align: right; }
+  .pager.top { margin-top: 16px; padding: 0 0 12px; border-top: none; border-bottom: 1px solid var(--line); font-size: .95rem; }
+  .pager.top + header.title { margin-top: 18px; }
+  .theme-toggle { font: inherit; font-size: .85rem; line-height: 1.2; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
+  .theme-toggle:hover { border-color: var(--ink); }
+  .topbar .theme-toggle { margin-left: auto; }
+  .topbar .print-btn + .theme-toggle { margin-left: 0; }
+  .topbar a { white-space: nowrap; }
+  @media (max-width: 480px) { .topbar .in:has(.print-btn) .crumb { display: none; } }
+
+  /* printing (the Print / PDF button, or the browser's own Print): light colours
+     on white, no site navigation, code wrapped instead of scrolling, and
+     headings, figures and code kept off page breaks where they fit */
+  @media print {
+    :root:not([data-print]), :root[data-theme] {   /* outranks the dark-mode rules */
+      --bg: #ffffff; --panel: #ffffff; --ink: #1d1d1f; --muted: #6b6b72;
+      --line: #d6d6db; --accent: #2f6fde; --accent-soft: #eef3fd; --alert: #911a28;
+      --code-bg: #f6f6f3;
+      --tok-kw: #7048e8; --tok-type: #0e7178; --tok-num: #b35a00;
+      --tok-str: #2b8a3e; --tok-com: #8a8a93; --tok-pre: #c2255c; --tok-fn: #1c4fb8;
+      --term-bg: #ffffff; --term-ink: #1d1d1f; --term-line: #c9c9cf; --term-in: #1a7f37;
+    }
+    @page { margin: 15mm 14mm; }
+    body { background: #fff; font-size: 11pt; line-height: 1.5; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .topbar, .pager, .theme-toggle, .print-btn { display: none !important; }
+    main { max-width: none; padding: 0; }
+    header.title { margin-top: 0; }
+    h1, h2, h3, h4, .run-label, .label { break-after: avoid; page-break-after: avoid; }
+    figure, img, svg, .columns, .callout, .tryit, table, nav#TOC,
+    div.sourceCode, pre, .runoutput { break-inside: avoid; page-break-inside: avoid; }
+    div.sourceCode, pre, pre.terminal, table, .animation { overflow: visible !important; }
+    pre, pre code, pre.terminal { white-space: pre-wrap !important; overflow-wrap: anywhere; }
+    pre > code.sourceCode > span { display: inline; }
+    a { text-decoration: none; }
+  }
+</style>
+<script>
+  // apply a saved light/dark choice before the page draws (no flash)
+  try { var t = localStorage.getItem('cpsc100-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+</head>
+<body>
+<div class="topbar"><div class="in">
+  <a href="../../">CPSC 100</a>
+  <span class="crumb">Lecture notes</span>
+  <button type="button" class="theme-toggle print-btn" onclick="window.print()" title="Print this page, or choose Save as PDF in the print dialog">⎙ Print / PDF</button>
+  <button type="button" class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</div></div>
+<main>
+<nav class="pager top" aria-label="Previous and next lecture">
+<a class="prev" href="../lecture07/"><span class="label">← Previous</span>Week
+7: Midterm 1 Review</a>
+<a class="next" href="../lecture08-part2/"><span class="label">Next →</span>Week
+8: Functions and Scope → Part 2: Scope</a>
+</nav>
+<header class="title">
+<div class="week">Week 8</div>
+<h1>Functions and Scope → Part 1: Functions</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#functions" id="toc-functions">Functions</a></li>
+<li><a href="#function-prototypes" id="toc-function-prototypes">Function
+Prototypes</a></li>
+<li><a href="#main" id="toc-main"><code>main()</code></a></li>
+<li><a href="#flow-diagrams" id="toc-flow-diagrams">Flow
+Diagrams</a></li>
+<li><a href="#the-prime-checker" id="toc-the-prime-checker">The Prime
+Checker</a></li>
+<li><a href="#pass-by-value"
+id="toc-pass-by-value">Pass-by-Value</a></li>
+<li><a href="#when-to-extract-a-function"
+id="toc-when-to-extract-a-function">When to Extract a Function</a></li>
+</ul>
+</nav>
+<section id="functions" class="level2">
+<h2>Functions</h2>
+<section id="breaking-a-big-task-into-small-ones" class="level3">
+<h3>Breaking a Big Task Into Small Ones</h3>
+<p>Every program you’ve written so far has been one long sequence of
+statements in <code
+class="sourceCode c">main<span class="op">()</span></code>.</p>
+<p>As a program grows, that stops working:</p>
+<ul>
+<li><p><code class="sourceCode c">main<span class="op">()</span></code>
+becomes hundreds of lines long</p></li>
+<li><p>the same logic gets copy-pasted every time you need it
+again</p></li>
+<li><p>it’s hard to find and fix a bug buried in the middle of it
+all</p></li>
+</ul>
+<p><span class="alert">Decomposition</span> is the fix: break a large
+task into smaller, named subtasks. This is the core habit of software
+design — and it’s exactly what a <strong>function</strong> lets you
+do.</p>
+</section>
+<section id="what-is-a-function" class="level3">
+<h3>What Is a Function?</h3>
+<p>In C, a function is a self-contained block of code that performs a
+specific task. It can take input values, execute a series of statements,
+and optionally <code
+class="sourceCode c"><span class="cf">return</span></code> a result to
+the caller.</p>
+</section>
+<section id="why-use-a-function" class="level3">
+<h3>Why Use a Function?</h3>
+<p>Functions are useful for:</p>
+<ul>
+<li><p>Avoiding repetition
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+replacing commonly used sections of code</p></li>
+<li><p>Improving organization:</p>
+<ul>
+<li><p>Separating code into smaller, single-purpose parts</p></li>
+<li><p>Making programs more modular and readable</p></li>
+<li><p>Simplifying debugging and maintenance</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="functions-as-a-contract" class="level3">
+<h3>Functions as a Contract</h3>
+<p>Think of a function as a <span class="alert">contract</span>:</p>
+<ul>
+<li><p>Given these <strong>inputs</strong> (its parameters)…</p></li>
+<li><p>…it produces this <strong>output</strong> (its return
+value).</p></li>
+</ul>
+<p>The caller doesn’t need to know <em>how</em> the function does its
+work. Only what it needs to give it, and what it will get back.</p>
+</section>
+<section id="the-anatomy-of-a-function" class="level3">
+<h3>The Anatomy of a Function</h3>
+<p>Every function has the same five parts:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>return_type function_name<span class="op">(</span> parameter list <span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// body</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> value<span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p><strong>return type</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+the kind of value it gives back</p></li>
+<li><p><strong>name</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+how you call it</p></li>
+<li><p><strong>parameter list</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+what inputs it expects, and their types</p></li>
+<li><p><strong>body</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+the statements that do the work</p></li>
+<li><p><strong><code
+class="sourceCode c"><span class="cf">return</span></code></strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+sends a value back to the caller</p></li>
+</ul>
+</section>
+<section id="declaration-and-definition" class="level3">
+<h3>Declaration and Definition</h3>
+<p>A function in C is made up of <strong>two parts</strong>:</p>
+<ul>
+<li><p><strong>Declaration (prototype):</strong> tells the compiler the
+function’s name, return type, and parameters <em>before</em> it is
+used</p></li>
+<li><p><strong>Definition:</strong> contains the actual block of code
+that runs when the function is called</p></li>
+</ul>
+<p>You can think of the declaration as a <em>promise</em>, and the
+definition as the <em>delivery of that promise</em>.</p>
+</section>
+<section id="example" class="level3">
+<h3>Example</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> is_factor<span class="op">(</span><span class="dt">int</span> x<span class="op">,</span> <span class="dt">int</span> y<span class="op">)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> result <span class="op">=</span> x <span class="op">%</span> y<span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">(</span>result <span class="op">==</span> <span class="dv">0</span><span class="op">);</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The function’s <strong>prototype</strong> is:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> is_factor<span class="op">(</span><span class="dt">int</span> x<span class="op">,</span> <span class="dt">int</span> y<span class="op">);</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">// returns an integer</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">// and takes two integer arguments x and y</span></span></code></pre></div>
+<p>and its <strong>definition</strong> is the statements in the
+body:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> result <span class="op">=</span> x <span class="op">%</span> y<span class="op">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">(</span>result <span class="op">==</span> <span class="dv">0</span><span class="op">);</span></span></code></pre></div>
+</section>
+<section id="the-void-type-in-function-declarations" class="level3">
+<h3>The <code>void</code> Type in Function Declarations</h3>
+<p><code class="sourceCode c"><span class="dt">void</span></code> is a
+special type meaning <em>"no type"</em> or <em>"nothing"</em>. It is
+used in two ways:</p>
+<ul>
+<li><p>As a <strong>return type</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+the function does not return a value</p></li>
+<li><p>As a <strong>parameter list</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+the function takes no arguments</p></li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> greet<span class="op">(</span><span class="dt">void</span><span class="op">);</span>     <span class="co">// no return value, </span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                      <span class="co">// no parameters</span></span></code></pre></div>
+<p>Writing <code
+class="sourceCode c"><span class="op">(</span><span class="dt">void</span><span class="op">)</span></code>
+explicitly (rather than leaving the parameter list empty) is preferred
+in modern C, to make the intent clear.</p>
+</section>
+<section id="arguments-vs.-parameters" class="level3">
+<h3>Arguments vs. Parameters</h3>
+<p>These two words get used interchangeably in casual conversation, but
+they mean different things:</p>
+<div class="callout">
+<p><strong></strong></p>
+<ul>
+<li><p>An <span class="alert">argument</span> is a value passed
+<em>into</em> a function at the call site.</p></li>
+<li><p>A <span class="alert">parameter</span> is the name the function’s
+definition uses to refer to that value.</p></li>
+</ul>
+</div>
+<p>Put another way: <strong>parameters</strong> are part of the
+function’s <em>definition</em>; <strong>arguments</strong> are given
+when the function is <em>called</em>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> average<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">);</span>   <span class="co">// a, b are parameters</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>average<span class="op">(</span>x<span class="op">,</span> y<span class="op">);</span>                <span class="co">// x, y are arguments</span></span></code></pre></div>
+</section>
+</section>
+<section id="function-prototypes" class="level2">
+<h2>Function Prototypes</h2>
+<section id="where-function-declarations-go" class="level3">
+<h3>Where Function Declarations Go</h3>
+<p>In C, every function must be <strong>declared before it is
+used</strong>, this lets the compiler check the return type and the
+number and types of its parameters <strong>at the call
+site</strong>.</p>
+<p>Two common ways to organize your functions:</p>
+<ol>
+<li><p>Place the <strong>function definition</strong> <em>before</em>
+<code class="sourceCode c">main<span class="op">()</span></code>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+the compiler sees the function before it’s called</p></li>
+<li><p>Place only a <strong>prototype</strong> before <code
+class="sourceCode c">main<span class="op">()</span></code>, and the full
+<strong>definition</strong> later in the file
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+this improves readability</p></li>
+</ol>
+</section>
+<section id="example-both-are-equivalent" class="level3">
+<h3>Example: Both Are Equivalent</h3>
+<div class="columns">
+<div class="column">
+<p>Declaration and definition separated:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">/* prototype */</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> greet<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    greet<span class="op">();</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> greet<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Hello!</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div><div class="column">
+<p>Declared and defined together:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> greet<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Hello!</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    greet<span class="op">();</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+</div>
+<p><code class="sourceCode c">greet<span class="op">()</span></code> has
+no <code class="sourceCode c"><span class="cf">return</span></code>
+statement: a <code
+class="sourceCode c"><span class="dt">void</span></code> function
+returns to its caller when it reaches its closing brace.</p>
+</section>
+<section id="the-pitfall-using-a-function-before-its-declared"
+class="level3">
+<h3>The Pitfall: Using a Function Before It’s Declared</h3>
+<p>If the compiler hasn’t seen a prototype <em>or</em> a definition for
+a function by the time it’s called, you get a <strong>"used before
+declared"</strong> style error.</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb9-1"><a href="#cb9-1"></a><span class="dt">int</span> average_of_two<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a>    <span class="cf">return</span> total<span class="op">(</span>a<span class="op">,</span> b<span class="op">)</span> <span class="op">/</span> <span class="dv">2</span><span class="op">;</span>  <span class="co">// total() used before declared</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="op">}</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a></span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="dt">int</span> total<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span>    <span class="co">// total() has no prototype above main()</span></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="op">{</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a>    <span class="cf">return</span> a <span class="op">+</span> b<span class="op">;</span></span>
+<span id="cb9-9"><a href="#cb9-9"></a><span class="op">}</span></span></code></pre></div>
+<p><code
+class="sourceCode c">average_of_two<span class="op">()</span></code>
+calls <code class="sourceCode c">total<span class="op">()</span></code>
+on line 3, but the compiler hasn’t seen <em>anything</em> about <code
+class="sourceCode c">total</code> yet; not a prototype, not a
+definition.</p>
+</section>
+<section id="the-fix-add-a-prototype" class="level3">
+<h3>The Fix: Add a Prototype</h3>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb10-1"><a href="#cb10-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="dt">int</span> average_of_two<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">);</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="dt">int</span> total<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">);</span>   <span class="co">// FIX: prototype before main()</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a></span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="op">{</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> average_of_two<span class="op">(</span><span class="dv">4</span><span class="op">,</span> <span class="dv">6</span><span class="op">));</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a><span class="op">}</span></span>
+<span id="cb10-10"><a href="#cb10-10"></a></span>
+<span id="cb10-11"><a href="#cb10-11"></a><span class="dt">int</span> average_of_two<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span></span>
+<span id="cb10-12"><a href="#cb10-12"></a><span class="op">{</span></span>
+<span id="cb10-13"><a href="#cb10-13"></a>    <span class="cf">return</span> total<span class="op">(</span>a<span class="op">,</span> b<span class="op">)</span> <span class="op">/</span> <span class="dv">2</span><span class="op">;</span>  <span class="co">// total() is now declared</span></span>
+<span id="cb10-14"><a href="#cb10-14"></a><span class="op">}</span></span>
+<span id="cb10-15"><a href="#cb10-15"></a></span>
+<span id="cb10-16"><a href="#cb10-16"></a><span class="dt">int</span> total<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span></span>
+<span id="cb10-17"><a href="#cb10-17"></a><span class="op">{</span></span>
+<span id="cb10-18"><a href="#cb10-18"></a>    <span class="cf">return</span> a <span class="op">+</span> b<span class="op">;</span></span>
+<span id="cb10-19"><a href="#cb10-19"></a><span class="op">}</span></span></code></pre></div>
+</section>
+</section>
+<section id="main" class="level2">
+<h2><code>main()</code></h2>
+<section id="a-familiar-example-main" class="level3">
+<h3>A Familiar Example: <code>main()</code></h3>
+<p>A function prototype you already know:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span></code></pre></div>
+<ul>
+<li><p><code class="sourceCode c">main<span class="op">()</span></code>
+is the <strong>entry point</strong> of every C program
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+when your program starts, the operating system automatically calls
+it</p></li>
+<li><p>Every C program must contain exactly <strong>one</strong> <code
+class="sourceCode c">main<span class="op">()</span></code> function
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+it defines where execution begins and ends</p></li>
+<li><p><code
+class="sourceCode c"><span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></code>
+(or <code class="sourceCode c">EXIT_SUCCESS</code>) signals to the OS
+that the program finished successfully</p></li>
+</ul>
+</section>
+</section>
+<section id="flow-diagrams" class="level2">
+<h2>Flow Diagrams</h2>
+<section id="a-new-shape-the-function-call" class="level3">
+<h3>A New Shape: The Function Call</h3>
+<p>Recall our flow-diagram shapes: <span class="alert">oval</span>
+(Start/Stop), <span class="alert">rectangle</span> (process), <span
+class="alert">parallelogram</span> (I/O), <span
+class="alert">diamond</span> (decision), and a <span
+class="alert">dashed box</span> around a loop body.</p>
+<p>This week we add one new shape: a rectangle with a <span
+class="alert">vertical bar at each end</span>.</p>
+<div class="center">
+<p><img src="fig01.svg?v=aeed1321" alt="Diagram" class="diagram" loading="lazy"
+width="262" /></p>
+</div>
+<ul>
+<li><p>It is a single labeled block in a <strong>top-level</strong>
+diagram</p></li>
+<li><p>Its internals live in a <strong>separate
+diagram</strong></p></li>
+<li><p>That block <em>is</em> a <span class="alert">function
+call</span>.</p></li>
+<li><p>Its diagram’s ovals: <code>function_name(parameters)</code>
+instead of Start, <code>return</code> <em>value</em> instead of Stop
+(just <code>return</code> for a <code>void</code> function)</p></li>
+</ul>
+<p>The side bars say “this step is defined somewhere else.” The dashed
+box still means only <strong>loop body</strong>.</p>
+</section>
+</section>
+<section id="the-prime-checker" class="level2">
+<h2>The Prime Checker</h2>
+<section id="top-level-diagram-checking-if-a-number-is-prime"
+class="level3">
+<h3>Top-Level Diagram: Checking If a Number Is Prime</h3>
+<div class="columns">
+<div class="column figure-col">
+<div class="center">
+<p><img src="fig02.svg?v=33d6a4d4" alt="Flow diagram with boxes: Start; Prompt user and read n; is_prime(n); Print &quot;prime&quot; or &quot;not prime&quot;; Stop" class="diagram" loading="lazy"
+width="269" /></p>
+</div>
+</div><div class="column">
+<p>Read a number from the user and report whether it’s prime. At the top
+level, we don’t care <em>how</em> the check works; only that <code
+class="sourceCode c">is_prime<span class="op">(</span>n<span class="op">)</span></code>
+is a single labeled step.</p>
+</div>
+</div>
+</section>
+<section id="internals-whats-inside-is_primen" class="level3">
+<h3>Internals: What’s Inside <code>is_prime(n)</code></h3>
+<div class="columns">
+<div class="column figure-col">
+<div class="center">
+<p><img src="fig03.svg?v=9eeca99a" alt="Flow diagram with boxes: is_prime(n); Assume prime: prime = 1; n &lt; 2?; Initialize counter: i = 2; i * i &lt;= n?; n % i == 0?; Update counter: i++; Not prime: prime = 0; Not prime: prime = 0 (then break); return prime" class="diagram" loading="lazy"
+width="680" /></p>
+</div>
+</div><div class="column">
+<p><span class="alert">This diagram <em>expands</em> the function-call
+box from the previous slide</span>: what happens once <code
+class="sourceCode c">is_prime<span class="op">(</span>n<span class="op">)</span></code>
+is called.</p>
+<ul>
+<li><p>Start with <code
+class="sourceCode c">prime <span class="op">=</span> <span class="dv">1</span></code></p></li>
+<li><p><code
+class="sourceCode c">n <span class="op">&lt;</span> <span class="dv">2</span></code>:
+set <code
+class="sourceCode c">prime <span class="op">=</span> <span class="dv">0</span></code></p></li>
+<li><p>Otherwise test divisors up to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msqrt><mi>n</mi></msqrt><annotation encoding="application/x-tex">\sqrt{n}</annotation></semantics></math>;
+on a hit, set <code
+class="sourceCode c">prime <span class="op">=</span> <span class="dv">0</span></code>
+and <code
+class="sourceCode c"><span class="cf">break</span></code></p></li>
+<li><p>Return <code class="sourceCode c">prime</code> once, at the
+end</p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="the-code-main" class="level3">
+<h3>The Code: <code>main()</code></h3>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb12-1"><a href="#cb12-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a></span>
+<span id="cb12-3"><a href="#cb12-3"></a><span class="co">// Prototype: declare before use</span></span>
+<span id="cb12-4"><a href="#cb12-4"></a><span class="dt">int</span> is_prime<span class="op">(</span><span class="dt">int</span> n<span class="op">);</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a></span>
+<span id="cb12-6"><a href="#cb12-6"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-7"><a href="#cb12-7"></a>    <span class="dt">int</span> n<span class="op">;</span></span>
+<span id="cb12-8"><a href="#cb12-8"></a>    printf<span class="op">(</span><span class="st">&quot;Enter a number: &quot;</span><span class="op">);</span></span>
+<span id="cb12-9"><a href="#cb12-9"></a>    scanf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">&amp;</span>n<span class="op">);</span></span>
+<span id="cb12-10"><a href="#cb12-10"></a></span>
+<span id="cb12-11"><a href="#cb12-11"></a>    <span class="co">// is_prime() returns 1 (true) or 0 (false)</span></span>
+<span id="cb12-12"><a href="#cb12-12"></a>    <span class="cf">if</span> <span class="op">(</span>is_prime<span class="op">(</span>n<span class="op">))</span></span>
+<span id="cb12-13"><a href="#cb12-13"></a>        printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> is prime</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> n<span class="op">);</span></span>
+<span id="cb12-14"><a href="#cb12-14"></a>    <span class="cf">else</span></span>
+<span id="cb12-15"><a href="#cb12-15"></a>        printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> is not prime</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> n<span class="op">);</span></span>
+<span id="cb12-16"><a href="#cb12-16"></a></span>
+<span id="cb12-17"><a href="#cb12-17"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb12-18"><a href="#cb12-18"></a><span class="op">}</span></span></code></pre></div>
+</section>
+<section id="the-code-is_prime" class="level3">
+<h3>The Code: <code>is_prime()</code></h3>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1"></a><span class="co">// Returns 1 if n is prime, 0 otherwise</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a><span class="dt">int</span> is_prime<span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-3"><a href="#cb13-3"></a>    <span class="dt">int</span> prime <span class="op">=</span> <span class="dv">1</span><span class="op">;</span>              <span class="co">// assume prime</span></span>
+<span id="cb13-4"><a href="#cb13-4"></a></span>
+<span id="cb13-5"><a href="#cb13-5"></a>    <span class="cf">if</span> <span class="op">(</span>n <span class="op">&lt;</span> <span class="dv">2</span><span class="op">)</span> <span class="op">{</span>                <span class="co">// below 2: not prime</span></span>
+<span id="cb13-6"><a href="#cb13-6"></a>        prime <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb13-7"><a href="#cb13-7"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb13-8"><a href="#cb13-8"></a>        <span class="co">// Only test divisors up to sqrt(n): i * i &lt;= n</span></span>
+<span id="cb13-9"><a href="#cb13-9"></a>        <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">2</span><span class="op">;</span> i <span class="op">*</span> i <span class="op">&lt;=</span> n<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb13-10"><a href="#cb13-10"></a>            <span class="cf">if</span> <span class="op">(</span>n <span class="op">%</span> i <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span>   <span class="co">// i divides n evenly</span></span>
+<span id="cb13-11"><a href="#cb13-11"></a>                prime <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb13-12"><a href="#cb13-12"></a>                <span class="cf">break</span><span class="op">;</span>          <span class="co">// stop looking</span></span>
+<span id="cb13-13"><a href="#cb13-13"></a>            <span class="op">}</span></span>
+<span id="cb13-14"><a href="#cb13-14"></a>        <span class="op">}</span></span>
+<span id="cb13-15"><a href="#cb13-15"></a>    <span class="op">}</span></span>
+<span id="cb13-16"><a href="#cb13-16"></a>    <span class="cf">return</span> prime<span class="op">;</span>               <span class="co">// one return, at the end</span></span>
+<span id="cb13-17"><a href="#cb13-17"></a><span class="op">}</span></span></code></pre></div>
+</section>
+</section>
+<section id="pass-by-value" class="level2">
+<h2>Pass-by-Value</h2>
+<section id="passing-variables-into-a-function" class="level3">
+<h3>Passing Variables Into a Function</h3>
+<p>When a variable is passed to a function in C, the function receives
+its <span class="alert">own local copy</span> of the value.</p>
+<ul>
+<li><p>The original variable in the caller is not changed</p></li>
+<li><p>This is called <span class="alert">pass-by-value</span></p></li>
+<li><p>C <strong>always</strong> copies the argument into the parameter
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+only the called function can use its copy, and only while it
+runs</p></li>
+</ul>
+<p>A consequence: a function <strong>cannot</strong> change the caller’s
+variable this way. (There’s a way around this, <span
+class="alert">pointers</span>, but, that’s a topic for another day.)</p>
+</section>
+<section id="example-computing-an-average-pass-by-value" class="level3">
+<h3>Example: Computing an Average (Pass-by-Value)</h3>
+<div class="columns">
+<div class="column">
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb14-1"><a href="#cb14-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a></span>
+<span id="cb14-3"><a href="#cb14-3"></a><span class="dt">void</span> average<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">);</span></span>
+<span id="cb14-4"><a href="#cb14-4"></a></span>
+<span id="cb14-5"><a href="#cb14-5"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-6"><a href="#cb14-6"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">8</span><span class="op">,</span> y <span class="op">=</span> <span class="dv">6</span><span class="op">;</span></span>
+<span id="cb14-7"><a href="#cb14-7"></a></span>
+<span id="cb14-8"><a href="#cb14-8"></a>    average<span class="op">(</span>x<span class="op">,</span> y<span class="op">);</span></span>
+<span id="cb14-9"><a href="#cb14-9"></a></span>
+<span id="cb14-10"><a href="#cb14-10"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb14-11"><a href="#cb14-11"></a><span class="op">}</span></span>
+<span id="cb14-12"><a href="#cb14-12"></a></span>
+<span id="cb14-13"><a href="#cb14-13"></a><span class="dt">void</span> average<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-14"><a href="#cb14-14"></a>    <span class="dt">float</span> avg <span class="op">=</span> <span class="op">(</span>a <span class="op">+</span> b<span class="op">)</span> <span class="op">/</span> <span class="fl">2.0</span><span class="op">;</span></span>
+<span id="cb14-15"><a href="#cb14-15"></a>    printf<span class="op">(</span><span class="st">&quot;Average of </span><span class="sc">%d</span><span class="st"> and </span><span class="sc">%d</span><span class="st"> = </span><span class="sc">%.1f\n</span><span class="st">&quot;</span><span class="op">,</span></span>
+<span id="cb14-16"><a href="#cb14-16"></a>           a<span class="op">,</span> b<span class="op">,</span> avg<span class="op">);</span></span>
+<span id="cb14-17"><a href="#cb14-17"></a><span class="op">}</span></span></code></pre></div>
+</div><div class="column">
+<p><strong>Output:</strong></p>
+<pre class="text"><code>Average of 8 and 6 = 7.0</code></pre>
+<p><strong>Explanation:</strong></p>
+<ul>
+<li><p><code class="sourceCode c">x</code> and <code
+class="sourceCode c">y</code> are passed <strong>by value</strong> to
+<code class="sourceCode c">average<span class="op">()</span></code>
+(line 8).</p></li>
+<li><p><code
+class="sourceCode c">average<span class="op">()</span></code> receives
+its own copies of <code class="sourceCode c">x</code> and <code
+class="sourceCode c">y</code>, called <code
+class="sourceCode c">a</code> and <code class="sourceCode c">b</code>,
+and prints a result.</p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="example-swapping-variables-pass-by-value" class="level3">
+<h3>Example: Swapping Variables (Pass-by-Value)</h3>
+<div class="columns">
+<div class="column">
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb16-1"><a href="#cb16-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb16-2"><a href="#cb16-2"></a></span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="dt">void</span> swap<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">);</span></span>
+<span id="cb16-4"><a href="#cb16-4"></a></span>
+<span id="cb16-5"><a href="#cb16-5"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-6"><a href="#cb16-6"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">3</span><span class="op">,</span> y <span class="op">=</span> <span class="dv">7</span><span class="op">;</span></span>
+<span id="cb16-7"><a href="#cb16-7"></a></span>
+<span id="cb16-8"><a href="#cb16-8"></a>    printf<span class="op">(</span><span class="st">&quot;Before: x=</span><span class="sc">%d</span><span class="st">, y=</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">,</span> y<span class="op">);</span></span>
+<span id="cb16-9"><a href="#cb16-9"></a>    swap<span class="op">(</span>x<span class="op">,</span> y<span class="op">);</span></span>
+<span id="cb16-10"><a href="#cb16-10"></a>    printf<span class="op">(</span><span class="st">&quot;After:  x=</span><span class="sc">%d</span><span class="st">, y=</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">,</span> y<span class="op">);</span></span>
+<span id="cb16-11"><a href="#cb16-11"></a></span>
+<span id="cb16-12"><a href="#cb16-12"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb16-13"><a href="#cb16-13"></a><span class="op">}</span></span>
+<span id="cb16-14"><a href="#cb16-14"></a></span>
+<span id="cb16-15"><a href="#cb16-15"></a><span class="dt">void</span> swap<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-16"><a href="#cb16-16"></a>    <span class="dt">int</span> temp <span class="op">=</span> a<span class="op">;</span></span>
+<span id="cb16-17"><a href="#cb16-17"></a>    a <span class="op">=</span> b<span class="op">;</span></span>
+<span id="cb16-18"><a href="#cb16-18"></a>    b <span class="op">=</span> temp<span class="op">;</span></span>
+<span id="cb16-19"><a href="#cb16-19"></a>    printf<span class="op">(</span><span class="st">&quot;Inside swap: a=</span><span class="sc">%d</span><span class="st">, b=</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> a<span class="op">,</span> b<span class="op">);</span></span>
+<span id="cb16-20"><a href="#cb16-20"></a><span class="op">}</span></span></code></pre></div>
+</div><div class="column">
+<p><strong>Output:</strong></p>
+<pre class="text"><code>Before: x=3, y=7
+Inside swap: a=7, b=3
+After:  x=3, y=7</code></pre>
+<p><strong>Explanation:</strong></p>
+<ul>
+<li><p><code class="sourceCode c">swap<span class="op">()</span></code>
+receives <strong>copies</strong> of <code class="sourceCode c">x</code>
+and <code class="sourceCode c">y</code>.</p></li>
+<li><p>The swap works inside the function, but only on the local copies
+<code class="sourceCode c">a</code> and <code
+class="sourceCode c">b</code>.</p></li>
+<li><p>When the function ends, those copies are destroyed. The originals
+in <code class="sourceCode c">main<span class="op">()</span></code> stay
+unchanged.</p></li>
+</ul>
+</div>
+</div>
+</section>
+</section>
+<section id="when-to-extract-a-function" class="level2">
+<h2>When to Extract a Function</h2>
+<section id="when-should-you-pull-code-out-into-a-function"
+class="level3">
+<h3>When Should You Pull Code Out Into a Function?</h3>
+<p>A few signals that a block of code wants to become its own
+function:</p>
+<ul>
+<li><p>You’ve written the <strong>same logic more than once</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+extract it once, call it from everywhere</p></li>
+<li><p>A block of code does <strong>one clearly nameable thing</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+if you can describe it in a short verb phrase (<code
+class="sourceCode c">is_prime</code>, <code
+class="sourceCode c">average</code>, <code
+class="sourceCode c">square_elements</code>), it’s probably a
+function</p></li>
+<li><p>A section of <code
+class="sourceCode c">main<span class="op">()</span></code> is getting
+long enough that you have to scroll to see the whole thing</p></li>
+<li><p>You want to <strong>test</strong> a piece of logic on its own,
+without running the entire program</p></li>
+</ul>
+</section>
+</section>
+<nav class="pager" aria-label="Previous and next lecture">
+<a class="prev" href="../lecture07/"><span class="label">← Previous</span>Week
+7: Midterm 1 Review</a>
+<a class="next" href="../lecture08-part2/"><span class="label">Next →</span>Week
+8: Functions and Scope → Part 2: Scope</a>
+</nav>
+</main>
+<script>
+  // light/dark toggle: an explicit choice wins over the system setting
+  (function () {
+    var b = document.getElementById('theme-toggle'), r = document.documentElement;
+    function current() {
+      var t = r.getAttribute('data-theme');
+      return t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    function show() {
+      var dark = current() === 'dark';
+      b.textContent = dark ? '☀ Light' : '☾ Dark';
+      b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    b.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      r.setAttribute('data-theme', next);
+      try { localStorage.setItem('cpsc100-theme', next); } catch (e) {}
+      show();
+      b.blur();   // so Space goes back to the demo's "next step"
+    });
+    show();
+  })();
+</script>
+</body>
+</html>
