@@ -639,6 +639,7 @@ void print_square(void) {
                err: "error: 'x' undeclared (first use in this function)\n    int result = x * x;\n                 ^" },
       },
       noRun: "error: 'x' undeclared (first use in this function)\n    int result = x * x;\n                 ^",
+      noRunSay: 'Click the red <b>x</b> on line 13 to see why, then try the <b>Fixed with a parameter</b> tab, which runs.',
     },
     {
       tab: 'Fixed with a parameter',
@@ -757,6 +758,81 @@ int main(void) {
         T.snap(14, '<code>return 0;</code> main() is finished: its box is destroyed and the program ends.', { done: true });
       },
     },
+    {
+      tab: 'If block',
+      from: 'From the left side of the slide "Example: Block Scope With if".',
+      code: String.raw`#include <stdio.h>
+
+int main(void) {
+    int {d:sc:score} = 72;
+
+    if ({u:sc:score} >= 50) {
+        char {d:gp:grade} = 'P';
+    } else {
+        char {d:gf:grade} = 'F';
+    }
+
+    printf("grade = %c\n", {x:g12:grade});
+    return 0;
+}`,
+      decls: {
+        sc: { line: 4, from: 4, to: 14, kind: 'a local variable of <code>main()</code>',
+              more: 'It is declared in <code>main()</code>\'s own braces, so the <code>if</code> test on line 6 can use it.' },
+        gp: { line: 7, from: 7, to: 8, kind: 'a variable declared inside the <code>if</code> block\'s braces',
+              more: 'It has <b>block scope</b>: it exists only between the <code>{</code> on line 6 and the <code>}</code> on line 8. Click the other <code>grade</code> on line 9: it is a completely separate variable with the same name.' },
+        gf: { line: 9, from: 9, to: 10, kind: 'a variable declared inside the <code>else</code> block\'s braces',
+              more: 'It has <b>block scope</b>: it exists only between the <code>{</code> on line 8 and the <code>}</code> on line 10. It has nothing to do with the <code>grade</code> on line 7.' },
+      },
+      bad: {
+        g12: { show: 'gp',
+               html: 'There are two variables named <code>grade</code>, but each one\'s scope ended at its block\'s closing brace, on line 8 or line 10 (the shaded lines show the first one). By line 12 neither exists, so the compiler sees no <code>grade</code> at all. Try the <b>If block fixed</b> tab: declare <code>grade</code> before the <code>if</code>.',
+               err: "error: 'grade' undeclared (first use in this function)" },
+      },
+      noRunSay: 'Click the red <b>grade</b> on line 12 to see why, then try the <b>If block fixed</b> tab, which runs.',
+      noRun: "error: 'grade' undeclared (first use in this function)\n    printf(\"grade = %c\\n\", grade);\n                           ^",
+    },
+    {
+      tab: 'If block fixed',
+      from: 'From the right side of the slide "Example: Block Scope With if".',
+      code: String.raw`#include <stdio.h>
+
+int main(void) {
+    int {d:sc:score} = 72;
+    char {d:g:grade};
+
+    if ({u:sc:score} >= 50) {
+        {u:g:grade} = 'P';
+    } else {
+        {u:g:grade} = 'F';
+    }
+
+    printf("grade = %c\n", {u:g:grade});
+    return 0;
+}`,
+      decls: {
+        sc: { line: 4, from: 4, to: 15, kind: 'a local variable of <code>main()</code>',
+              more: 'It is declared in <code>main()</code>\'s own braces, so the <code>if</code> test on line 7 can use it.' },
+        g: { line: 5, from: 5, to: 15, kind: 'a local variable of <code>main()</code>',
+             more: 'It is declared <b>before</b> the <code>if</code>, in <code>main()</code>\'s own braces. The <code>if</code> and <code>else</code> blocks are inside those braces, so they can set it, and line 13, after the <code>if</code>, can still use it.' },
+      },
+      bad: {},
+      run(T) {
+        T.call('main');
+        T.snap(3, 'The program starts by calling <code>main()</code>, which gets its own box, empty so far.');
+        T.set('score', 72);
+        T.snap(4, '<code>int score = 72;</code> creates <b>score</b> in main\'s box.');
+        T.set('grade', '?');
+        T.snap(5, '<code>char grade;</code> creates <b>grade</b> in main\'s box, before the <code>if</code>. It has no value yet.');
+        T.snap(7, 'Test <code>72 &gt;= 50</code>: True, so run the <code>if</code> block.');
+        T.set('grade', "'P'");
+        T.snap(8, '<code>grade = \'P\';</code> stores \'P\' in main\'s <b>grade</b>. No <code>char</code> here, so it doesn\'t create a new variable: it sets the one from line 5.');
+        T.snap(11, 'The end of the <code>if</code>. Nothing is destroyed: grade wasn\'t declared inside these braces.');
+        T.print('grade = P\n');
+        T.snap(13, 'Prints grade: P. grade is still in scope after the <code>if</code>.');
+        T.ret();
+        T.snap(14, '<code>return 0;</code> main() is finished: its box is destroyed and the program ends.', { done: true });
+      },
+    },
   ];
 
   const TOKEN = /\{([dux]):(\w+):(\w+)\}/g;
@@ -765,7 +841,7 @@ int main(void) {
   // highlight one piece of plain code (no markup tokens) as HTML
   function hl(text) {
     let html = '', m, rest = text;
-    const re = /("(?:[^"\\]|\\.)*")|\b(int|void|return|for|static|char|double|float)\b|(#include)/;
+    const re = /("(?:[^"\\]|\\.)*")|\b(int|void|return|for|if|else|static|char|double|float)\b|(#include)/;
     while ((m = rest.match(re))) {
       html += esc(rest.slice(0, m.index));
       html += m[1] ? `<span class="s">${esc(m[1])}</span>` : `<span class="k">${esc(m[0])}</span>`;
@@ -836,7 +912,7 @@ int main(void) {
       $('banner').innerHTML = `✗ This program doesn't compile, so it can't run.<pre>${esc(ex.noRun)}</pre>`;
       $('status').textContent = 'Can\'t run';
       $('status').classList.add('bad');
-      $('say').innerHTML = 'Click the red <b>x</b> on line 13 to see why, then try the <b>Fixed with a parameter</b> tab, which runs.';
+      $('say').innerHTML = ex.noRunSay;
       $('out').textContent = '';
       $('counter').textContent = '';
       $('frames').innerHTML = '<span class="hint">nothing: the program never ran</span>';
