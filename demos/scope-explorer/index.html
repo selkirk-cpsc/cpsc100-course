@@ -635,55 +635,57 @@ void print_square(void) {
       },
       bad: {
         x13: { show: 'x',
-               html: 'This <code>x</code> is inside <code>print_square()</code>, but the only <code>x</code> in the program is <code>main()</code>\'s, and its scope (shaded) ends on line 10. Being called from <code>main()</code> doesn\'t give a function access to <code>main()</code>\'s variables. The next slide fixes this by making <code>x</code> global. Passing <code>x</code> in as a parameter would also work, and is usually the better fix.',
+               html: 'This <code>x</code> is inside <code>print_square()</code>, but the only <code>x</code> in the program is <code>main()</code>\'s, and its scope (shaded) ends on line 10. Being called from <code>main()</code> doesn\'t give a function access to <code>main()</code>\'s variables. The next slide fixes this by passing <code>x</code> in as a parameter. Making <code>x</code> global would also compile, but it would let every function change it.',
                err: "error: 'x' undeclared (first use in this function)\n    int result = x * x;\n                 ^" },
       },
       noRun: "error: 'x' undeclared (first use in this function)\n    int result = x * x;\n                 ^",
     },
     {
-      tab: 'Fixed with a global',
+      tab: 'Fixed with a parameter',
       from: 'From the slide "Example: Scope Errors (Fix)".',
       code: String.raw`#include <stdio.h>
 
-int {d:g:x} = 5; // global variable
-
-void print_square(void);
+void print_square(int n);
 
 int main(void) {
-    print_square();
+    int {d:x:x} = 5; // local to main
+    print_square({u:x:x});
     printf("Done!\n");
     return 0;
 }
 
-void print_square(void) {
-    int {d:r:result} = {u:g:x} * {u:g:x}; // 'x' is now visible (global)
+void print_square(int {d:n:n}) {
+    int {d:r:result} = {u:n:n} * {u:n:n}; // copy of x
     printf("Square = %d\n", {u:r:result});
 }`,
       decls: {
-        g: { line: 3, from: 3, to: 16, kind: 'a <b>global</b> variable',
-             more: 'It is declared outside every function, so <code>print_square()</code> can now use it. That fixes the error, but any other function could change <code>x</code> too. Passing <code>x</code> as a parameter keeps it private.' },
-        r: { line: 14, from: 14, to: 16, kind: 'a local variable of <code>print_square()</code>',
+        x: { line: 6, from: 6, to: 10, kind: 'a local variable of <code>main()</code>',
+             more: '<code>print_square()</code> still can\'t see it. Instead, line 7 hands its <b>value</b> over as an argument.' },
+        n: { line: 12, from: 12, to: 15, kind: 'a <b>parameter</b> of <code>print_square()</code>',
+             more: 'A parameter is a local variable that starts as a copy of the argument. Each call gets its own n, holding whatever value the caller passed in.' },
+        r: { line: 13, from: 13, to: 15, kind: 'a local variable of <code>print_square()</code>',
              more: 'It is created each time <code>print_square()</code> runs this line, and destroyed when it returns.' },
       },
       bad: {},
       run(T) {
-        T.gset('x', 5);
-        T.snap(3, 'Before <code>main()</code> starts, the global <b>x</b> is created and set to 5.');
         T.call('main');
-        T.snap(7, 'The program calls <code>main()</code>, which gets its own box. main has no local variables now: x moved out of it.');
-        T.snap(8, 'main calls <code>print_square()</code> and pauses here until it returns.');
+        T.snap(5, 'The program starts by calling <code>main()</code>, which gets its own box.');
+        T.set('x', 5);
+        T.snap(6, '<code>int x = 5;</code> creates <b>x</b> in main\'s box. It is still local to main.');
+        T.snap(7, 'main calls <code>print_square(x)</code>. The argument <code>x</code> is worked out first: it is the <b>value</b> 5. main pauses here until print_square returns.');
         T.call('print_square');
-        T.snap(13, 'Enter <code>print_square()</code>: a new, empty box.');
+        T.set('n', 5);
+        T.snap(12, 'Enter <code>print_square()</code>: a new box, and the parameter <b>n</b> is created in it holding a <b>copy</b> of the 5. print_square never needs to see main\'s x.');
         T.set('result', 25);
-        T.snap(14, '<code>x * x</code> uses the <b>global</b> x (5), which every function can see, so <b>result</b> = 25.');
+        T.snap(13, '<code>n * n</code> uses print_square\'s own <b>n</b> (5), so <b>result</b> = 25.');
         T.print('Square = 25\n');
-        T.snap(15, 'Prints result.');
+        T.snap(14, 'Prints result.');
         T.ret();
-        T.snap(16, 'print_square() returns: its box and result are destroyed. The global x stays.');
+        T.snap(15, 'print_square() returns: its box, with n and result, is destroyed.');
         T.print('Done!\n');
-        T.snap(9, 'Back in main, which prints <code>Done!</code>.');
+        T.snap(8, 'Back in main, which prints <code>Done!</code>.');
         T.ret();
-        T.snap(10, '<code>return 0;</code> main() is finished and the program ends.', { done: true });
+        T.snap(9, '<code>return 0;</code> main() is finished and the program ends. No global was needed: x stayed private to main the whole time.', { done: true });
       },
     },
     {
@@ -834,7 +836,7 @@ int main(void) {
       $('banner').innerHTML = `✗ This program doesn't compile, so it can't run.<pre>${esc(ex.noRun)}</pre>`;
       $('status').textContent = 'Can\'t run';
       $('status').classList.add('bad');
-      $('say').innerHTML = 'Click the red <b>x</b> on line 13 to see why, then try the <b>Fixed with a global</b> tab, which runs.';
+      $('say').innerHTML = 'Click the red <b>x</b> on line 13 to see why, then try the <b>Fixed with a parameter</b> tab, which runs.';
       $('out').textContent = '';
       $('counter').textContent = '';
       $('frames').innerHTML = '<span class="hint">nothing: the program never ran</span>';

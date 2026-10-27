@@ -433,28 +433,39 @@ class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span i
 <pre class="text"><code>error: &#39;x&#39; undeclared (first use in this function)
     int result = x * x;
                  ^</code></pre>
-<p>Declare <code class="sourceCode c">x</code> outside all functions
-instead:</p>
+<p>Pass <code class="sourceCode c">x</code> to <code
+class="sourceCode c">print_square<span class="op">()</span></code> as an
+argument instead:</p>
+<div class="columns">
+<div class="column">
 <div class="sourceCode" id="cb9"><pre
 class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb9-1"><a href="#cb9-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
 <span id="cb9-2"><a href="#cb9-2"></a></span>
-<span id="cb9-3"><a href="#cb9-3"></a><span class="dt">int</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span> <span class="co">// global variable</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="dt">void</span> print_square<span class="op">(</span><span class="dt">int</span> n<span class="op">);</span></span>
 <span id="cb9-4"><a href="#cb9-4"></a></span>
-<span id="cb9-5"><a href="#cb9-5"></a><span class="dt">void</span> print_square<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
-<span id="cb9-6"><a href="#cb9-6"></a></span>
-<span id="cb9-7"><a href="#cb9-7"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb9-8"><a href="#cb9-8"></a>    print_square<span class="op">();</span></span>
-<span id="cb9-9"><a href="#cb9-9"></a>    printf<span class="op">(</span><span class="st">&quot;Done!</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
-<span id="cb9-10"><a href="#cb9-10"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb9-11"><a href="#cb9-11"></a><span class="op">}</span></span>
-<span id="cb9-12"><a href="#cb9-12"></a></span>
-<span id="cb9-13"><a href="#cb9-13"></a><span class="dt">void</span> print_square<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb9-14"><a href="#cb9-14"></a>    <span class="dt">int</span> result <span class="op">=</span> x <span class="op">*</span> x<span class="op">;</span> <span class="co">// &#39;x&#39; is now visible (global)</span></span>
-<span id="cb9-15"><a href="#cb9-15"></a>    printf<span class="op">(</span><span class="st">&quot;Square = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> result<span class="op">);</span></span>
-<span id="cb9-16"><a href="#cb9-16"></a><span class="op">}</span></span></code></pre></div>
-<p>Output:</p>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span> <span class="co">// local to main</span></span>
+<span id="cb9-7"><a href="#cb9-7"></a>    print_square<span class="op">(</span>x<span class="op">);</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a>    printf<span class="op">(</span><span class="st">&quot;Done!</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb9-9"><a href="#cb9-9"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb9-10"><a href="#cb9-10"></a><span class="op">}</span></span>
+<span id="cb9-11"><a href="#cb9-11"></a></span>
+<span id="cb9-12"><a href="#cb9-12"></a><span class="dt">void</span> print_square<span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-13"><a href="#cb9-13"></a>    <span class="dt">int</span> result <span class="op">=</span> n <span class="op">*</span> n<span class="op">;</span> <span class="co">// copy of x</span></span>
+<span id="cb9-14"><a href="#cb9-14"></a>    printf<span class="op">(</span><span class="st">&quot;Square = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> result<span class="op">);</span></span>
+<span id="cb9-15"><a href="#cb9-15"></a><span class="op">}</span></span></code></pre></div>
+</div><div class="column">
+<p><strong>Output:</strong></p>
 <pre class="text"><code>Square = 25
 Done!</code></pre>
+<p>A global <code class="sourceCode c">x</code> would also compile, but
+the parameter keeps <code class="sourceCode c">x</code> private to <code
+class="sourceCode c">main<span class="op">()</span></code>, and the
+signature shows what <code
+class="sourceCode c">print_square<span class="op">()</span></code>
+needs.</p>
+</div>
+</div>
 </section>
 <section id="example-block-scope" class="level3">
 <h3>Example: Block Scope</h3>
