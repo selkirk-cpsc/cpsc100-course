@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Functions and Scope → Part 1: Functions · CPSC 100 Notes</title>
+<title>Functions and Scope Part 1: Functions · CPSC 100 Notes</title>
 <style>
   :root {
     --bg: #f6f6f3;
@@ -184,11 +184,11 @@
 <a class="prev" href="../lecture07/"><span class="label">← Previous</span>Week
 7: Midterm 1 Review</a>
 <a class="next" href="../lecture08-part2/"><span class="label">Next →</span>Week
-8: Functions and Scope → Part 2: Scope</a>
+8: Functions and Scope Part 2: Scope</a>
 </nav>
 <header class="title">
 <div class="week">Week 8</div>
-<h1>Functions and Scope → Part 1: Functions</h1>
+<h1>Functions and Scope Part 1: Functions</h1>
 </header>
 <nav id="TOC" role="doc-toc">
 <ul>
@@ -266,7 +266,7 @@ work. Only what it needs to give it, and what it will get back.</p>
 <p>Every function has the same five parts:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>return_type function_name<span class="op">(</span> parameter list <span class="op">)</span> <span class="op">{</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// body</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> value<span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> value<span class="op">;</span>   <span class="co">// optional</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <ul>
 <li><p><strong>return type</strong>
@@ -284,7 +284,7 @@ the statements that do the work</p></li>
 <li><p><strong><code
 class="sourceCode c"><span class="cf">return</span></code></strong>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
-sends a value back to the caller</p></li>
+sends a value back to the caller (optional)</p></li>
 </ul>
 </section>
 <section id="declaration-and-definition" class="level3">
@@ -423,19 +423,21 @@ class="level3">
 a function by the time it’s called, you get a <strong>"used before
 declared"</strong> style error.</p>
 <div class="sourceCode" id="cb9"><pre
-class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb9-1"><a href="#cb9-1"></a><span class="dt">int</span> average_of_two<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span></span>
-<span id="cb9-2"><a href="#cb9-2"></a><span class="op">{</span></span>
-<span id="cb9-3"><a href="#cb9-3"></a>    <span class="cf">return</span> total<span class="op">(</span>a<span class="op">,</span> b<span class="op">)</span> <span class="op">/</span> <span class="dv">2</span><span class="op">;</span>  <span class="co">// total() used before declared</span></span>
-<span id="cb9-4"><a href="#cb9-4"></a><span class="op">}</span></span>
-<span id="cb9-5"><a href="#cb9-5"></a></span>
-<span id="cb9-6"><a href="#cb9-6"></a><span class="dt">int</span> total<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span>    <span class="co">// total() has no prototype above main()</span></span>
-<span id="cb9-7"><a href="#cb9-7"></a><span class="op">{</span></span>
-<span id="cb9-8"><a href="#cb9-8"></a>    <span class="cf">return</span> a <span class="op">+</span> b<span class="op">;</span></span>
-<span id="cb9-9"><a href="#cb9-9"></a><span class="op">}</span></span></code></pre></div>
-<p><code
-class="sourceCode c">average_of_two<span class="op">()</span></code>
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb9-1"><a href="#cb9-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="op">{</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> total<span class="op">(</span><span class="dv">4</span><span class="op">,</span> <span class="dv">6</span><span class="op">));</span>  <span class="co">// total() used before declared</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="op">}</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a></span>
+<span id="cb9-9"><a href="#cb9-9"></a><span class="dt">int</span> total<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span></span>
+<span id="cb9-10"><a href="#cb9-10"></a><span class="op">{</span></span>
+<span id="cb9-11"><a href="#cb9-11"></a>    <span class="cf">return</span> a <span class="op">+</span> b<span class="op">;</span></span>
+<span id="cb9-12"><a href="#cb9-12"></a><span class="op">}</span></span></code></pre></div>
+<p><code class="sourceCode c">main<span class="op">()</span></code>
 calls <code class="sourceCode c">total<span class="op">()</span></code>
-on line 3, but the compiler hasn’t seen <em>anything</em> about <code
+on line 5, but the compiler hasn’t seen <em>anything</em> about <code
 class="sourceCode c">total</code> yet; not a prototype, not a
 definition.</p>
 </section>
@@ -444,23 +446,18 @@ definition.</p>
 <div class="sourceCode" id="cb10"><pre
 class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb10-1"><a href="#cb10-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
 <span id="cb10-2"><a href="#cb10-2"></a></span>
-<span id="cb10-3"><a href="#cb10-3"></a><span class="dt">int</span> average_of_two<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">);</span></span>
-<span id="cb10-4"><a href="#cb10-4"></a><span class="dt">int</span> total<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">);</span>   <span class="co">// FIX: prototype before main()</span></span>
-<span id="cb10-5"><a href="#cb10-5"></a></span>
-<span id="cb10-6"><a href="#cb10-6"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
-<span id="cb10-7"><a href="#cb10-7"></a><span class="op">{</span></span>
-<span id="cb10-8"><a href="#cb10-8"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> average_of_two<span class="op">(</span><span class="dv">4</span><span class="op">,</span> <span class="dv">6</span><span class="op">));</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="dt">int</span> total<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">);</span>   <span class="co">// FIX: prototype before main()</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="op">{</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> total<span class="op">(</span><span class="dv">4</span><span class="op">,</span> <span class="dv">6</span><span class="op">));</span>  <span class="co">// total() is now declared</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
 <span id="cb10-9"><a href="#cb10-9"></a><span class="op">}</span></span>
 <span id="cb10-10"><a href="#cb10-10"></a></span>
-<span id="cb10-11"><a href="#cb10-11"></a><span class="dt">int</span> average_of_two<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span></span>
+<span id="cb10-11"><a href="#cb10-11"></a><span class="dt">int</span> total<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span></span>
 <span id="cb10-12"><a href="#cb10-12"></a><span class="op">{</span></span>
-<span id="cb10-13"><a href="#cb10-13"></a>    <span class="cf">return</span> total<span class="op">(</span>a<span class="op">,</span> b<span class="op">)</span> <span class="op">/</span> <span class="dv">2</span><span class="op">;</span>  <span class="co">// total() is now declared</span></span>
-<span id="cb10-14"><a href="#cb10-14"></a><span class="op">}</span></span>
-<span id="cb10-15"><a href="#cb10-15"></a></span>
-<span id="cb10-16"><a href="#cb10-16"></a><span class="dt">int</span> total<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span></span>
-<span id="cb10-17"><a href="#cb10-17"></a><span class="op">{</span></span>
-<span id="cb10-18"><a href="#cb10-18"></a>    <span class="cf">return</span> a <span class="op">+</span> b<span class="op">;</span></span>
-<span id="cb10-19"><a href="#cb10-19"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb10-13"><a href="#cb10-13"></a>    <span class="cf">return</span> a <span class="op">+</span> b<span class="op">;</span></span>
+<span id="cb10-14"><a href="#cb10-14"></a><span class="op">}</span></span></code></pre></div>
 </section>
 </section>
 <section id="main" class="level2">
@@ -648,9 +645,8 @@ class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span i
 <span id="cb14-12"><a href="#cb14-12"></a></span>
 <span id="cb14-13"><a href="#cb14-13"></a><span class="dt">void</span> average<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
 <span id="cb14-14"><a href="#cb14-14"></a>    <span class="dt">float</span> avg <span class="op">=</span> <span class="op">(</span>a <span class="op">+</span> b<span class="op">)</span> <span class="op">/</span> <span class="fl">2.0</span><span class="op">;</span></span>
-<span id="cb14-15"><a href="#cb14-15"></a>    printf<span class="op">(</span><span class="st">&quot;Average of </span><span class="sc">%d</span><span class="st"> and </span><span class="sc">%d</span><span class="st"> = </span><span class="sc">%.1f\n</span><span class="st">&quot;</span><span class="op">,</span></span>
-<span id="cb14-16"><a href="#cb14-16"></a>           a<span class="op">,</span> b<span class="op">,</span> avg<span class="op">);</span></span>
-<span id="cb14-17"><a href="#cb14-17"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb14-15"><a href="#cb14-15"></a>    printf<span class="op">(</span><span class="st">&quot;Average of </span><span class="sc">%d</span><span class="st"> and </span><span class="sc">%d</span><span class="st"> = </span><span class="sc">%.1f\n</span><span class="st">&quot;</span><span class="op">,</span> a<span class="op">,</span> b<span class="op">,</span> avg<span class="op">);</span></span>
+<span id="cb14-16"><a href="#cb14-16"></a><span class="op">}</span></span></code></pre></div>
 </div><div class="column">
 <p><strong>Output:</strong></p>
 <pre class="text"><code>Average of 8 and 6 = 7.0</code></pre>
@@ -670,49 +666,77 @@ and prints a result.</p></li>
 </div>
 </div>
 </section>
-<section id="example-swapping-variables-pass-by-value" class="level3">
-<h3>Example: Swapping Variables (Pass-by-Value)</h3>
+<section id="example-changing-a-copy-pass-by-value" class="level3">
+<h3>Example: Changing a Copy (Pass-by-Value)</h3>
 <div class="columns">
 <div class="column">
 <div class="sourceCode" id="cb16"><pre
 class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb16-1"><a href="#cb16-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
 <span id="cb16-2"><a href="#cb16-2"></a></span>
-<span id="cb16-3"><a href="#cb16-3"></a><span class="dt">void</span> swap<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">);</span></span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="dt">void</span> addOne<span class="op">(</span><span class="dt">int</span> n<span class="op">);</span></span>
 <span id="cb16-4"><a href="#cb16-4"></a></span>
 <span id="cb16-5"><a href="#cb16-5"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb16-6"><a href="#cb16-6"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">3</span><span class="op">,</span> y <span class="op">=</span> <span class="dv">7</span><span class="op">;</span></span>
+<span id="cb16-6"><a href="#cb16-6"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
 <span id="cb16-7"><a href="#cb16-7"></a></span>
-<span id="cb16-8"><a href="#cb16-8"></a>    printf<span class="op">(</span><span class="st">&quot;Before: x=</span><span class="sc">%d</span><span class="st">, y=</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">,</span> y<span class="op">);</span></span>
-<span id="cb16-9"><a href="#cb16-9"></a>    swap<span class="op">(</span>x<span class="op">,</span> y<span class="op">);</span></span>
-<span id="cb16-10"><a href="#cb16-10"></a>    printf<span class="op">(</span><span class="st">&quot;After:  x=</span><span class="sc">%d</span><span class="st">, y=</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">,</span> y<span class="op">);</span></span>
+<span id="cb16-8"><a href="#cb16-8"></a>    printf<span class="op">(</span><span class="st">&quot;Before: x = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span></span>
+<span id="cb16-9"><a href="#cb16-9"></a>    addOne<span class="op">(</span>x<span class="op">);</span></span>
+<span id="cb16-10"><a href="#cb16-10"></a>    printf<span class="op">(</span><span class="st">&quot;After:  x = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span></span>
 <span id="cb16-11"><a href="#cb16-11"></a></span>
 <span id="cb16-12"><a href="#cb16-12"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
 <span id="cb16-13"><a href="#cb16-13"></a><span class="op">}</span></span>
 <span id="cb16-14"><a href="#cb16-14"></a></span>
-<span id="cb16-15"><a href="#cb16-15"></a><span class="dt">void</span> swap<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb16-16"><a href="#cb16-16"></a>    <span class="dt">int</span> temp <span class="op">=</span> a<span class="op">;</span></span>
-<span id="cb16-17"><a href="#cb16-17"></a>    a <span class="op">=</span> b<span class="op">;</span></span>
-<span id="cb16-18"><a href="#cb16-18"></a>    b <span class="op">=</span> temp<span class="op">;</span></span>
-<span id="cb16-19"><a href="#cb16-19"></a>    printf<span class="op">(</span><span class="st">&quot;Inside swap: a=</span><span class="sc">%d</span><span class="st">, b=</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> a<span class="op">,</span> b<span class="op">);</span></span>
-<span id="cb16-20"><a href="#cb16-20"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb16-15"><a href="#cb16-15"></a><span class="dt">void</span> addOne<span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-16"><a href="#cb16-16"></a>    n <span class="op">=</span> n <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb16-17"><a href="#cb16-17"></a>    printf<span class="op">(</span><span class="st">&quot;In addOne: n = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> n<span class="op">);</span></span>
+<span id="cb16-18"><a href="#cb16-18"></a><span class="op">}</span></span></code></pre></div>
 </div><div class="column">
 <p><strong>Output:</strong></p>
-<pre class="text"><code>Before: x=3, y=7
-Inside swap: a=7, b=3
-After:  x=3, y=7</code></pre>
+<pre class="text"><code>Before: x = 5
+In addOne: n = 6
+After:  x = 5</code></pre>
 <p><strong>Explanation:</strong></p>
 <ul>
-<li><p><code class="sourceCode c">swap<span class="op">()</span></code>
-receives <strong>copies</strong> of <code class="sourceCode c">x</code>
-and <code class="sourceCode c">y</code>.</p></li>
-<li><p>The swap works inside the function, but only on the local copies
-<code class="sourceCode c">a</code> and <code
-class="sourceCode c">b</code>.</p></li>
-<li><p>When the function ends, those copies are destroyed. The originals
-in <code class="sourceCode c">main<span class="op">()</span></code> stay
-unchanged.</p></li>
+<li><p><code
+class="sourceCode c">addOne<span class="op">()</span></code> receives a
+<strong>copy</strong> of <code class="sourceCode c">x</code>, called
+<code class="sourceCode c">n</code> (line 9).</p></li>
+<li><p>It adds one to <code class="sourceCode c">n</code>, but <code
+class="sourceCode c">x</code> back in <code
+class="sourceCode c">main<span class="op">()</span></code> is
+untouched.</p></li>
+<li><p>When <code
+class="sourceCode c">addOne<span class="op">()</span></code> returns,
+<code class="sourceCode c">n</code> is gone.</p></li>
+<li><p>To change <code class="sourceCode c">x</code> itself, <code
+class="sourceCode c">addOne<span class="op">()</span></code> needs to
+know <em>where</em> <code class="sourceCode c">x</code> lives
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+<span class="alert">pointers</span>, coming soon.</p></li>
 </ul>
 </div>
+</div>
+</section>
+<section id="try-it-changing-a-copy" class="level3">
+<h3>Try It: Changing a Copy</h3>
+<div class="tryit">
+<p>Step through <code
+class="sourceCode c">addOne<span class="op">()</span></code> one line at
+a time and watch which box of variables changes:</p>
+<div class="center">
+<p><span><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/add-one/"
+class="demo-link" target="_blank"
+rel="noopener"><code>selkirk-cpsc.github.io/cpsc100-course/demos/add-one/</code></a></span></p>
+</div>
+<ul>
+<li><p>Watch <code class="sourceCode c">n</code> become 6 while <code
+class="sourceCode c">x</code> stays 5 in <code
+class="sourceCode c">main<span class="op">()</span></code>’s
+box</p></li>
+<li><p>When <code
+class="sourceCode c">addOne<span class="op">()</span></code> returns,
+its box (and the 6) is destroyed</p></li>
+</ul>
 </div>
 </section>
 </section>
@@ -746,7 +770,7 @@ without running the entire program</p></li>
 <a class="prev" href="../lecture07/"><span class="label">← Previous</span>Week
 7: Midterm 1 Review</a>
 <a class="next" href="../lecture08-part2/"><span class="label">Next →</span>Week
-8: Functions and Scope → Part 2: Scope</a>
+8: Functions and Scope Part 2: Scope</a>
 </nav>
 </main>
 <script>

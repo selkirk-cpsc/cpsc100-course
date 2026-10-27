@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Changing a Copy</title>
+<style>
+  :root {
+    --bg: #f6f6f3;
+    --panel: #ffffff;
+    --ink: #1d1d1f;
+    --muted: #6b6b72;
+    --line: #a9aab2;
+    --node: #ffffff;
+    --visited: #eef1f6;
+    --accent: #2f6fde;
+    --accent-soft: #dce8fd;
+    --left: #d9480f;
+    --right: #7048e8;
+    --ok: #2b8a3e;
+    --ok-soft: #d3f9d8;
+    --bad: #c92a2a;
+    --bad-soft: #ffe0e0;
+    --term: #e9e9ec;
+    --type: #0c8599;
+    --kwc: #0c8599; --str: #a6501a; --cmt: #868e96;
+    --out-bg: #ffffff; --out-ink: #1d1d1f; --out-line: #c9c9cf; --out-dim: #6b6b72;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5; --line: #5a5b63;
+      --node: #25262b; --visited: #2b2e36; --accent: #6ea0ff; --accent-soft: #1d3157;
+      --left: #ff8a50; --right: #a98bff; --ok: #69db7c; --ok-soft: #1c3a24;
+      --bad: #ff8787; --bad-soft: #4a1f22; --term: #2c2d33; --type: #3bc9db;
+      --kwc: #3bc9db; --str: #ffa94d; --cmt: #8a8f98;
+      --out-bg: #111111; --out-ink: #e6e6e6; --out-line: #2c2d33; --out-dim: #8a8a8a;
+      --shadow: 0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5; --line: #5a5b63;
+    --node: #25262b; --visited: #2b2e36; --accent: #6ea0ff; --accent-soft: #1d3157;
+    --left: #ff8a50; --right: #a98bff; --ok: #69db7c; --ok-soft: #1c3a24;
+    --bad: #ff8787; --bad-soft: #4a1f22; --term: #2c2d33; --type: #3bc9db;
+    --kwc: #3bc9db; --str: #ffa94d; --cmt: #8a8f98;
+    --out-bg: #111111; --out-ink: #e6e6e6; --out-line: #2c2d33; --out-dim: #8a8a8a;
+    --shadow: 0 1px 3px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+  header { max-width: 1280px; margin: 0 auto; padding: 20px 16px 4px; }
+  h1 { font-size: 1.45rem; margin: 0 0 4px; letter-spacing: -.01em; }
+  header p { margin: 0; color: var(--muted); }
+
+  main {
+    max-width: 1280px; margin: 0 auto; padding: 12px 16px 32px;
+    display: grid; gap: 16px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    align-items: start;
+  }
+  @media (max-width: 920px) { main { grid-template-columns: minmax(0, 1fr); } }
+
+  .card {
+    background: var(--panel); border-radius: 14px; box-shadow: var(--shadow);
+    padding: 16px; min-width: 0;
+  }
+  .card h2 {
+    font-size: .78rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); margin: 0 0 10px;
+  }
+  .side { display: grid; gap: 16px; min-width: 0; }
+
+  button {
+    font: inherit; cursor: pointer; border-radius: 8px; border: 1.5px solid var(--line);
+    background: var(--node); color: var(--ink); padding: 6px 12px;
+  }
+  button:hover { border-color: var(--accent); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button:disabled { opacity: .4; cursor: default; border-color: var(--line); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .hint { color: var(--muted); font-size: .85rem; }
+  .note { font-size: .88rem; color: var(--muted); margin: 10px 0 0; }
+  kbd { font: 12px ui-monospace, Menlo, Consolas, monospace; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+
+  .theme-toggle { font: inherit; font-size: .85rem; line-height: 1.2; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
+  .theme-toggle:hover { border-color: var(--ink); }
+  header .theme-toggle { float: right; margin: 0 0 8px 12px; }
+
+  /* ---------- code, stepped one line at a time ---------- */
+  .from { color: var(--muted); font-size: .85rem; margin: 0 0 10px; }
+  .codewrap { overflow-x: auto; border: 1px solid var(--out-line); border-radius: 10px; background: var(--out-bg); }
+  .code { margin: 0; padding: 8px 0; font: 14px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--out-ink); min-width: max-content; }
+  .ln { display: block; padding: 0 14px 0 0; border-left: 4px solid transparent; transition: background .2s; }
+  .ln .no { display: inline-block; width: 2.6em; padding-right: .9em; text-align: right; color: var(--out-dim); user-select: none; }
+  .ln .mark { display: inline-block; width: 1.4em; text-align: center; color: var(--accent); font-weight: 700; }
+  .ln.cur { box-shadow: inset 0 0 0 2px var(--accent); background: var(--accent-soft); }
+  .ln.skip { box-shadow: inset 0 0 0 2px var(--bad); background: var(--bad-soft); }
+  .ln.skip .mark { color: var(--bad); }
+  .code .k { color: var(--kwc); font-weight: 700; }
+  .code .s { color: var(--str); }
+  .code .c, .code .c .k, .code .c .s { color: var(--cmt); font-weight: 400; }
+
+  .stepctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+  .stepctl input[type=range] { flex: 1 1 8em; min-width: 6em; accent-color: var(--accent); }
+  .counter { color: var(--muted); font-size: .9rem; }
+  .runmsg { margin-top: 12px; border: 1px solid var(--out-line); border-radius: 10px; padding: 10px 14px; }
+  .runmsg .status { font-weight: 700; margin-bottom: 2px; }
+  .runmsg .status.bad { color: var(--bad); }
+  .runmsg #say { min-height: 4.5em; }
+  .runmsg b { color: var(--accent); }
+  .runmsg h2, .outbox h2 { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 6px; }
+  .outbox { margin-top: 12px; }
+  .outbox pre { margin: 0; min-height: 2.4em; font: 14px ui-monospace, Menlo, Consolas, monospace; background: var(--out-bg); color: var(--out-ink); border: 1px solid var(--out-line); border-radius: 8px; padding: 8px 12px; white-space: pre-wrap; }
+  .outbox pre .crash { color: var(--bad); font-weight: 700; }
+
+  /* ---------- memory: one box per call, one cell per variable ---------- */
+  .frames { display: grid; gap: 28px; margin-top: 6px; }
+  .mframe { position: relative; border: 2px solid var(--line); border-radius: 12px; padding: 14px 14px 10px; background: var(--node); transition: opacity .3s; }
+  .mframe.call { border-color: var(--accent); }
+  .mframe .fh { position: absolute; top: -11px; left: 12px; padding: 0 6px; background: var(--node); font: 700 14px/20px ui-monospace, Menlo, Consolas, monospace; }
+  .mframe .fh .tag { font: 600 12px system-ui, sans-serif; color: var(--muted); margin-left: 4px; }
+  .mframe .none { color: var(--muted); font-size: .85rem; font-style: italic; padding: 8px 0; }
+  .mframe.gone { border-style: dashed; opacity: .55; }
+  .mframe.gone .fh .tag { color: var(--bad); }
+  .cells { display: flex; flex-wrap: wrap; gap: 14px 40px; padding-top: 10px; }
+  .mv { width: 8.2em; display: flex; flex-direction: column; align-items: center; }
+  .mv .nm { font: 700 14px ui-monospace, Menlo, Consolas, monospace; white-space: nowrap; }
+  .mv .nm .ty { color: var(--type); font-weight: 700; }
+  .mv .box {
+    width: 100%; height: 52px; margin: 3px 0; border: 2px solid var(--line); border-radius: 8px;
+    display: grid; place-items: center; background: var(--panel);
+    font: 700 20px ui-monospace, Menlo, Consolas, monospace;
+    transition: background .3s, border-color .3s, box-shadow .3s;
+  }
+  .mv .box.read { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .mv .box.chg { border-color: var(--accent); background: var(--accent-soft); animation: pulse .9s ease-out; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--accent); } 100% { box-shadow: 0 0 0 10px transparent; } }
+  .copyline { color: var(--muted); font-size: .88rem; text-align: center; margin: -16px 0 -14px; }
+  .copyline b { color: var(--accent); }
+  .empty { color: var(--muted); font-style: italic; }
+
+  .legend2 { display: grid; gap: 8px; font-size: .9rem; }
+  .sw { display: inline-block; width: 26px; height: 16px; border-radius: 4px; vertical-align: -3px; margin-right: 6px; border: 2px solid var(--line); background: var(--panel); }
+  .sw.read { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .sw.chg { border-color: var(--accent); background: var(--accent-soft); }
+  .sw.gone { border-style: dashed; opacity: .55; }
+</style>
+<script>
+  // apply a saved light/dark choice before the page draws (no flash)
+  try { var t = localStorage.getItem('cpsc100-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+</head>
+<body>
+<header>
+  <button type="button" class="theme-toggle" id="theme-toggle">☾ Dark</button>
+  <h1>Changing a Copy: Pass-by-Value</h1>
+  <p>The <code>addOne()</code> example from the lecture slides, run one line at a time. Each function call gets its own box of variables. Watch which box changes when <code>addOne()</code> adds one to its parameter.
+     Keys: <kbd>→</kbd>/<kbd>Space</kbd> next, <kbd>←</kbd> back.</p>
+</header>
+
+<main>
+  <section class="card" aria-label="Example code">
+    <p class="from">From the slide "Example: Changing a Copy (Pass-by-Value)".</p>
+    <div class="codewrap"><pre class="code" id="code"></pre></div>
+    <div class="stepctl">
+      <button type="button" id="first" title="First step">⏮ First</button>
+      <button type="button" id="back" title="Back (←)">◀ Back</button>
+      <button type="button" id="next" class="primary" title="Next (→ or Space)">Next ▶</button>
+      <button type="button" id="last" title="Last step">Last ⏭</button>
+      <input type="range" id="slider" min="0" value="0" aria-label="Step">
+      <span class="counter" id="counter"></span>
+    </div>
+    <div class="runmsg" aria-live="polite">
+      <h2>What's happening</h2>
+      <div class="status" id="status"></div>
+      <div id="say"></div>
+    </div>
+    <div class="outbox"><h2>Output</h2><pre id="out"></pre></div>
+  </section>
+
+  <div class="side">
+    <section class="card">
+      <h2>Memory right now</h2>
+      <div class="frames" id="frames"></div>
+      <p class="note">x and n are two separate boxes. When main calls <code>addOne(x)</code>, the <b>value</b> in x is copied into n. After that, nothing connects them.</p>
+    </section>
+
+    <section class="card">
+      <h2>Key</h2>
+      <div class="legend2">
+        <div><span class="sw"></span>a variable: its type and name above, its value inside. Each outlined group is one function call.</div>
+        <div><span class="sw read"></span>read by the line that just ran</div>
+        <div><span class="sw chg"></span>changed by the line that just ran</div>
+        <div><span class="sw gone"></span>a call that just returned: its box is destroyed</div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  /* Records the program one line at a time. Each snapshot is taken just after its
+     line runs: every call's variables, which boxes the line read or changed, and
+     the output so far. */
+  function makeTracer() {
+    const steps = [], frames = [];
+    let out = '', marks = {}, gone = null;
+    // a variable's key is "<frame number>:<name>"; look in the newest call first
+    const key = name => {
+      for (let f = frames.length - 1; f >= 0; f--)
+        if (frames[f].vars.some(v => v.name === name)) return f + ':' + name;
+      throw new Error('no variable ' + name);
+    };
+    const cell = name => { const [f, n] = key(name).split(':'); return frames[f].vars.find(v => v.name === n); };
+    const copy = f => ({ fn: f.fn, vars: f.vars.map(v => Object.assign({}, v)) });
+    return {
+      steps,
+      snap(line, say, opt = {}) {
+        steps.push(Object.assign({ line, say, out, marks, gone, frames: frames.map(copy) }, opt));
+        marks = {}; gone = null;
+      },
+      call(fn) { frames.push({ fn, vars: [] }); },
+      // the call's box stays on screen, dashed, for the step where it returns
+      ret() { gone = copy(frames.pop()); },
+      decl(type, name, val) {
+        frames[frames.length - 1].vars.push({ type, name, val });
+        marks[key(name)] = 'chg';
+      },
+      set(name, val) { cell(name).val = val; marks[key(name)] = 'chg'; },
+      read(...names) { names.forEach(n => { marks[key(n)] = marks[key(n)] || 'read'; }); },
+      print(s) { out += s; },
+    };
+  }
+
+  /* Code is copied from the Lecture 8 Part 1 slide
+     "Example: Changing a Copy (Pass-by-Value)". */
+  const CODE = String.raw`#include <stdio.h>
+
+void addOne(int n);
+
+int main(void) {
+    int x = 5;
+
+    printf("Before: x = %d\n", x);
+    addOne(x);
+    printf("After:  x = %d\n", x);
+
+    return 0;
+}
+
+void addOne(int n) {
+    n = n + 1;
+    printf("In addOne: n = %d\n", n);
+}`;
+
+  function run(T) {
+    T.call('main');
+    T.snap(5, 'The program starts by calling <code>main()</code>, which gets its own box.');
+    T.decl('int', 'x', 5);
+    T.snap(6, '<code>int x = 5;</code> creates <b>x</b> in main\'s box.');
+    T.read('x');
+    T.print('Before: x = 5\n');
+    T.snap(8, 'Prints x before the call: 5.');
+    T.read('x');
+    T.snap(9, 'main calls <code>addOne(x)</code>. The argument <code>x</code> is worked out first: it is the <b>value</b> 5. That 5 is what gets passed. main pauses here until addOne returns.');
+    T.call('addOne');
+    T.decl('int', 'n', 5);
+    T.snap(15, 'Enter <code>addOne()</code>. It gets its own box, and the parameter <b>n</b> is a brand-new variable holding a <b>copy</b> of the 5. n is not x: it is a different box that happens to start with the same value.', { copied: true });
+    T.read('n');
+    T.set('n', 6);
+    T.snap(16, '<code>n = n + 1;</code> reads n (5), adds one, and stores 6 back in <b>n</b>. Only addOne\'s box changes. Look at main\'s box: x is still 5.');
+    T.read('n');
+    T.print('In addOne: n = 6\n');
+    T.snap(17, 'Prints n: 6. Inside addOne, the change worked, but only on the copy.');
+    T.ret();
+    T.snap(18, 'addOne() reaches its closing brace and returns. Its box is destroyed, and n, with the 6 in it, goes with it.');
+    T.read('x');
+    T.print('After:  x = 5\n');
+    T.snap(10, 'Back in main, x is still <b>5</b>. addOne() only ever had a copy, so it had no way to reach x.');
+    T.ret();
+    T.snap(12, '<code>return 0;</code> main() is finished and the program ends. To change x itself, addOne() would need to know <b>where</b> x lives in memory. That takes <b>pointers</b>, coming soon.', { done: true });
+  }
+
+  let steps = [], cur = 0;
+
+  // highlight one piece of plain code as HTML
+  function hl(text) {
+    let html = '', m, rest = text;
+    const re = /("(?:[^"\\]|\\.)*")|\b(int|void|return)\b|(#include)/;
+    while ((m = rest.match(re))) {
+      html += esc(rest.slice(0, m.index));
+      html += m[1] ? `<span class="s">${esc(m[1])}</span>` : `<span class="k">${esc(m[0])}</span>`;
+      rest = rest.slice(m.index + m[0].length);
+    }
+    return html + esc(rest);
+  }
+  function renderLine(raw, no) {
+    const cut = raw.indexOf('//');
+    const code = cut < 0 ? hl(raw) : hl(raw.slice(0, cut)) + `<span class="c">${esc(raw.slice(cut))}</span>`;
+    return `<span class="ln" data-no="${no}"><span class="mark"></span><span class="no">${no}</span>${code}</span>`;
+  }
+
+  function cellHTML(v, f, s) {
+    const m = s.marks[f + ':' + v.name] || '';
+    return `<div class="mv"><div class="nm"><span class="ty">${esc(v.type)} </span>${esc(v.name)}</div>` +
+           `<div class="box ${m}">${esc(v.val)}</div></div>`;
+  }
+  function frameHTML(f, i, s, cls, tag) {
+    const body = f.vars.length ? `<div class="cells">${f.vars.map(v => cellHTML(v, i, s)).join('')}</div>` : `<div class="none">no variables yet</div>`;
+    return `<div class="mframe ${cls}"><div class="fh">${esc(f.fn)}()${tag ? `<span class="tag">${tag}</span>` : ''}</div>${body}</div>`;
+  }
+
+  function showStep() {
+    const s = steps[cur];
+    document.querySelectorAll('#code .ln').forEach(l => {
+      const hit = +l.dataset.no === s.line;
+      l.classList.toggle('cur', hit);
+      l.querySelector('.mark').textContent = hit ? '➜' : '';
+    });
+    const parts = s.frames.map((f, i, all) => {
+      const last = i === all.length - 1;
+      return frameHTML(f, i, s, last ? 'call' : '', last ? '' : `paused until ${esc(all[i + 1].fn)}() returns`);
+    });
+    if (s.copied) parts.splice(1, 0, '<div class="copyline">the <b>value</b> 5 was copied from x into n ↓</div>');
+    if (s.gone) parts.push(frameHTML(s.gone, -1, s, 'gone', 'returned: destroyed'));
+    $('frames').innerHTML = parts.join('') ||
+      `<span class="empty">${s.line === null ? 'nothing yet: the program hasn\'t started' : 'nothing: the program has ended'}</span>`;
+    $('status').textContent = s.line === null ? 'Ready to run'
+      : s.done ? `Line ${s.line} ran · the program has finished`
+      : `Line ${s.line} just ran`;
+    $('say').innerHTML = s.say;
+    $('out').textContent = s.out;
+    $('counter').textContent = `Step ${cur + 1} of ${steps.length}`;
+    $('slider').value = cur;
+    $('first').disabled = $('back').disabled = cur === 0;
+    $('next').disabled = $('last').disabled = cur === steps.length - 1;
+  }
+
+  function go(k) { cur = Math.max(0, Math.min(steps.length - 1, k)); showStep(); }
+
+  $('code').innerHTML = CODE.split('\n').map((l, j) => renderLine(l, j + 1)).join('');
+  const T = makeTracer();
+  T.snap(null, 'Press <b>Next</b> to run the code one line at a time. The highlighted line is the one that just ran.');
+  run(T);
+  steps = T.steps;
+  $('slider').max = steps.length - 1;
+
+  $('first').onclick = () => go(0);
+  $('back').onclick = () => go(cur - 1);
+  $('next').onclick = () => go(cur + 1);
+  $('last').onclick = () => go(steps.length - 1);
+  $('slider').oninput = e => go(+e.target.value);
+  document.addEventListener('keydown', e => {
+    if (['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON'].includes(e.target.tagName) && e.key === ' ') return;
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); go(cur - 1); }
+  });
+  go(0);
+})();
+</script>
+<script>
+  // light/dark toggle: an explicit choice wins over the system setting
+  (function () {
+    var b = document.getElementById('theme-toggle'), r = document.documentElement;
+    function current() {
+      var t = r.getAttribute('data-theme');
+      return t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    function show() {
+      var dark = current() === 'dark';
+      b.textContent = dark ? '☀ Light' : '☾ Dark';
+      b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    b.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      r.setAttribute('data-theme', next);
+      try { localStorage.setItem('cpsc100-theme', next); } catch (e) {}
+      show();
+      b.blur();   // so Space goes back to the demo's "next step"
+    });
+    show();
+  })();
+</script>
+</body>
+</html>
