@@ -476,65 +476,69 @@ void test(void) {
       from: 'From the slide "Example: Local Variables With the Same Name".',
       code: String.raw`#include <stdio.h>
 
-void alpha(void);
-void beta(void);
+void add_ten(void);
+void add_hundred(void);
 
 int main(void) {
-    alpha();
-    beta();
-    alpha();
+    add_ten();
+    add_hundred();
+    add_ten();
     return 0;
 }
 
-void alpha(void) {
-    int {d:xa:x} = 10; // local to alpha
-    printf("alpha: x = %d\n", {u:xa:x});
-    {u:xa:x}++;
+void add_ten(void) {
+    int {d:xa:x} = 0; // local
+    {u:xa:x} = {u:xa:x} + 10;
+    printf("add_ten:     x = %d\n", {u:xa:x});
 }
 
-void beta(void) {
-    int {d:xb:x} = 100; // local to beta
-    printf("beta:  x = %d\n", {u:xb:x});
+void add_hundred(void) {
+    int {d:xb:x} = 0; // local
+    {u:xb:x} = {u:xb:x} + 100;
+    printf("add_hundred: x = %d\n", {u:xb:x});
 }`,
       decls: {
-        xa: { line: 14, from: 14, to: 17, kind: '<code>alpha()</code>\'s local <code>x</code>',
-              more: 'Every call to <code>alpha()</code> creates a fresh one set to 10, so the <code>x++</code> on line 16 is lost when the call returns. Click <code>beta()</code>\'s <code>x</code> on line 20 to compare: the two scopes don\'t overlap, so the two <code>x</code>s can never be confused.' },
-        xb: { line: 20, from: 20, to: 22, kind: '<code>beta()</code>\'s local <code>x</code>',
-              more: 'It has the same name as <code>alpha()</code>\'s <code>x</code>, but it is a completely separate variable. Nothing in <code>alpha()</code> can see it.' },
+        xa: { line: 14, from: 14, to: 17, kind: '<code>add_ten()</code>\'s local <code>x</code>',
+              more: 'Every call to <code>add_ten()</code> creates a fresh one set to 0, so it never gets past 10: the 10 is lost when the call returns. Click <code>add_hundred()</code>\'s <code>x</code> on line 20 to compare: the two scopes don\'t overlap, so the two <code>x</code>s can never be confused.' },
+        xb: { line: 20, from: 20, to: 23, kind: '<code>add_hundred()</code>\'s local <code>x</code>',
+              more: 'It has the same name as <code>add_ten()</code>\'s <code>x</code>, but it is a completely separate variable. Nothing in <code>add_ten()</code> can see it.' },
       },
       bad: {},
       run(T) {
-        const alpha = (n) => {
-          T.call('alpha');
-          T.snap(13, n === 1 ? 'Enter <code>alpha()</code>: a new, empty box for this call.'
-                             : 'Enter <code>alpha()</code> again: a <b>brand-new</b> box. Nothing is left over from the first call.');
+        const addTen = (n) => {
+          T.call('add_ten');
+          T.snap(13, n === 1 ? 'Enter <code>add_ten()</code>: a new, empty box for this call.'
+                             : 'Enter <code>add_ten()</code> again: a <b>brand-new</b> box. Nothing is left over from the first call.');
+          T.set('x', 0);
+          T.snap(14, n === 1 ? '<code>int x = 0;</code> creates add_ten\'s <b>x</b>.'
+                             : '<b>x</b> starts at 0 again, not 10: it\'s a new x, in a new box.');
           T.set('x', 10);
-          T.snap(14, n === 1 ? '<code>int x = 10;</code> creates alpha\'s <b>x</b>.'
-                             : '<b>x</b> starts at 10 again, not 11: it\'s a new x, in a new box.');
-          T.print('alpha: x = 10\n');
-          T.snap(15, 'Prints this call\'s x: 10.');
-          T.set('x', 11);
-          T.snap(16, '<code>x++</code> makes this call\'s x 11.');
+          T.snap(15, '<code>x = x + 10;</code> makes this call\'s x 10.');
+          T.print('add_ten:     x = 10\n');
+          T.snap(16, n === 1 ? 'Prints this call\'s x: 10.'
+                             : 'Prints 10, not 20: this call\'s x started over at 0.');
           T.ret();
-          T.snap(17, 'alpha() returns: its box is destroyed, and x (11) goes with it.');
+          T.snap(17, 'add_ten() returns: its box is destroyed, and x (10) goes with it.');
         };
         T.call('main');
         T.snap(6, 'The program starts by calling <code>main()</code>, which gets its own box. main has no local variables.');
-        T.snap(7, 'main calls <code>alpha()</code> and pauses here until it returns.');
-        alpha(1);
-        T.snap(8, 'Back in main, which calls <code>beta()</code>.');
-        T.call('beta');
-        T.snap(19, 'Enter <code>beta()</code>: a new, empty box.');
+        T.snap(7, 'main calls <code>add_ten()</code> and pauses here until it returns.');
+        addTen(1);
+        T.snap(8, 'Back in main, which calls <code>add_hundred()</code>.');
+        T.call('add_hundred');
+        T.snap(19, 'Enter <code>add_hundred()</code>: a new, empty box.');
+        T.set('x', 0);
+        T.snap(20, '<code>int x = 0;</code> creates add_hundred\'s own <b>x</b>: the same name as add_ten\'s, but a different variable.');
         T.set('x', 100);
-        T.snap(20, '<code>int x = 100;</code> creates beta\'s own <b>x</b>: the same name as alpha\'s, but a different variable.');
-        T.print('beta:  x = 100\n');
-        T.snap(21, 'Prints beta\'s x: 100.');
+        T.snap(21, '<code>x = x + 100;</code> makes add_hundred\'s x 100. add_ten\'s x is long gone, and was never connected to this one anyway.');
+        T.print('add_hundred: x = 100\n');
+        T.snap(22, 'Prints add_hundred\'s x: 100.');
         T.ret();
-        T.snap(22, 'beta() returns: its box, and its x, are destroyed.');
-        T.snap(9, 'Back in main, which calls <code>alpha()</code> a second time.');
-        alpha(2);
+        T.snap(23, 'add_hundred() returns: its box, and its x, are destroyed.');
+        T.snap(9, 'Back in main, which calls <code>add_ten()</code> a second time.');
+        addTen(2);
         T.ret();
-        T.snap(10, '<code>return 0;</code> main() is finished and the program ends. alpha printed 10 both times: each call had its own x.', { done: true });
+        T.snap(10, '<code>return 0;</code> main() is finished and the program ends. add_ten printed 10 both times: each call had its own x, starting at 0.', { done: true });
       },
     },
     {
@@ -542,64 +546,65 @@ void beta(void) {
       from: 'From the slide "Example: Global Scope".',
       code: String.raw`#include <stdio.h>
 
-int {d:g:x} = 10; // global variable
+int {d:g:x} = 0; // global variable
 
-void alpha(void);
-void beta(void);
+void add_ten(void);
+void add_hundred(void);
 
 int main(void) {
-    alpha();
-    beta();
-    alpha();
+    add_ten();
+    add_hundred();
+    add_ten();
     return 0;
 }
 
-void alpha(void) {
-    printf("alpha: x = %d\n", {u:g:x});
-    {u:g:x}++;
+void add_ten(void) {
+    {u:g:x} = {u:g:x} + 10;
+    printf("add_ten:     x = %d\n", {u:g:x});
 }
 
-void beta(void) {
-    {u:g:x} = 100; // no int
-    printf("beta:  x = %d\n", {u:g:x});
+void add_hundred(void) {
+    {u:g:x} = {u:g:x} + 100;
+    printf("add_hundred: x = %d\n", {u:g:x});
 }`,
       decls: {
         g: { line: 3, from: 3, to: 23, kind: 'a <b>global</b> variable',
-             more: 'It is declared outside every function, so every function below it can see it and change it, and it lasts for the whole program. Compare the <b>Same name</b> tab: there, alpha() and beta() each declared their own <code>x</code>. Here neither does, so they share this one. That\'s also why globals cause bugs that are hard to track: any function could have changed it.' },
+             more: 'It is declared outside every function, so every function below it can see it and change it, and it lasts for the whole program. Compare the <b>Same name</b> tab: there, add_ten() and add_hundred() each declared their own <code>x</code>. Here neither does, so they share this one. That\'s also why globals cause bugs that are hard to track: any function could have changed it.' },
       },
       bad: {},
       run(T) {
-        let x = 10;
-        const alpha = (n) => {
-          T.call('alpha');
-          T.snap(15, 'Enter <code>alpha()</code>. Its box is empty: alpha has no local variables, but it can still use the global <b>x</b>.');
-          T.print(`alpha: x = ${x}\n`);
-          T.snap(16, n === 1 ? `Prints the global x: ${x}.`
-                             : `Prints the global x: ${x}, not 10. In the <b>Same name</b> tab this call printed 10, because it had its own fresh x. Here there is only one x, and beta() changed it.`);
-          x += 1;
+        let x = 0;
+        const addTen = (n) => {
+          T.call('add_ten');
+          T.snap(15, 'Enter <code>add_ten()</code>. Its box is empty: add_ten has no local variables, but it can still use the global <b>x</b>.');
+          const before = x;
+          x += 10;
           T.gset('x', x);
-          T.snap(17, `<code>x++</code> adds 1 to the global x, making it ${x}.`);
+          T.snap(16, `<code>x = x + 10;</code> adds 10 to the global x: ${before} becomes ${x}.` +
+                     (n > 1 ? ` In the <b>Same name</b> tab this call started over at 0. Here there is only one x, and it still holds what add_hundred() left.` : ''));
+          T.print(`add_ten:     x = ${x}\n`);
+          T.snap(17, n === 1 ? `Prints the global x: ${x}.` : `Prints the global x: ${x}, not 10.`);
           T.ret();
-          T.snap(18, `alpha() returns and its (empty) box is destroyed. x is global, so it keeps its value: ${x}.`);
+          T.snap(18, `add_ten() returns and its (empty) box is destroyed. x is global, so it keeps its value: ${x}.`);
         };
-        T.gset('x', 10);
-        T.snap(3, 'Before <code>main()</code> even starts, the global <b>x</b> is created and set to 10. It isn\'t in any function\'s box: it belongs to the whole program.');
+        T.gset('x', 0);
+        T.snap(3, 'Before <code>main()</code> even starts, the global <b>x</b> is created and set to 0. It isn\'t in any function\'s box: it belongs to the whole program.');
         T.call('main');
         T.snap(8, 'The program calls <code>main()</code>, which gets its own box. main has no local variables.');
-        T.snap(9, 'main calls <code>alpha()</code> and pauses here until it returns.');
-        alpha(1);
-        T.snap(10, 'Back in main, which calls <code>beta()</code>.');
-        T.call('beta');
-        T.snap(20, 'Enter <code>beta()</code>. Its box is empty too, and it can also use the global x.');
-        x = 100;
+        T.snap(9, 'main calls <code>add_ten()</code> and pauses here until it returns.');
+        addTen(1);
+        T.snap(10, 'Back in main, which calls <code>add_hundred()</code>.');
+        T.call('add_hundred');
+        T.snap(20, 'Enter <code>add_hundred()</code>. Its box is empty too, and it can also use the global x.');
+        x += 100;
         T.gset('x', x);
-        T.snap(21, '<code>x = 100;</code> has no <code>int</code>, so it doesn\'t create a new variable: it changes the <b>global</b> x to 100. In the <b>Same name</b> tab, <code>int x = 100;</code> made a separate x that only beta could see.');
-        T.print(`beta:  x = ${x}\n`);
+        T.snap(21, `<code>x = x + 100;</code> adds 100 to the <b>same</b> global x: 10 becomes ${x}. In the <b>Same name</b> tab, add_hundred() had its own x starting at 0.`);
+        T.print(`add_hundred: x = ${x}\n`);
         T.snap(22, `Prints the global x: ${x}.`);
         T.ret();
-        T.snap(23, 'beta() returns. The global x keeps its value: 100.');
-        T.snap(11, 'Back in main, which calls <code>alpha()</code> a second time.');
-        alpha(2);
+        T.snap(23, `add_hundred() returns. The global x keeps its value: ${x}.`);
+        T.snap(11, 'Back in main, which calls <code>add_ten()</code> a second time.');
+        addTen(2);
         T.ret();
         T.snap(12, `<code>return 0;</code> main() is finished and the program ends. The global x lasted until the very end, at ${x}.`, { done: true });
       },

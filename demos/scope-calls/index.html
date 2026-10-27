@@ -280,13 +280,13 @@
 <header>
   <button type="button" class="theme-toggle" id="theme-toggle">☾ Dark</button>
   <h1>Each Call Gets Its Own Variables</h1>
-  <p><code>alpha()</code> and <code>beta()</code> both have a local variable named <code>x</code>. Step through the program and watch a new box of variables appear each time a function is called, and disappear when it returns.
+  <p><code>add_ten()</code> and <code>add_hundred()</code> both have a local variable named <code>x</code>. Step through the program and watch a new box of variables appear each time a function is called, and disappear when it returns.
      Keys: <kbd>→</kbd>/<kbd>Space</kbd> next, <kbd>←</kbd> back, <kbd>R</kbd> reset.</p>
 </header>
 
 <main>
   <section class="card diagram" aria-label="Flow diagrams">
-    <svg class="flow" viewBox="0 0 660 430" role="img" aria-label="Flow diagrams for main, alpha and beta">
+    <svg class="flow" viewBox="0 0 660 430" role="img" aria-label="Flow diagrams for main, add_ten and add_hundred">
       <defs>
         <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path class="arrowhead" d="M0,0 L10,5 L0,10 z"/>
@@ -300,8 +300,8 @@
       <rect class="lane" x="232" y="6" width="196" height="418" rx="12"/>
       <rect class="lane" x="452" y="6" width="196" height="418" rx="12"/>
       <text class="coltitle" x="110" y="24">main</text>
-      <text class="coltitle" x="330" y="24">inside alpha()</text>
-      <text class="coltitle" x="550" y="24">inside beta()</text>
+      <text class="coltitle" x="330" y="24">inside add_ten()</text>
+      <text class="coltitle" x="550" y="24">inside add_hundred()</text>
 
       <!-- main -->
       <path class="edge" id="e-m0-c1" d="M110 80 V120"/>
@@ -309,32 +309,34 @@
       <path class="edge" id="e-c2-c3" d="M110 248 V288"/>
       <path class="edge" id="e-c3-m4" d="M110 332 V372"/>
       <g class="node" id="n-m0"><rect x="45" y="40" width="130" height="40" rx="20"/><text x="110" y="60">Start</text></g>
-      <g class="node" id="n-c1"><rect x="35" y="120" width="150" height="44" rx="2"/><line x1="45" y1="120" x2="45" y2="164"/><line x1="175" y1="120" x2="175" y2="164"/><text class="code" id="t-c1" x="110" y="142">alpha()</text></g>
-      <g class="node" id="n-c2"><rect x="35" y="204" width="150" height="44" rx="2"/><line x1="45" y1="204" x2="45" y2="248"/><line x1="175" y1="204" x2="175" y2="248"/><text class="code" id="t-c2" x="110" y="226">beta()</text></g>
-      <g class="node" id="n-c3"><rect x="35" y="288" width="150" height="44" rx="2"/><line x1="45" y1="288" x2="45" y2="332"/><line x1="175" y1="288" x2="175" y2="332"/><text class="code" id="t-c3" x="110" y="310">alpha()</text></g>
+      <g class="node" id="n-c1"><rect x="35" y="120" width="150" height="44" rx="2"/><line x1="45" y1="120" x2="45" y2="164"/><line x1="175" y1="120" x2="175" y2="164"/><text class="code" id="t-c1" x="110" y="142">add_ten()</text></g>
+      <g class="node" id="n-c2"><rect x="35" y="204" width="150" height="44" rx="2"/><line x1="45" y1="204" x2="45" y2="248"/><line x1="175" y1="204" x2="175" y2="248"/><text class="code" id="t-c2" x="110" y="226">add_hundred()</text></g>
+      <g class="node" id="n-c3"><rect x="35" y="288" width="150" height="44" rx="2"/><line x1="45" y1="288" x2="45" y2="332"/><line x1="175" y1="288" x2="175" y2="332"/><text class="code" id="t-c3" x="110" y="310">add_ten()</text></g>
       <g class="node" id="n-m4"><rect x="45" y="372" width="130" height="40" rx="20"/><text x="110" y="392">Stop</text></g>
 
-      <!-- alpha -->
+      <!-- add_ten -->
       <path class="edge" id="e-a1-a2" d="M330 80 V112"/>
       <path class="edge" id="e-a2-a3" d="M330 162 V194"/>
       <path class="edge" id="e-a3-a4" d="M330 240 V272"/>
       <path class="edge" id="e-a4-a5" d="M330 318 V350"/>
-      <g class="node" id="n-a1"><rect x="265" y="40" width="130" height="40" rx="20"/><text class="code" x="330" y="60">alpha()</text></g>
+      <g class="node" id="n-a1"><rect x="265" y="40" width="130" height="40" rx="20"/><text class="code" x="330" y="60">add_ten()</text></g>
       <g class="node" id="n-a2"><rect x="255" y="112" width="150" height="50" rx="4"/>
-        <text x="330" y="128">Declare:</text><text class="code" x="330" y="147"><tspan class="kw">int</tspan> x = 10</text></g>
-      <g class="node" id="n-a3"><polygon points="267,194 405,194 393,240 255,240"/><text x="330" y="217">print <tspan class="code" style="font-family:ui-monospace,Menlo,Consolas,monospace">x</tspan></text></g>
-      <g class="node" id="n-a4"><rect x="255" y="272" width="150" height="46" rx="4"/><text class="code" x="330" y="295">x++</text></g>
+        <text x="330" y="128">Declare:</text><text class="code" x="330" y="147"><tspan class="kw">int</tspan> x = 0</text></g>
+      <g class="node" id="n-a3"><rect x="255" y="194" width="150" height="46" rx="4"/><text class="code" x="330" y="217">x = x + 10</text></g>
+      <g class="node" id="n-a4"><polygon points="267,272 405,272 393,318 255,318"/><text x="330" y="295">print <tspan class="code" style="font-family:ui-monospace,Menlo,Consolas,monospace">x</tspan></text></g>
       <g class="node" id="n-a5"><rect x="265" y="350" width="130" height="40" rx="20"/><text class="code" x="330" y="370">return</text></g>
 
-      <!-- beta -->
+      <!-- add_hundred -->
       <path class="edge" id="e-b1-b2" d="M550 80 V112"/>
       <path class="edge" id="e-b2-b3" d="M550 162 V194"/>
       <path class="edge" id="e-b3-b4" d="M550 240 V272"/>
-      <g class="node" id="n-b1"><rect x="485" y="40" width="130" height="40" rx="20"/><text class="code" x="550" y="60">beta()</text></g>
+      <path class="edge" id="e-b4-b5" d="M550 318 V350"/>
+      <g class="node" id="n-b1"><rect x="485" y="40" width="130" height="40" rx="20"/><text class="code" x="550" y="60">add_hundred()</text></g>
       <g class="node" id="n-b2"><rect x="475" y="112" width="150" height="50" rx="4"/>
-        <text x="550" y="128">Declare:</text><text class="code" x="550" y="147"><tspan class="kw">int</tspan> x = 100</text></g>
-      <g class="node" id="n-b3"><polygon points="487,194 625,194 613,240 475,240"/><text x="550" y="217">print <tspan class="code" style="font-family:ui-monospace,Menlo,Consolas,monospace">x</tspan></text></g>
-      <g class="node" id="n-b4"><rect x="485" y="272" width="130" height="40" rx="20"/><text class="code" x="550" y="292">return</text></g>
+        <text x="550" y="128">Declare:</text><text class="code" x="550" y="147"><tspan class="kw">int</tspan> x = 0</text></g>
+      <g class="node" id="n-b3"><rect x="475" y="194" width="150" height="46" rx="4"/><text class="code" x="550" y="217">x = x + 100</text></g>
+      <g class="node" id="n-b4"><polygon points="487,272 625,272 613,318 475,318"/><text x="550" y="295">print <tspan class="code" style="font-family:ui-monospace,Menlo,Consolas,monospace">x</tspan></text></g>
+      <g class="node" id="n-b5"><rect x="485" y="350" width="130" height="40" rx="20"/><text class="code" x="550" y="370">return</text></g>
 
       <g class="badge" id="badge" style="display:none">
         <rect x="0" y="0" width="54" height="22" rx="11"/>
@@ -347,11 +349,11 @@
     <section class="card">
       <h2>The order main calls them in</h2>
       <div class="presets">
-        <button class="preset on" data-order="alpha,beta,alpha">alpha, beta, alpha</button>
-        <button class="preset" data-order="alpha,alpha,alpha">alpha, alpha, alpha</button>
-        <button class="preset" data-order="beta,alpha,beta">beta, alpha, beta</button>
+        <button class="preset on" data-order="add_ten,add_hundred,add_ten">add_ten, add_hundred, add_ten</button>
+        <button class="preset" data-order="add_ten,add_ten,add_ten">add_ten, add_ten, add_ten</button>
+        <button class="preset" data-order="add_hundred,add_ten,add_hundred">add_hundred, add_ten, add_hundred</button>
       </div>
-      <p class="note">The first order is the one on the lecture slide. Try <b>alpha, alpha, alpha</b>: does the second call remember that <code>x</code> reached 11?</p>
+      <p class="note">The first order is the one on the lecture slide. Try <b>add_ten, add_ten, add_ten</b>: does the second call remember that <code>x</code> reached 10?</p>
     </section>
 
     <section class="card">
@@ -513,8 +515,8 @@
   }
 
   const FN = {
-    alpha: { p: 'a', init: 10, other: 'beta' },
-    beta:  { p: 'b', init: 100, other: 'alpha' },
+    add_ten:     { p: 'a', add: 10, other: 'add_hundred', label: 'add_ten:     ' },
+    add_hundred: { p: 'b', add: 100, other: 'add_ten', label: 'add_hundred: ' },
   };
   const ord = n => ['first', 'second', 'third'][n - 1] || `${n}th`;
 
@@ -534,14 +536,14 @@
   const demo = makeDemo({
     names: { m0: 'Start (entering main)', c1: 'main: function-call box', c2: 'main: function-call box', c3: 'main: function-call box',
              m4: 'Stop (main returns 0)',
-             a1: 'alpha() begins', a2: 'alpha: declare x', a3: 'alpha: print x', a4: 'alpha: x++', a5: 'alpha: return',
-             b1: 'beta() begins', b2: 'beta: declare x', b3: 'beta: print x', b4: 'beta: return' },
+             a1: 'add_ten() begins', a2: 'add_ten: declare x', a3: 'add_ten: x = x + 10', a4: 'add_ten: print x', a5: 'add_ten: return',
+             b1: 'add_hundred() begins', b2: 'add_hundred: declare x', b3: 'add_hundred: x = x + 100', b4: 'add_hundred: print x', b5: 'add_hundred: return' },
     vars: [],
     traceCols: ['Call', 'Function', '<code>x</code> when created', '<code>x</code> when destroyed'],
     traceEmpty: 'No call has returned yet',
     badgePos: {},
     build({ order }) {
-      const steps = [], counts = { alpha: 0, beta: 0 };
+      const steps = [], counts = { add_ten: 0, add_hundred: 0 };
       let out = '', trace = [], frames = [{ fn: 'main' }], ghosts = [], waiting = null, calls = 0;
       const push = s => steps.push(Object.assign({ vars: {}, out, trace: trace.slice(),
         frames: frames.map(f => Object.assign({}, f)), ghosts: ghosts.slice(), waiting }, s));
@@ -561,41 +563,36 @@
         push({ node: d.p + '1', where: `${f}() begins (call ${n})`,
           msg: `Enter <b>${f}()</b>${n > 1 ? ` for the ${ord(n)} time` : ''}. This call gets its <b>own, brand-new</b> box of local variables, shown on the right. main's box is still there, waiting for the call to finish.` });
 
-        fr.x = d.init;
-        let msg = `Create <b>x</b> inside this call's box and set it to <b>${d.init}</b>.`;
-        if (n > 1 && f === 'alpha') msg += ` alpha's last call left its x at 11, but that x was destroyed when the call returned. This is a new x, so it starts at 10 again.`;
-        else if (n > 1) msg += ` beta's last call had an x too, but it was destroyed when that call returned. This is a new one.`;
+        fr.x = 0;
+        let msg = `Create <b>x</b> inside this call's box and set it to <b>0</b>.`;
+        if (n > 1) msg += ` ${f}'s last call left its x at ${d.add}, but that x was destroyed when the call returned. This is a new x, so it starts at 0 again.`;
         else if (counts[d.other]) msg += ` ${d.other}() also had a variable named x, but it was a different variable in a different box. Two functions can use the same name without colliding.`;
         push({ node: d.p + '2', edge: `e-${d.p}1-${d.p}2`, msg });
         const created = fr.x;
 
-        out += f === 'alpha' ? `alpha: x = ${fr.x}\n` : `beta:  x = ${fr.x}\n`;
-        push({ node: d.p + '3', edge: `e-${d.p}2-${d.p}3`, msg: `Print this call's x: <b>${fr.x}</b>.` });
+        fr.x += d.add;
+        push({ node: d.p + '3', edge: `e-${d.p}2-${d.p}3`,
+          msg: `<b>x = x + ${d.add}</b> changes this call's x from 0 to <b>${fr.x}</b>. Only this box changes: nothing outside this call can see x.` });
 
-        let last = d.p + '3';
-        if (f === 'alpha') {
-          fr.x++;
-          push({ node: 'a4', edge: 'e-a3-a4',
-            msg: `<b>x++</b> changes this call's x from 10 to <b>11</b>. Only this box changes: nothing outside this call can see x.` });
-          last = 'a4';
-        }
+        out += `${d.label}x = ${fr.x}\n`;
+        push({ node: d.p + '4', edge: `e-${d.p}3-${d.p}4`, msg: `Print this call's x: <b>${fr.x}</b>.` });
 
-        const ret = d.p + (f === 'alpha' ? '5' : '4');
         fr.ending = true;
         calls++;
         trace.push([calls, `<code>${f}()</code>`, created, fr.x]);
-        push({ node: ret, edge: `e-${last}-${ret}`, traceLatest: true,
+        push({ node: d.p + '5', edge: `e-${d.p}4-${d.p}5`, traceLatest: true,
           msg: `<b>return</b>: the call is over, so its box of local variables is <b>destroyed</b>. x (${fr.x}) is gone for good. The program goes back to main, to the box just after the call.` });
         frames.pop();
         ghosts.push(`${f}() call ${n}: <s>x = ${fr.x}</s>`);
       });
 
       waiting = null;
-      const a = counts.alpha, b = counts.beta;
+      const a = counts.add_ten, b = counts.add_hundred;
       push({ node: 'm4', edge: 'e-c3-m4',
         msg: `<b>Stop</b>: main reaches its <code>return 0</code>. ` +
-             (a > 1 ? `alpha() printed 10 every time, even though each call left x at 11: every call started with a fresh x. ` : '') +
-             (a && b ? `alpha's x and beta's x never touched each other. ` : '') +
+             (a > 1 ? `add_ten() printed 10 every time, never 20: every call started with a fresh x at 0. ` : '') +
+             (b > 1 ? `add_hundred() printed 100 every time, never 200: every call started with a fresh x at 0. ` : '') +
+             (a && b ? `add_ten's x and add_hundred's x never touched each other. ` : '') +
              `Each call got its own private set of local variables.` });
       return steps;
     },

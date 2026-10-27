@@ -61,7 +61,7 @@ Each demo steps through a flow diagram one box at a time. As you follow the arro
 | Demo | What it shows |
 |---|---|
 | [Changing a Copy](https://selkirk-cpsc.github.io/cpsc100-course/demos/add-one/) | `main()` passes `x` to `addOne()`, which adds one to its parameter `n`. Watch `n` become 6 while `x` stays 5: the function only ever had a copy. |
-| [Each Call Gets Its Own Variables](https://selkirk-cpsc.github.io/cpsc100-course/demos/scope-calls/) | `alpha()` and `beta()` both have a local `x`. Watch a new box of variables appear for each function call and disappear when it returns, so a second call to `alpha()` starts fresh. |
+| [Each Call Gets Its Own Variables](https://selkirk-cpsc.github.io/cpsc100-course/demos/scope-calls/) | `add_ten()` and `add_hundred()` both have a local `x`. Watch a new box of variables appear for each function call and disappear when it returns, so a second call to `add_ten()` starts over at 0. |
 | [Scope Explorer](https://selkirk-cpsc.github.io/cpsc100-course/demos/scope-explorer/) | Run the lecture's scope examples one line at a time and watch each call's variables appear and disappear. Click any variable to shade every line where it can be used, or to see why a use is out of scope, including a loop's block scope. |
 | [Ordinary Local vs. static](https://selkirk-cpsc.github.io/cpsc100-course/demos/static-local/) | Call `count_calls()` three times with `calls` declared `static`, then as an ordinary local. One version counts 1, 2, 3; the other starts over every call. |
 

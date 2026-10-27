@@ -271,44 +271,46 @@ program doesn’t compile.</p></li>
 <div class="sourceCode" id="cb3"><pre
 class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
 <span id="cb3-2"><a href="#cb3-2"></a></span>
-<span id="cb3-3"><a href="#cb3-3"></a><span class="dt">void</span> alpha<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
-<span id="cb3-4"><a href="#cb3-4"></a><span class="dt">void</span> beta<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="dt">void</span> add_ten<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="dt">void</span> add_hundred<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
 <span id="cb3-5"><a href="#cb3-5"></a></span>
 <span id="cb3-6"><a href="#cb3-6"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb3-7"><a href="#cb3-7"></a>    alpha<span class="op">();</span></span>
-<span id="cb3-8"><a href="#cb3-8"></a>    beta<span class="op">();</span></span>
-<span id="cb3-9"><a href="#cb3-9"></a>    alpha<span class="op">();</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a>    add_ten<span class="op">();</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a>    add_hundred<span class="op">();</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a>    add_ten<span class="op">();</span></span>
 <span id="cb3-10"><a href="#cb3-10"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
 <span id="cb3-11"><a href="#cb3-11"></a><span class="op">}</span></span>
 <span id="cb3-12"><a href="#cb3-12"></a></span>
-<span id="cb3-13"><a href="#cb3-13"></a><span class="dt">void</span> alpha<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb3-14"><a href="#cb3-14"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">10</span><span class="op">;</span> <span class="co">// local to alpha</span></span>
-<span id="cb3-15"><a href="#cb3-15"></a>    printf<span class="op">(</span><span class="st">&quot;alpha: x = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span></span>
-<span id="cb3-16"><a href="#cb3-16"></a>    x<span class="op">++;</span></span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="dt">void</span> add_ten<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-14"><a href="#cb3-14"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// local</span></span>
+<span id="cb3-15"><a href="#cb3-15"></a>    x <span class="op">=</span> x <span class="op">+</span> <span class="dv">10</span><span class="op">;</span></span>
+<span id="cb3-16"><a href="#cb3-16"></a>    printf<span class="op">(</span><span class="st">&quot;add_ten:     x = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span></span>
 <span id="cb3-17"><a href="#cb3-17"></a><span class="op">}</span></span>
 <span id="cb3-18"><a href="#cb3-18"></a></span>
-<span id="cb3-19"><a href="#cb3-19"></a><span class="dt">void</span> beta<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb3-20"><a href="#cb3-20"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">100</span><span class="op">;</span> <span class="co">// local to beta</span></span>
-<span id="cb3-21"><a href="#cb3-21"></a>    printf<span class="op">(</span><span class="st">&quot;beta:  x = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span></span>
-<span id="cb3-22"><a href="#cb3-22"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb3-19"><a href="#cb3-19"></a><span class="dt">void</span> add_hundred<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-20"><a href="#cb3-20"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// local</span></span>
+<span id="cb3-21"><a href="#cb3-21"></a>    x <span class="op">=</span> x <span class="op">+</span> <span class="dv">100</span><span class="op">;</span></span>
+<span id="cb3-22"><a href="#cb3-22"></a>    printf<span class="op">(</span><span class="st">&quot;add_hundred: x = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span></span>
+<span id="cb3-23"><a href="#cb3-23"></a><span class="op">}</span></span></code></pre></div>
 </div><div class="column">
 <p><strong>Output:</strong></p>
-<pre class="text"><code>alpha: x = 10
-beta:  x = 100
-alpha: x = 10</code></pre>
+<pre class="text"><code>add_ten:     x = 10
+add_hundred: x = 100
+add_ten:     x = 10</code></pre>
 <p><strong>Key Ideas:</strong></p>
 <ul>
 <li><p>Each function has its own <code
 class="sourceCode c">x</code>.</p></li>
 <li><p>Changing <code class="sourceCode c">x</code> in <code
-class="sourceCode c">alpha<span class="op">()</span></code> does not
+class="sourceCode c">add_ten<span class="op">()</span></code> does not
 affect <code class="sourceCode c">x</code> in <code
-class="sourceCode c">beta<span class="op">()</span></code>.</p></li>
-<li><p>This is <em>why</em> one function can’t see another function’s
-variables
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
-<strong>each call gets its own private set of local variables</strong>,
-separate from every other call.</p></li>
+class="sourceCode c">add_hundred<span class="op">()</span></code>.</p></li>
+<li><p>The second <code
+class="sourceCode c">add_ten<span class="op">()</span></code> prints 10,
+not 20: its <code class="sourceCode c">x</code> starts over at
+0.</p></li>
+<li><p><strong>Each call gets its own private set of local
+variables.</strong></p></li>
 </ul>
 </div>
 </div>
@@ -317,10 +319,10 @@ separate from every other call.</p></li>
 <h3>Try It: Each Call Gets Its Own Variables</h3>
 <div class="tryit">
 <p>Step through <code
-class="sourceCode c">alpha<span class="op">()</span></code>, <code
-class="sourceCode c">beta<span class="op">()</span></code>, <code
-class="sourceCode c">alpha<span class="op">()</span></code> and watch a
-new box of variables appear for each call, then disappear when it
+class="sourceCode c">add_ten<span class="op">()</span></code>, <code
+class="sourceCode c">add_hundred<span class="op">()</span></code>, <code
+class="sourceCode c">add_ten<span class="op">()</span></code> and watch
+a new box of variables appear for each call, then disappear when it
 returns:</p>
 <div class="center">
 <p><span><a
@@ -329,9 +331,9 @@ class="demo-link" target="_blank"
 rel="noopener"><code>selkirk-cpsc.github.io/cpsc100-course/demos/scope-calls/</code></a></span></p>
 </div>
 <ul>
-<li><p>Try <strong>alpha, alpha, alpha</strong>: the second call does
-<span class="alert">not</span> remember that <code
-class="sourceCode c">x</code> reached 11</p></li>
+<li><p>Try <strong>add_ten, add_ten, add_ten</strong>: the second call
+does <span class="alert">not</span> remember that <code
+class="sourceCode c">x</code> reached 10</p></li>
 </ul>
 </div>
 </section>
@@ -342,32 +344,32 @@ class="sourceCode c">x</code> reached 11</p></li>
 <div class="sourceCode" id="cb5"><pre
 class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb5-1"><a href="#cb5-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
 <span id="cb5-2"><a href="#cb5-2"></a></span>
-<span id="cb5-3"><a href="#cb5-3"></a><span class="dt">int</span> x <span class="op">=</span> <span class="dv">10</span><span class="op">;</span> <span class="co">// global variable</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="dt">int</span> x <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// global variable</span></span>
 <span id="cb5-4"><a href="#cb5-4"></a></span>
-<span id="cb5-5"><a href="#cb5-5"></a><span class="dt">void</span> alpha<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
-<span id="cb5-6"><a href="#cb5-6"></a><span class="dt">void</span> beta<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="dt">void</span> add_ten<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="dt">void</span> add_hundred<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
 <span id="cb5-7"><a href="#cb5-7"></a></span>
 <span id="cb5-8"><a href="#cb5-8"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb5-9"><a href="#cb5-9"></a>    alpha<span class="op">();</span></span>
-<span id="cb5-10"><a href="#cb5-10"></a>    beta<span class="op">();</span></span>
-<span id="cb5-11"><a href="#cb5-11"></a>    alpha<span class="op">();</span></span>
+<span id="cb5-9"><a href="#cb5-9"></a>    add_ten<span class="op">();</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a>    add_hundred<span class="op">();</span></span>
+<span id="cb5-11"><a href="#cb5-11"></a>    add_ten<span class="op">();</span></span>
 <span id="cb5-12"><a href="#cb5-12"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
 <span id="cb5-13"><a href="#cb5-13"></a><span class="op">}</span></span>
 <span id="cb5-14"><a href="#cb5-14"></a></span>
-<span id="cb5-15"><a href="#cb5-15"></a><span class="dt">void</span> alpha<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb5-16"><a href="#cb5-16"></a>    printf<span class="op">(</span><span class="st">&quot;alpha: x = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span></span>
-<span id="cb5-17"><a href="#cb5-17"></a>    x<span class="op">++;</span></span>
+<span id="cb5-15"><a href="#cb5-15"></a><span class="dt">void</span> add_ten<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-16"><a href="#cb5-16"></a>    x <span class="op">=</span> x <span class="op">+</span> <span class="dv">10</span><span class="op">;</span></span>
+<span id="cb5-17"><a href="#cb5-17"></a>    printf<span class="op">(</span><span class="st">&quot;add_ten:     x = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span></span>
 <span id="cb5-18"><a href="#cb5-18"></a><span class="op">}</span></span>
 <span id="cb5-19"><a href="#cb5-19"></a></span>
-<span id="cb5-20"><a href="#cb5-20"></a><span class="dt">void</span> beta<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb5-21"><a href="#cb5-21"></a>    x <span class="op">=</span> <span class="dv">100</span><span class="op">;</span> <span class="co">// no int</span></span>
-<span id="cb5-22"><a href="#cb5-22"></a>    printf<span class="op">(</span><span class="st">&quot;beta:  x = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span></span>
+<span id="cb5-20"><a href="#cb5-20"></a><span class="dt">void</span> add_hundred<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-21"><a href="#cb5-21"></a>    x <span class="op">=</span> x <span class="op">+</span> <span class="dv">100</span><span class="op">;</span></span>
+<span id="cb5-22"><a href="#cb5-22"></a>    printf<span class="op">(</span><span class="st">&quot;add_hundred: x = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span></span>
 <span id="cb5-23"><a href="#cb5-23"></a><span class="op">}</span></span></code></pre></div>
 </div><div class="column">
 <p><strong>Output:</strong></p>
-<pre class="text"><code>alpha: x = 10
-beta:  x = 100
-alpha: x = 100</code></pre>
+<pre class="text"><code>add_ten:     x = 10
+add_hundred: x = 110
+add_ten:     x = 120</code></pre>
 <p><strong>Key Ideas:</strong></p>
 <ul>
 <li><p><code class="sourceCode c">x</code> is declared outside all
@@ -379,10 +381,10 @@ it.</p></li>
 so they all share <strong>one</strong> <code
 class="sourceCode c">x</code>.</p></li>
 <li><p>The second <code
-class="sourceCode c">alpha<span class="op">()</span></code> prints 100,
-not 10: <code
-class="sourceCode c">beta<span class="op">()</span></code>’s change is
-still there.</p></li>
+class="sourceCode c">add_ten<span class="op">()</span></code> prints
+120, not 10: it adds to what <code
+class="sourceCode c">add_hundred<span class="op">()</span></code> left
+behind.</p></li>
 </ul>
 </div>
 </div>
@@ -607,11 +609,11 @@ exception: it opts a single variable out of "destroyed when the block
 ends," without changing who can <em>see</em> it.</p>
 </div>
 <p>This is exactly why <code
-class="sourceCode c">alpha<span class="op">()</span></code>’s <code
+class="sourceCode c">add_ten<span class="op">()</span></code>’s <code
 class="sourceCode c">x</code> and <code
-class="sourceCode c">beta<span class="op">()</span></code>’s <code
-class="sourceCode c">x</code> didn’t collide earlier, and why two calls
-to the same function never interfere with each other, either.</p>
+class="sourceCode c">add_hundred<span class="op">()</span></code>’s
+<code class="sourceCode c">x</code> didn’t collide earlier, and why two
+calls to the same function never interfere with each other, either.</p>
 </section>
 </section>
 <section id="summary" class="level2">
