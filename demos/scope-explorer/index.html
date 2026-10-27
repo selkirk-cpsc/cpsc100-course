@@ -542,62 +542,66 @@ void beta(void) {
       from: 'From the slide "Example: Global Scope".',
       code: String.raw`#include <stdio.h>
 
-int {d:g:counter} = 0; // global variable
+int {d:g:x} = 10; // global variable
 
 void alpha(void);
 void beta(void);
 
 int main(void) {
-    alpha(); beta(); alpha();
-    printf("Final counter = %d\n", {u:g:counter});
+    alpha();
+    beta();
+    alpha();
     return 0;
 }
 
 void alpha(void) {
-    printf("alpha: counter = %d\n", ++{u:g:counter});
+    printf("alpha: x = %d\n", {u:g:x});
+    {u:g:x}++;
 }
 
 void beta(void) {
-    printf("beta:  counter = %d\n", {u:g:counter} += 10);
+    {u:g:x} = 100; // no int
+    printf("beta:  x = %d\n", {u:g:x});
 }`,
       decls: {
-        g: { line: 3, from: 3, to: 20, kind: 'a <b>global</b> variable',
-             more: 'It is declared outside every function, so every function below it can see it and change it, and it lasts for the whole program. That\'s why <code>alpha()</code> and <code>beta()</code> both change the same <code>counter</code>, and why bugs are hard to track: any function could have changed it.' },
+        g: { line: 3, from: 3, to: 23, kind: 'a <b>global</b> variable',
+             more: 'It is declared outside every function, so every function below it can see it and change it, and it lasts for the whole program. Compare the <b>Same name</b> tab: there, alpha() and beta() each declared their own <code>x</code>. Here neither does, so they share this one. That\'s also why globals cause bugs that are hard to track: any function could have changed it.' },
       },
       bad: {},
       run(T) {
-        let counter = 0;
-        const alpha = () => {
+        let x = 10;
+        const alpha = (n) => {
           T.call('alpha');
-          T.snap(14, 'Enter <code>alpha()</code>. Its box is empty: alpha has no local variables, but it can still use the global <b>counter</b>.');
-          counter += 1;
-          T.gset('counter', counter);
-          T.print(`alpha: counter = ${counter}\n`);
-          T.snap(15, `<code>++counter</code> adds 1 to the global counter, making it ${counter}, and printf prints it.`);
+          T.snap(15, 'Enter <code>alpha()</code>. Its box is empty: alpha has no local variables, but it can still use the global <b>x</b>.');
+          T.print(`alpha: x = ${x}\n`);
+          T.snap(16, n === 1 ? `Prints the global x: ${x}.`
+                             : `Prints the global x: ${x}, not 10. In the <b>Same name</b> tab this call printed 10, because it had its own fresh x. Here there is only one x, and beta() changed it.`);
+          x += 1;
+          T.gset('x', x);
+          T.snap(17, `<code>x++</code> adds 1 to the global x, making it ${x}.`);
           T.ret();
-          T.snap(16, `alpha() returns and its (empty) box is destroyed. counter is global, so it keeps its value: ${counter}.`);
+          T.snap(18, `alpha() returns and its (empty) box is destroyed. x is global, so it keeps its value: ${x}.`);
         };
-        T.gset('counter', 0);
-        T.snap(3, 'Before <code>main()</code> even starts, the global <b>counter</b> is created and set to 0. It isn\'t in any function\'s box: it belongs to the whole program.');
+        T.gset('x', 10);
+        T.snap(3, 'Before <code>main()</code> even starts, the global <b>x</b> is created and set to 10. It isn\'t in any function\'s box: it belongs to the whole program.');
         T.call('main');
         T.snap(8, 'The program calls <code>main()</code>, which gets its own box. main has no local variables.');
-        T.snap(9, 'main calls <code>alpha()</code>, the first of three calls on this line.');
-        alpha();
-        T.snap(9, 'Back on line 9, main calls <code>beta()</code>.');
+        T.snap(9, 'main calls <code>alpha()</code> and pauses here until it returns.');
+        alpha(1);
+        T.snap(10, 'Back in main, which calls <code>beta()</code>.');
         T.call('beta');
-        T.snap(18, 'Enter <code>beta()</code>. Its box is empty too, and it can also use the global counter.');
-        counter += 10;
-        T.gset('counter', counter);
-        T.print(`beta:  counter = ${counter}\n`);
-        T.snap(19, `<code>counter += 10</code> changes the same global counter, making it ${counter}.`);
+        T.snap(20, 'Enter <code>beta()</code>. Its box is empty too, and it can also use the global x.');
+        x = 100;
+        T.gset('x', x);
+        T.snap(21, '<code>x = 100;</code> has no <code>int</code>, so it doesn\'t create a new variable: it changes the <b>global</b> x to 100. In the <b>Same name</b> tab, <code>int x = 100;</code> made a separate x that only beta could see.');
+        T.print(`beta:  x = ${x}\n`);
+        T.snap(22, `Prints the global x: ${x}.`);
         T.ret();
-        T.snap(20, 'beta() returns. The global counter keeps its value.');
-        T.snap(9, 'Back on line 9, main calls <code>alpha()</code> again.');
-        alpha();
-        T.print(`Final counter = ${counter}\n`);
-        T.snap(10, `main prints the global counter: ${counter}. Three different calls changed it.`);
+        T.snap(23, 'beta() returns. The global x keeps its value: 100.');
+        T.snap(11, 'Back in main, which calls <code>alpha()</code> a second time.');
+        alpha(2);
         T.ret();
-        T.snap(11, '<code>return 0;</code> main() is finished and the program ends. The global counter lasted until the very end.', { done: true });
+        T.snap(12, `<code>return 0;</code> main() is finished and the program ends. The global x lasted until the very end, at ${x}.`, { done: true });
       },
     },
     {
