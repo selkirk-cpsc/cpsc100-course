@@ -427,7 +427,7 @@
 
 void test(void);
 
-int main(void) {
+int main() {
     int {d:a:a} = 10; // main's own variable
     printf("main: a = %d\n", {u:a:a});
     test();
@@ -479,7 +479,7 @@ void test(void) {
 void add_ten(void);
 void add_hundred(void);
 
-int main(void) {
+int main() {
     add_ten();
     add_hundred();
     add_ten();
@@ -551,7 +551,7 @@ int {d:g:x} = 0; // global variable
 void add_ten(void);
 void add_hundred(void);
 
-int main(void) {
+int main() {
     add_ten();
     add_hundred();
     add_ten();
@@ -616,7 +616,7 @@ void add_hundred(void) {
 
 void print_square(void);
 
-int main(void) {
+int main() {
     int {d:x:x} = 5; // local to main
     print_square();
     printf("Done!\n");
@@ -648,7 +648,7 @@ void print_square(void) {
 
 void print_square(int n);
 
-int main(void) {
+int main() {
     int {d:x:x} = 5; // local to main
     print_square({u:x:x});
     printf("Done!\n");
@@ -694,7 +694,7 @@ void print_square(int {d:n:n}) {
       from: 'From the slide "Example: Block Scope". On the slide, lines 12 and 13 are commented out.',
       code: String.raw`#include <stdio.h>
 
-int main(void) {
+int main() {
     int {d:t:total} = 0;
 
     for (int {d:i:i} = 1; {u:i:i} <= 3; {u:i:i}++) {
@@ -763,7 +763,7 @@ int main(void) {
       from: 'From the left side of the slide "Example: Block Scope With if".',
       code: String.raw`#include <stdio.h>
 
-int main(void) {
+int main() {
     int {d:sc:score} = 72;
 
     if ({u:sc:score} >= 50) {
@@ -796,7 +796,7 @@ int main(void) {
       from: 'From the right side of the slide "Example: Block Scope With if".',
       code: String.raw`#include <stdio.h>
 
-int main(void) {
+int main() {
     int {d:sc:score} = 72;
     char {d:g:grade};
 
