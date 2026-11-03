@@ -72,6 +72,7 @@ Each demo steps through a flow diagram one box at a time. As you follow the arro
 |---|---|
 | [Pointer Explorer](https://selkirk-cpsc.github.io/cpsc100-course/demos/pointer-explorer/) | Run the lecture's `&` and `*` examples one line at a time. Every variable is a box with an address; a pointer's box holds another box's address. Watch `*pAge = 25` change `age`, a `NULL` pointer crash the program when nobody checks it, and an uninitialized pointer print a junk number that gets past the check. |
 | [Array Pointers](https://selkirk-cpsc.github.io/cpsc100-course/demos/array-pointers/) | Run the lecture's array and pointer examples one line at a time. Two pointers land on the same element, four spellings all reach `vals[4]`, and `pVals1++` moves its arrow while the array's name can't move at all. |
+| [String Pointers](https://selkirk-cpsc.github.io/cpsc100-course/demos/string-pointers/) | Compare `char name[]`, which holds its own letters, with `char *pName`, which holds an address. Watch the arrow move while the letters stay put, then see an array of pointers reach strings of different lengths. |
 
 ### Other Topics
 
