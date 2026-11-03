@@ -198,8 +198,7 @@ and Pointers</a></li>
 <li><a href="#character-arrays-and-pointers"
 id="toc-character-arrays-and-pointers">Character Arrays and
 Pointers</a></li>
-<li><a href="#this-weeks-tutorial" id="toc-this-weeks-tutorial">This
-Week’s Tutorial</a></li>
+<li><a href="#summary" id="toc-summary">Summary</a></li>
 </ul>
 </nav>
 <section id="memory" class="level2">
@@ -922,50 +921,50 @@ loop follows a different arrow</p></li>
 </div>
 </section>
 </section>
-<section id="this-weeks-tutorial" class="level2">
-<h2>This Week’s Tutorial</h2>
-<section id="this-weeks-tutorial-1" class="level3">
-<h3>This Week’s Tutorial</h3>
+<section id="summary" class="level2">
+<h2>Summary</h2>
+<section id="summary-1" class="level3">
+<h3>Summary</h3>
 <ul>
-<li><p><strong>Memory Diagrams quiz</strong> on Moodle: read, trace and
-pick memory diagrams.</p></li>
-<li><p><strong>Address and value</strong>: print <code>&amp;x</code>,
-<code class="sourceCode c">x</code>, <code class="sourceCode c">p</code>
-and <code class="sourceCode c"><span class="op">*</span>p</code>, change
-<code class="sourceCode c">x</code> through the pointer, then see what a
-mismatched pointer type does.</p></li>
-<li><p><strong><code class="sourceCode c">NULL</code> check</strong>:
-crash it once with no check, then guard the dereference with <code
-class="sourceCode c"><span class="cf">if</span> <span class="op">(</span>p <span class="op">!=</span> NULL<span class="op">)</span></code>.</p></li>
-<li><p><strong>Walking an array with a pointer</strong>: read with <code
-class="sourceCode c"><span class="op">*(</span>p <span class="op">+</span> i<span class="op">)</span></code>,
-write with all four index forms, then walk with <code
-class="sourceCode c">p<span class="op">++</span></code> (and see why
-<code class="sourceCode c">vals<span class="op">++</span></code> won’t
-compile).</p></li>
-<li><p><strong>Memory diagram</strong>: draw one by hand, then check it
-against the addresses your program prints with <code
-class="sourceCode c">printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%p</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">...)</span></code>.</p></li>
-<li><p><strong>2D array, one pointer</strong>: one loop over the whole
-grid, plus the <code
-class="sourceCode c">row <span class="op">*</span> NUM_COLS <span class="op">+</span> col</code>
-offset.</p></li>
-<li><p><strong>Strings and pointers</strong>: <code
-class="sourceCode c"><span class="dt">char</span> name<span class="op">[]</span></code>
-vs. <code
-class="sourceCode c"><span class="dt">char</span> <span class="op">*</span>pName</code>,
-the string-literal catch, and an array of strings.</p></li>
+<li><p><strong>Memory</strong> is a series of numbered bytes; every
+variable lives at an <strong>address</strong>, usually written in
+hexadecimal</p></li>
+<li><p>A <strong>pointer</strong> is a variable that stores an address,
+and its type must match what it points to</p></li>
+<li><p><code>&amp;</code> gets a variable’s address; <code
+class="sourceCode c"><span class="op">*</span></code> follows a pointer
+to the value stored there</p></li>
+<li><p>Always initialize a pointer, even if only to <code
+class="sourceCode c">NULL</code>, and check for <code
+class="sourceCode c">NULL</code> before you dereference
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+an uninitialized pointer holds garbage you can’t test for</p></li>
 </ul>
-</section>
-<section id="looking-ahead" class="level3">
-<h3>Looking Ahead</h3>
-<p>Today: pointer fundamentals; addresses, <code>&amp;</code>/<code
-class="sourceCode c"><span class="op">*</span></code>, memory diagrams,
-and how arrays decay to pointers.</p>
-<p>Part 2, next week: pass-by-reference (finally fixing <code
-class="sourceCode c">swap<span class="op">()</span></code>), and the
-rest of the functions story; passing arrays and strings to functions,
-and returning multiple values through pointers.</p>
+<ul>
+<li><p>An array name <strong>decays</strong> to a pointer to its first
+element in most expressions</p></li>
+<li><p><code
+class="sourceCode c">vals<span class="op">[</span><span class="dv">4</span><span class="op">]</span></code>,
+<code
+class="sourceCode c">pVals<span class="op">[</span><span class="dv">4</span><span class="op">]</span></code>,
+<code
+class="sourceCode c"><span class="op">*(</span>vals <span class="op">+</span> <span class="dv">4</span><span class="op">)</span></code>
+and <code
+class="sourceCode c"><span class="op">*(</span>pVals <span class="op">+</span> <span class="dv">4</span><span class="op">)</span></code>
+all reach the same element</p></li>
+<li><p><strong>Arrays are not pointers</strong>: a pointer can be
+changed, but an array name can’t</p></li>
+<li><p>Print an address with <code>%p</code> and <code
+class="sourceCode c"><span class="op">(</span><span class="dt">void</span> <span class="op">*)</span></code></p></li>
+<li><p><code
+class="sourceCode c"><span class="dt">char</span> name<span class="op">[]</span></code>
+holds its own copy of the letters; <code
+class="sourceCode c"><span class="dt">char</span> <span class="op">*</span>pName</code>
+holds only the address of a string stored elsewhere</p></li>
+<li><p>An array of <code
+class="sourceCode c"><span class="dt">char</span> <span class="op">*</span></code>
+can reach strings of different lengths</p></li>
+</ul>
 </section>
 </section>
 <nav class="pager" aria-label="Previous and next lecture">
