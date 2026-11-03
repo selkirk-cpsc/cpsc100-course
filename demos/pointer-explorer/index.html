@@ -232,7 +232,7 @@
         <div><span class="sw chg"></span>changed by the line that just ran</div>
         <div><span class="swline"></span>a pointer being followed by <code>*</code></div>
       </div>
-      <p class="note">Two different jobs for <code>*</code>: in a declaration (<code>int *pAge;</code>) it is part of the <b>type</b>, &ldquo;pAge is a pointer to an int&rdquo;. Anywhere else (<code>*pAge = 25;</code>) it <b>follows</b> the pointer to the box at the other end.</p>
+      <p class="note">Two different jobs for <code>*</code>: in a declaration (<code>int *pAge = NULL;</code>) it is part of the <b>type</b>, &ldquo;pAge is a pointer to an int&rdquo;. Anywhere else (<code>*pAge = 25;</code>) it <b>follows</b> the pointer to the box at the other end.</p>
     </section>
   </div>
 </main>
@@ -299,7 +299,7 @@
       tab: '& and *',
       from: 'From the slide "Using the Dereferencing Operator *". The slide shows these lines on their own: picture them inside main().',
       code: String.raw`int age; // Declares empty int called age
-int *pAge; // Creates a pointer for an integer
+int *pAge = NULL; // Creates a pointer; points nowhere yet
 
 pAge = &age; // Links the pointer to age
 age = 19; // Sets the value of age
@@ -313,8 +313,8 @@ printf("Values of age, pAge: %d %d\n", age, *pAge);
         T.call('main');
         T.decl('int', 'age', '0x7FFD');
         T.snap(1, '<code>int age;</code> sets aside a box for <b>age</b>, at address <code>0x7FFD</code>. Nothing has been stored in it, so it holds whatever garbage was left in that memory, shown as <code>?</code>.');
-        T.decl('int *', 'pAge', '0xA47D');
-        T.snap(2, '<code>int *pAge;</code> creates <b>pAge</b>. The <code>*</code> here is part of the <b>type</b>: pAge is a pointer to an int. It is a variable with a box and an address of its own, <code>0xA47D</code>. It holds garbage too, so it doesn\'t point anywhere sensible yet.');
+        T.decl('int *', 'pAge', '0xA47D', 'NULL');
+        T.snap(2, '<code>int *pAge = NULL;</code> creates <b>pAge</b>. The <code>*</code> here is part of the <b>type</b>: pAge is a pointer to an int. It is a variable with a box and an address of its own, <code>0xA47D</code>. We have nothing for it to point to yet, so it starts as <code>NULL</code>, not garbage.');
         T.read('age');
         T.point('pAge', 'age');
         T.snap(4, '<code>&amp;age</code> looks up age\'s <b>address</b>, <code>0x7FFD</code>, and that number is stored in pAge\'s box. pAge now <b>points to</b> age: that\'s the arrow. age\'s own box hasn\'t changed; it still holds garbage.');
