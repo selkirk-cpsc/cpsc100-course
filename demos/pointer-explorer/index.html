@@ -356,6 +356,29 @@ if (pNum != NULL) {
       },
     },
     {
+      tab: 'Uninitialized',
+      from: 'From the slide "Example: An Uninitialized Pointer". Picture these lines inside main().',
+      code: String.raw`int *pNum;   // never given a value
+
+if (pNum != NULL) {
+    printf("%d\n", *pNum);
+} else {
+    printf("pNum has nothing to point to.\n");
+}`,
+      run(T) {
+        T.call('main');
+        T.decl('int *', 'pNum', '0x7FF8');
+        T.snap(1, '<code>int *pNum;</code> creates <b>pNum</b> but never gives it a value. It holds whatever garbage was left in that memory, shown as <code>?</code>. There\'s no arrow, because nobody knows where that garbage leads.');
+        T.read('pNum');
+        T.snap(3, 'Test <code>pNum != NULL</code>. On this run the garbage isn\'t NULL, so the test is <b>True</b>. The check can only spot NULL: it can\'t tell garbage from a real address.');
+        T.bad('pNum');
+        T.print('-1221434385\n');
+        T.snap(4, '<code>*pNum</code> <b>follows</b> the garbage to an address nobody chose and reads what\'s there. On this run that memory was readable, so it prints a junk number, with no crash and no message.');
+        T.ret();
+        T.snap(7, 'The program finished as if nothing went wrong. This is only <b>one</b> thing that can happen: another run can print a different number, and other compiler settings can crash or take the else-branch. Compare the <b>NULL check</b> tab, where one <code>= NULL</code> makes the check work every time.', { done: true });
+      },
+    },
+    {
       tab: 'No check',
       from: 'From the slide "Example: Dereferencing Without Checking". Picture these lines inside main().',
       code: String.raw`int *pNum = NULL;
