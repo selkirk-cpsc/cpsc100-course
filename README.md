@@ -21,6 +21,7 @@ Each week's lecture written out as a chapter you can read top to bottom, with th
 | 7 | [Midterm 1 Review](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture07/) |
 | 8 | [Functions and Scope Part 1: Functions](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture08-part1/) |
 | 8 | [Functions and Scope Part 2: Scope](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture08-part2/) |
+| 9 | [Pointers Part 1: Pointer Fundamentals](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture09-part1/) |
 
 ## Interactive Demos
 
@@ -64,6 +65,12 @@ Each demo steps through a flow diagram one box at a time. As you follow the arro
 | [Each Call Gets Its Own Variables](https://selkirk-cpsc.github.io/cpsc100-course/demos/scope-calls/) | `add_ten()` and `add_hundred()` both have a local `x`. Watch a new box of variables appear for each function call and disappear when it returns, so a second call to `add_ten()` starts over at 0. |
 | [Scope Explorer](https://selkirk-cpsc.github.io/cpsc100-course/demos/scope-explorer/) | Run the lecture's scope examples one line at a time and watch each call's variables appear and disappear. Click any variable to shade every line where it can be used, or to see why a use is out of scope, including a loop's block scope. |
 | [Ordinary Local vs. static](https://selkirk-cpsc.github.io/cpsc100-course/demos/static-local/) | Call `count_calls()` three times with `calls` declared `static`, then as an ordinary local. One version counts 1, 2, 3; the other starts over every call. |
+
+### Week 9: Pointers, Part 1
+
+| Demo | What it shows |
+|---|---|
+| [Pointer Explorer](https://selkirk-cpsc.github.io/cpsc100-course/demos/pointer-explorer/) | Run the lecture's `&` and `*` examples one line at a time. Every variable is a box with an address; a pointer's box holds another box's address. Watch `*pAge = 25` change `age`, and a `NULL` pointer crash the program when nobody checks it. |
 
 ### Other Topics
 

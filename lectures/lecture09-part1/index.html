@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pointers Part 1: Pointer Fundamentals · CPSC 100 Notes</title>
+<style>
+  :root {
+    --bg: #f6f6f3;
+    --panel: #ffffff;
+    --ink: #1d1d1f;
+    --muted: #6b6b72;
+    --line: #d6d6db;
+    --accent: #2f6fde;
+    --accent-soft: #dce8fd;
+    --alert: #911a28;
+    --code-bg: #f1f1ee;
+    --tok-kw: #7048e8; --tok-type: #0e7178; --tok-num: #b35a00;
+    --tok-str: #2b8a3e; --tok-com: #8a8a93; --tok-pre: #c2255c; --tok-fn: #1c4fb8;
+    --term-bg: #ffffff; --term-ink: #1d1d1f; --term-line: #c9c9cf; --term-in: #1a7f37;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5;
+      --line: #3a3b42; --accent: #6ea0ff; --accent-soft: #1d3157; --alert: #ff8f9c;
+      --code-bg: #25262b;
+      --tok-kw: #b197fc; --tok-type: #3bc9db; --tok-num: #ffa94d;
+      --tok-str: #69db7c; --tok-com: #868e96; --tok-pre: #f783ac; --tok-fn: #74c0fc;
+      --term-bg: #1d1f23; --term-ink: #e6e6e9; --term-line: #33363d; --term-in: #7ee787;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5;
+    --line: #3a3b42; --accent: #6ea0ff; --accent-soft: #1d3157; --alert: #ff8f9c;
+    --code-bg: #25262b;
+    --tok-kw: #b197fc; --tok-type: #3bc9db; --tok-num: #ffa94d;
+    --tok-str: #69db7c; --tok-com: #868e96; --tok-pre: #f783ac; --tok-fn: #74c0fc;
+    --term-bg: #1d1f23; --term-ink: #e6e6e9; --term-line: #33363d; --term-in: #7ee787;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 17px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  a { color: var(--accent); }
+  code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .9em; }
+
+  .topbar { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .topbar .in { max-width: 820px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 16px; align-items: center; }
+  .topbar a { text-decoration: none; font-weight: 600; }
+  .topbar .crumb { color: var(--muted); font-size: .9rem; }
+
+  main { max-width: 820px; margin: 0 auto; padding: 8px 16px 48px; }
+  header.title { margin: 28px 0 8px; }
+  header.title .week { color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: .85rem; }
+  header.title h1 { margin: 4px 0 0; font-size: 2.1rem; line-height: 1.2; }
+
+  nav#TOC { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 18px; margin: 20px 0 8px; }
+  nav#TOC::before { content: "In this chapter"; display: block; font-weight: 700; margin-bottom: 4px; }
+  nav#TOC ul { margin: 0; padding-left: 1.2em; }
+
+  h2 { font-size: 1.6rem; margin: 2.4em 0 .4em; padding-bottom: .2em; border-bottom: 2px solid var(--line); }
+  h3 { font-size: 1.2rem; margin: 1.8em 0 .3em; }
+  p, li { max-width: 72ch; }
+  li { margin: .2em 0; }
+  li > p { margin: 0; }
+  .alert { color: var(--alert); font-weight: 600; }
+  :not(pre) > code { background: var(--code-bg); padding: .08em .3em; border-radius: 4px; overflow-wrap: anywhere; }
+  math[display="block"] { overflow-x: auto; max-width: 100%; }
+
+  div.sourceCode { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; margin: 1em 0; overflow-x: auto; }
+  pre.sourceCode { margin: 0; padding: 12px 14px; line-height: 1.5; }
+  /* program output and shell sessions (minted text blocks) */
+  pre:not(.sourceCode) { background: var(--panel); border: 1px dashed var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; line-height: 1.5; }
+  /* sample runs of a program (make_notes.py compiles and runs it): a terminal
+     box in the page's theme, with what the user typed highlighted in green */
+  .runoutput { margin: -.3em 0 1.2em; }
+  .run-label { color: var(--muted); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin: .7em 0 .25em; }
+  pre.terminal { background: var(--term-bg); color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 8px; padding: 10px 14px; margin: 0 0 .5em; overflow-x: auto; line-height: 1.5; }
+  pre.terminal .in { color: var(--term-in); font-weight: 700; }
+  .run-label .run-setup { text-transform: none; letter-spacing: 0; font-weight: 400; }
+  pre.numberSource code > span { position: relative; left: -4em; }
+  pre.numberSource { margin-left: 3em; border-left: 1px solid var(--line); padding-left: 4px; }
+  pre.numberSource code > span > a:first-child::before {
+    content: counter(source-line); counter-increment: source-line; position: relative; left: -1em;
+    text-align: right; vertical-align: baseline; display: inline-block; width: 4em; color: var(--tok-com);
+  }
+  pre.numberSource code { counter-reset: source-line 0; }
+  pre > code.sourceCode > span { display: inline-block; line-height: 1.5; }
+  code.sourceCode > span > a:first-child { text-decoration: none; }
+  code span.kw, code span.cf { color: var(--tok-kw); font-weight: 600; }
+  code span.dt { color: var(--tok-type); }
+  code span.dv, code span.fl, code span.bn, code span.cn { color: var(--tok-num); }
+  code span.st, code span.ch, code span.sc, code span.ss, code span.vs { color: var(--tok-str); }
+  code span.co, code span.cv, code span.do, code span.an { color: var(--tok-com); font-style: italic; }
+  code span.pp, code span.im { color: var(--tok-pre); }
+  code span.fu, code span.bu { color: var(--tok-fn); }
+
+  img { max-width: 100%; height: auto; }
+  img.diagram { background: #fff; border-radius: 8px; padding: 8px; display: block; margin: 0 auto; }
+  /* PNGs are drawings (some with transparent backgrounds): same white card, so dark lines stay visible in dark mode */
+  img[src*=".png"] { background: #fff; border-radius: 8px; padding: 8px; }
+  .center, figure { text-align: center; }
+  figure { margin: 1em 0; }
+  figcaption { color: var(--muted); font-size: .9rem; }
+  .credit { text-align: center; color: var(--muted); font-size: .78rem; margin-top: -.6em; }
+  .credit p { max-width: none; }
+
+  /* slide columns: a figure keeps its natural width and the other column
+     fills the rest; when both can't fit, they stack (see notes.lua) */
+  .columns { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .columns > .column { flex: 1 1 280px; min-width: 0; }
+  .columns > .column.figure-col { flex: 0 1 auto; max-width: 100%; margin: 0 auto; }
+  .columns > .column.figure-col img:not(.diagram) { width: 320px; }
+
+  .multicol ul { columns: 4 8em; list-style: none; padding-left: 0; }
+
+  .callout { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 4px 16px; margin: 1em 0; }
+  .tryit { background: var(--accent-soft); border-radius: 10px; padding: 6px 18px; margin: 1.2em 0; }
+  .tryit .center { text-align: left; }
+  a.demo-link { display: inline-block; background: var(--accent); color: var(--bg); padding: 6px 14px; border-radius: 8px; text-decoration: none; }
+  a.demo-link code { background: none; color: inherit; }
+
+  table { border-collapse: collapse; margin: 1em auto; display: block; overflow-x: auto; max-width: 100%; width: fit-content; }
+  th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--panel); }
+
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .pager a { text-decoration: none; max-width: 48%; }
+  .pager .label { display: block; color: var(--muted); font-size: .85rem; }
+  .pager .next { margin-left: auto; text-align: right; }
+  .pager.top { margin-top: 16px; padding: 0 0 12px; border-top: none; border-bottom: 1px solid var(--line); font-size: .95rem; }
+  .pager.top + header.title { margin-top: 18px; }
+  .theme-toggle { font: inherit; font-size: .85rem; line-height: 1.2; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
+  .theme-toggle:hover { border-color: var(--ink); }
+  .topbar .theme-toggle { margin-left: auto; }
+  .topbar .print-btn + .theme-toggle { margin-left: 0; }
+  .topbar a { white-space: nowrap; }
+  @media (max-width: 480px) { .topbar .in:has(.print-btn) .crumb { display: none; } }
+
+  /* printing (the Print / PDF button, or the browser's own Print): light colours
+     on white, no site navigation, code wrapped instead of scrolling, and
+     headings, figures and code kept off page breaks where they fit */
+  @media print {
+    :root:not([data-print]), :root[data-theme] {   /* outranks the dark-mode rules */
+      --bg: #ffffff; --panel: #ffffff; --ink: #1d1d1f; --muted: #6b6b72;
+      --line: #d6d6db; --accent: #2f6fde; --accent-soft: #eef3fd; --alert: #911a28;
+      --code-bg: #f6f6f3;
+      --tok-kw: #7048e8; --tok-type: #0e7178; --tok-num: #b35a00;
+      --tok-str: #2b8a3e; --tok-com: #8a8a93; --tok-pre: #c2255c; --tok-fn: #1c4fb8;
+      --term-bg: #ffffff; --term-ink: #1d1d1f; --term-line: #c9c9cf; --term-in: #1a7f37;
+    }
+    @page { margin: 15mm 14mm; }
+    body { background: #fff; font-size: 11pt; line-height: 1.5; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .topbar, .pager, .theme-toggle, .print-btn { display: none !important; }
+    main { max-width: none; padding: 0; }
+    header.title { margin-top: 0; }
+    h1, h2, h3, h4, .run-label, .label { break-after: avoid; page-break-after: avoid; }
+    figure, img, svg, .columns, .callout, .tryit, table, nav#TOC,
+    div.sourceCode, pre, .runoutput { break-inside: avoid; page-break-inside: avoid; }
+    div.sourceCode, pre, pre.terminal, table, .animation { overflow: visible !important; }
+    pre, pre code, pre.terminal { white-space: pre-wrap !important; overflow-wrap: anywhere; }
+    pre > code.sourceCode > span { display: inline; }
+    a { text-decoration: none; }
+  }
+</style>
+<script>
+  // apply a saved light/dark choice before the page draws (no flash)
+  try { var t = localStorage.getItem('cpsc100-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+</head>
+<body>
+<div class="topbar"><div class="in">
+  <a href="../../">CPSC 100</a>
+  <span class="crumb">Lecture notes</span>
+  <button type="button" class="theme-toggle print-btn" onclick="window.print()" title="Print this page, or choose Save as PDF in the print dialog">⎙ Print / PDF</button>
+  <button type="button" class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</div></div>
+<main>
+<nav class="pager top" aria-label="Previous and next lecture">
+<a class="prev" href="../lecture08-part2/"><span class="label">← Previous</span>Week
+8: Functions and Scope Part 2: Scope</a>
+
+</nav>
+<header class="title">
+<div class="week">Week 9</div>
+<h1>Pointers Part 1: Pointer Fundamentals</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#memory" id="toc-memory">Memory</a></li>
+<li><a href="#pointers" id="toc-pointers">Pointers</a></li>
+<li><a href="#arrays-and-pointers" id="toc-arrays-and-pointers">Arrays
+and Pointers</a></li>
+<li><a href="#character-arrays-and-pointers"
+id="toc-character-arrays-and-pointers">Character Arrays and
+Pointers</a></li>
+<li><a href="#this-weeks-tutorial" id="toc-this-weeks-tutorial">This
+Week’s Tutorial</a></li>
+</ul>
+</nav>
+<section id="memory" class="level2">
+<h2>Memory</h2>
+<section id="memory-1" class="level3">
+<h3>Memory</h3>
+<p>Before introducing pointers, we first review our mental picture of
+memory</p>
+<div class="center">
+<p>– a long sequence of numbered storage locations.</p>
+</div>
+</section>
+<section id="understanding-memory-before-pointers" class="level3">
+<h3>Understanding Memory (Before Pointers)</h3>
+<div class="columns">
+<div class="column">
+<p>Every program you write uses the computer’s <strong>memory
+(RAM)</strong> to store data.</p>
+<ul>
+<li><p>Each piece of data; a variable, array element, or character;
+lives in a specific <strong>location</strong> in memory.</p></li>
+<li><p>These locations are numbered so the computer can keep track of
+where things are stored.</p></li>
+</ul>
+</div><div class="column">
+<p><img src="ram_ddr4.jpg?v=cb9f78fd" alt="Photo of a RAM module: a long green circuit board with memory chips" loading="lazy" /><br />
+<span>A RAM stick (memory module)</span></p>
+<div class="credit">
+<p>Photo: <a
+href="https://commons.wikimedia.org/wiki/File:16_GiB-DDR4-RAM-Riegel_RAM019FIX_Small_Crop_90_PCNT.png">PantheraLeo1359531</a>,
+<a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a>, via
+Wikimedia Commons</p>
+</div>
+</div>
+</div>
+</section>
+<section id="variables-and-memory" class="level3">
+<h3>Variables and Memory</h3>
+<p>When you declare a variable, you’re asking the computer to:</p>
+<ol>
+<li><p>Reserve space in memory.</p></li>
+<li><p>Associate that space with a name.</p></li>
+</ol>
+<p>Example:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> x <span class="op">=</span> <span class="dv">42</span><span class="op">;</span></span></code></pre></div>
+<p>The variable <code class="sourceCode c">x</code> is stored somewhere
+in memory, and the computer remembers both:</p>
+<ul>
+<li><p>its <strong>value</strong> (42)</p></li>
+<li><p>its <strong>location</strong> (address in memory)</p></li>
+</ul>
+</section>
+<section id="what-is-a-memory-address" class="level3">
+<h3>What is a Memory Address?</h3>
+<p>A <strong>memory address</strong> is a numeric label that tells the
+computer <em>where</em> a value is stored.</p>
+<ul>
+<li><p>Every byte in memory has its own unique address.</p></li>
+<li><p>You can think of memory like a long row of numbered
+boxes:</p></li>
+</ul>
+<div class="center">
+<p><img src="fig01.svg?v=5b88dc44" alt="Diagram" class="diagram" loading="lazy"
+width="386" /></p>
+</div>
+</section>
+<section id="number-bases-refresher" class="level3">
+<h3>Number Bases Refresher</h3>
+<ul>
+<li><p><strong>Binary</strong> (base 2): digits <code
+class="sourceCode c"><span class="dv">0</span><span class="op">,</span><span class="dv">1</span></code>;
+natural for hardware.</p>
+<ul>
+<li><p>Example: <code
+class="sourceCode c"><span class="dv">1010</span></code> = 10 in
+decimal</p></li>
+</ul></li>
+<li><p><strong>Decimal</strong> (base 10): digits <code
+class="sourceCode c"><span class="dv">0</span><span class="op">,</span><span class="dv">1</span><span class="op">,</span></code><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>…</mi><annotation encoding="application/x-tex">\ldots</annotation></semantics></math><code
+class="sourceCode c"><span class="dv">9</span></code>; natural for
+humans.</p></li>
+<li><p><strong>Hexadecimal</strong> (base 16): digits <code
+class="sourceCode c"><span class="dv">0</span><span class="op">,</span><span class="dv">1</span><span class="op">,</span></code><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>…</mi><annotation encoding="application/x-tex">\ldots</annotation></semantics></math><code
+class="sourceCode c"><span class="dv">9</span><span class="op">,</span>A<span class="op">,</span>B<span class="op">,</span></code><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>…</mi><annotation encoding="application/x-tex">\ldots</annotation></semantics></math><code
+class="sourceCode c">F</code>; a compact, human-friendly view of
+binary.</p>
+<ul>
+<li><p>Example: <code
+class="sourceCode c"><span class="bn">0x2A</span></code> = 42 in decimal
+= <code
+class="sourceCode c"><span class="bn">0010</span> <span class="dv">1010</span></code>
+in binary</p></li>
+<li><p>The prefix <code
+class="sourceCode c"><span class="dv">0</span><span class="er">x</span></code>
+means "this number is written in hexadecimal."</p></li>
+</ul></li>
+</ul>
+<div class="callout">
+<p><strong>Key Idea</strong></p>
+<p>Computers think in <strong>binary</strong>, humans think in
+<strong>decimal</strong>, and programmers often use
+<strong>hexadecimal</strong> to bridge the two.</p>
+</div>
+</section>
+<section id="memory-address-numbers" class="level3">
+<h3>Memory Address Numbers</h3>
+<p>A <strong>memory address</strong> is simply a number used to label a
+specific byte in RAM.</p>
+<p>The same address can be written in different number systems:</p>
+<div class="center">
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><strong>Base</strong></th>
+<th style="text-align: left;"><strong>Representation</strong></th>
+<th style="text-align: left;"><strong>Comment</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Binary</td>
+<td
+style="text-align: left;"><code>1111 1010 0110 1101 1010 0011 0111 1001</code></td>
+<td style="text-align: left;">Very long</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Decimal</td>
+<td
+style="text-align: left;"><code>4</code><span><code>,</code></span><code>208</code><span><code>,</code></span><code>935</code><span><code>,</code></span><code>033</code></td>
+<td style="text-align: left;">Compact but hard to relate to bits</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Hexadecimal</td>
+<td style="text-align: left;"><code>0xFA6DA379</code></td>
+<td style="text-align: left;">Short and byte-aligned</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="callout">
+<p><strong>Key Idea</strong></p>
+<p>All three forms represent the <em>same address</em>; hexadecimal is
+just the most convenient way to view it.</p>
+</div>
+</section>
+<section id="why-are-memory-addresses-in-hexadecimal" class="level3">
+<h3>Why Are Memory Addresses in Hexadecimal?</h3>
+<p>Addresses are really just numbers; but very large ones!</p>
+<ul>
+<li><p>Writing binary would be too long and hard to read.</p></li>
+<li><p>Decimal values don’t map neatly to the binary byte format used by
+computers.</p></li>
+<li><p>Hexadecimal (base 16) is a compact, readable way to represent
+binary data.</p></li>
+<li><p>Each hex digit corresponds exactly to 4 bits:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="monospace">𝟶𝟶𝟶𝟶</mtext><mo>=</mo><mn>0</mn><mo>,</mo><mspace width="1.0em"></mspace><mtext mathvariant="monospace">𝟷𝟷𝟷𝟷</mtext><mo>=</mo><mi>F</mi></mrow><annotation encoding="application/x-tex">\texttt{0000} = 0, \quad \texttt{1111} = F</annotation></semantics></math></p></li>
+</ul>
+<div class="callout">
+<p><strong>Example</strong></p>
+<p><code>0x7FFD4D0B82A0</code> means "the address stored in memory," and
+the <code>0x</code> just tells us it’s written in hexadecimal.</p>
+</div>
+</section>
+<section id="bringing-it-together" class="level3">
+<h3>Bringing It Together</h3>
+<ul>
+<li><p>Every variable has:</p>
+<ul>
+<li><p>a <strong>name</strong> (what you write in code)</p></li>
+<li><p>a <strong>value</strong> (the data stored)</p></li>
+<li><p>a <strong>memory address</strong> (where it lives)</p></li>
+</ul></li>
+<li><p>Hexadecimal is just how we display those addresses.</p></li>
+</ul>
+</section>
+</section>
+<section id="pointers" class="level2">
+<h2>Pointers</h2>
+<section id="solving-the-mystery-of-pointers" class="level3">
+<h3>Solving the Mystery of Pointers</h3>
+<p><em>Pointer variables</em>, often called <em>pointers</em>, let you
+do much more with C than a language without pointers.<br />
+They are often a <em>point</em> of challenge for students. But don’t
+worry, I will <em>point</em> you in the right direction.<br />
+After learning pointers people often ask “What is the <em>point</em>”. I
+usually answer, “What would be the <em>point</em> of all these jokes
+without pointers!”<br />
+My friends make a <em>point</em> of not talking to me.</p>
+</section>
+<section id="what-are-pointers" class="level3">
+<h3>What are Pointers?</h3>
+<p>Things to consider:</p>
+<ul>
+<li><p>C stores your program’s data in <strong>memory</strong>.</p></li>
+<li><p>Each location in memory has a unique
+<strong>address</strong>.</p></li>
+<li><p>Every variable you create is stored somewhere in memory.<br />
+Example: <code
+class="sourceCode c"><span class="bn">0x7FFCC8D6CF10</span></code>
+(Memory address in hexadecimal)</p></li>
+<li><p>It’s easier for humans to remember a <strong>name</strong> (e.g.,
+<code class="sourceCode c">orderNum</code>) than a numeric
+address.</p></li>
+</ul>
+<div class="callout">
+<p><strong>Definition</strong></p>
+<p>A <strong>pointer</strong> is a variable that stores a <strong>memory
+address</strong>.</p>
+</div>
+<ul>
+<li><p>Instead of holding a value like <code
+class="sourceCode c"><span class="dv">42</span></code>, it holds the
+address <em>of another variable</em>.</p></li>
+<li><p>You can think of a pointer as a "map location"
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+it tells the program <em>where</em> in memory to find
+something.</p></li>
+</ul>
+</section>
+<section id="defining-a-pointer" class="level3">
+<h3>Defining a Pointer</h3>
+<p>Here two variables are defined</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> num<span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> value<span class="op">;</span></span></code></pre></div>
+<p>Next two corresponding pointers are defined,</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>pNum<span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> <span class="op">*</span>pValue<span class="op">;</span></span></code></pre></div>
+<ul>
+<li><p>the <code class="sourceCode c"><span class="op">*</span></code>
+before the variable name means it is a pointer</p></li>
+<li><p>often pointers are named with a ‘p’ at the beginning<br />
+(<code class="sourceCode c">pNum</code> will point to <code
+class="sourceCode c">num</code>)</p></li>
+</ul>
+</section>
+<section id="new-operators" class="level3">
+<h3>New Operators</h3>
+<p>New operators are introduced,</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><strong>Operators</strong></th>
+<th style="text-align: left;"><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>&amp;</code></td>
+<td style="text-align: left;">Address-of operator</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>*</code></td>
+<td style="text-align: left;">Dereferencing operator</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>address-of: looks up the address of a variable</p></li>
+<li><p>dereferencing: define or access the value of a pointer</p></li>
+</ul>
+</section>
+<section id="using-the-address-of-operator" class="level3">
+<h3>Using the Address-of Operator <code>&amp;</code></h3>
+<div class="columns">
+<div class="column">
+<p>Example:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> age <span class="op">=</span> <span class="dv">19</span><span class="op">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>pAge <span class="op">=</span> <span class="op">&amp;</span>age<span class="op">;</span></span></code></pre></div>
+</div><div class="column figure-col">
+<p><img src="fig02.svg?v=17a6f454" alt="Diagram" class="diagram" loading="lazy"
+width="346" /></p>
+</div>
+</div>
+<p>What happened here?</p>
+<ul>
+<li><p>created the variable <code class="sourceCode c">age</code> and
+made space in the memory</p></li>
+<li><p>initialized the value of <code class="sourceCode c">age</code>
+equal to 19</p>
+<ul>
+<li><p>looked up the address using the variable name <code
+class="sourceCode c">age</code></p></li>
+</ul></li>
+<li><p>created a pointer <code class="sourceCode c">pAge</code> and
+initialized it to point to the <span class="alert">address</span> of
+<code class="sourceCode c">age</code> (say <code
+class="sourceCode c"><span class="bn">0x7FFD</span></code> for
+example)</p></li>
+</ul>
+</section>
+<section id="using-the-dereferencing-operator" class="level3">
+<h3>Using the Dereferencing Operator *</h3>
+<p>Once you link an address to a pointer you can access the variable
+using the pointer.</p>
+<p>Example,</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb5-1"><a href="#cb5-1"></a><span class="dt">int</span> age<span class="op">;</span> <span class="co">// Declares empty int called age</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="dt">int</span> <span class="op">*</span>pAge<span class="op">;</span> <span class="co">// Creates a pointer for an integer</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a></span>
+<span id="cb5-4"><a href="#cb5-4"></a>pAge <span class="op">=</span> <span class="op">&amp;</span>age<span class="op">;</span> <span class="co">// Links the pointer to age</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a>age <span class="op">=</span> <span class="dv">19</span><span class="op">;</span> <span class="co">// Sets the value of age</span></span>
+<span id="cb5-6"><a href="#cb5-6"></a>printf<span class="op">(</span><span class="st">&quot;Values of age, pAge: </span><span class="sc">%d</span><span class="st"> </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> age<span class="op">,</span> <span class="op">*</span>pAge<span class="op">);</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a><span class="co">// Output: Values of age, pAge: 19 19</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a></span>
+<span id="cb5-9"><a href="#cb5-9"></a><span class="op">*</span>pAge <span class="op">=</span> <span class="dv">25</span><span class="op">;</span> <span class="co">// Sets the value of age</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a>printf<span class="op">(</span><span class="st">&quot;Values of age, pAge: </span><span class="sc">%d</span><span class="st"> </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> age<span class="op">,</span> <span class="op">*</span>pAge<span class="op">);</span></span>
+<span id="cb5-11"><a href="#cb5-11"></a><span class="co">// Output: Values of age, pAge: 25 25</span></span></code></pre></div>
+<p>Notice:</p>
+<ul>
+<li><p>Initially <code
+class="sourceCode c"><span class="op">*</span></code> operates by
+creating the pointer <code class="sourceCode c">pAge</code> <span
+class="alert">at declaration</span><br />
+(line 2)</p></li>
+<li><p>After declaration, <code
+class="sourceCode c"><span class="op">*</span></code> operation on <code
+class="sourceCode c">pAge</code> changes; it accesses the value that
+<code class="sourceCode c">pAge</code> is pointing to and changes it to
+25 (line 9).</p></li>
+</ul>
+</section>
+<section id="pointers-must-match-variable-types" class="level3">
+<h3>Pointers Must Match Variable Types</h3>
+<p>Every pointer in C is declared to point to a <strong>specific data
+type</strong>.</p>
+<ul>
+<li><p>A pointer to an <code
+class="sourceCode c"><span class="dt">int</span></code> can only store
+the address of an <code
+class="sourceCode c"><span class="dt">int</span></code>
+variable.</p></li>
+<li><p>A pointer to a <code
+class="sourceCode c"><span class="dt">float</span></code> can only store
+the address of a <code
+class="sourceCode c"><span class="dt">float</span></code>, and so
+on.</p></li>
+<li><p>This type matching ensures that the compiler knows how many bytes
+to read or write when the pointer is used to access memory.</p></li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> age <span class="op">=</span> <span class="dv">19</span><span class="op">;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> price <span class="op">=</span> <span class="fl">5.99</span><span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>pAge <span class="op">=</span> <span class="op">&amp;</span>age<span class="op">;</span>       <span class="co">//  correct: int* points to int</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> <span class="op">*</span>pPrice <span class="op">=</span> <span class="op">&amp;</span>price<span class="op">;</span> <span class="co">//  correct: float* points to float</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>pAge <span class="op">=</span> <span class="op">&amp;</span>price<span class="op">;</span>           <span class="co">// error: incompatible types</span></span></code></pre></div>
+<p><strong>Key Idea:</strong> The pointer type must match the variable
+type it points to; this keeps memory access safe and predictable.</p>
+</section>
+<section id="null-a-pointer-that-points-to-nothing" class="level3">
+<h3><code class="text">NULL</code>: A Pointer That Points to
+Nothing</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>pNum <span class="op">=</span> NULL<span class="op">;</span>   <span class="co">// pNum doesn&#39;t point anywhere </span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// yet</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>pNum <span class="op">!=</span> NULL<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">*</span>pNum<span class="op">);</span>  <span class="co">// safe: only dereference</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">else</span> <span class="op">{</span>                    <span class="co">// if it isn&#39;t NULL</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;pNum has nothing to point to.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p><code class="sourceCode c">NULL</code> is a special address value
+meaning “points to nothing valid.”</p></li>
+<li><p><span class="alert">Dereferencing a <code
+class="sourceCode c">NULL</code> pointer crashes your program</span>
+(segmentation fault); always check before you dereference.</p></li>
+<li><p>An uninitialized pointer is worse than <code
+class="sourceCode c">NULL</code>: it holds <em>garbage</em>, and
+dereferencing it can silently corrupt memory instead of crashing
+cleanly. Always initialize a pointer, even if only to <code
+class="sourceCode c">NULL</code>.</p></li>
+</ul>
+</section>
+<section id="example-dereferencing-without-checking" class="level3">
+<h3>Example: Dereferencing Without Checking</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>pNum <span class="op">=</span> NULL<span class="op">;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">*</span>pNum<span class="op">);</span>   <span class="co">// no NULL check!</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;This line never runs.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span></code></pre></div>
+<p>Running it:</p>
+<pre class="text"><code>$ ./a.out
+Segmentation fault (core dumped)</code></pre>
+<ul>
+<li><p><code class="sourceCode c"><span class="op">*</span>pNum</code>
+tries to read <strong>through</strong> an address that doesn’t point
+anywhere valid; the operating system kills the program on the
+spot.</p></li>
+<li><p>Nothing after the crash runs; not the second <code
+class="sourceCode c">printf</code>, not any cleanup code later in <code
+class="sourceCode c">main<span class="op">()</span></code>.</p></li>
+<li><p>The fix is exactly the <code
+class="sourceCode c"><span class="cf">if</span> <span class="op">(</span>pNum <span class="op">!=</span> NULL<span class="op">)</span></code>
+check from the previous slide; always check <strong>before</strong> you
+dereference, not after something goes wrong.</p></li>
+</ul>
+</section>
+<section id="try-it-pointer-explorer" class="level3">
+<h3>Try It: Pointer Explorer</h3>
+<div class="tryit">
+<p>Run this section’s examples one line at a time and watch each
+variable’s box, its address, and the arrow from <code
+class="sourceCode c">pAge</code> to <code
+class="sourceCode c">age</code>:</p>
+<div class="center">
+<p><span><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/pointer-explorer/"
+class="demo-link" target="_blank"
+rel="noopener"><code>selkirk-cpsc.github.io/cpsc100-course/demos/pointer-explorer/</code></a></span></p>
+</div>
+<ul>
+<li><p>On the <strong>&amp; and *</strong> tab, stop at line 9: <code
+class="sourceCode c"><span class="op">*</span>pAge <span class="op">=</span> <span class="dv">25</span></code>
+changes <code class="sourceCode c">age</code> without ever naming
+it</p></li>
+<li><p>Untick <strong>Show pointers as arrows</strong>: <code
+class="sourceCode c">pAge</code>’s box holds nothing but the number
+<code
+class="sourceCode c"><span class="bn">0x7FFD</span></code></p></li>
+<li><p>Compare the <strong>NULL check</strong> and <strong>No
+check</strong> tabs</p></li>
+</ul>
+</div>
+</section>
+<section id="why-pointers-matter" class="level3">
+<h3>Why Pointers Matter</h3>
+<p>Pointers may seem abstract now; they’re just memory addresses! But
+they give us a way to <strong>directly access and control
+memory</strong>.</p>
+<ul>
+<li><p>C uses addresses everywhere: when passing variables to functions,
+working with arrays, and managing data dynamically (future
+topics).</p></li>
+<li><p>A pointer’s type tells C <strong>what kind of data</strong> lives
+at that address (<code
+class="sourceCode c"><span class="dt">int</span><span class="op">*</span></code>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+<code class="sourceCode c"><span class="dt">int</span></code>, <code
+class="sourceCode c"><span class="dt">float</span><span class="op">*</span></code>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+<code
+class="sourceCode c"><span class="dt">float</span></code>).</p></li>
+<li><p>Use the <code>&amp;</code> operator to <strong>get</strong> a
+variable’s address, and the <code class="text">*</code> operator to
+<strong>access</strong> the value stored there.</p></li>
+<li><p>As we move forward, pointers will help us build <strong>dynamic
+memory, structs, and modular programs</strong> efficiently.</p></li>
+<li><p>They’re one of the key ideas that make C both <strong>powerful
+and low-level</strong>.</p></li>
+</ul>
+</section>
+</section>
+<section id="arrays-and-pointers" class="level2">
+<h2>Arrays and Pointers</h2>
+<section id="arrays-and-pointers-1" class="level3">
+<h3>Arrays and Pointers</h3>
+<p>In C, arrays and pointers <strong>behave similarly</strong> in many
+expressions, but they are <strong>not the same thing</strong>.</p>
+<ul>
+<li><p>An array is a fixed block of contiguous memory that
+<strong>decays</strong> to a pointer to its first element when used in
+most expressions.</p></li>
+<li><p>A pointer, on the other hand, is a separate variable that can
+store different addresses and move through memory.</p></li>
+</ul>
+</section>
+<section id="example" class="level3">
+<h3>Example</h3>
+<p>Consider the following <code
+class="sourceCode c"><span class="dt">int</span></code> array</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> vals<span class="op">[</span><span class="dv">5</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">10</span><span class="op">,</span> <span class="dv">20</span><span class="op">,</span> <span class="dv">30</span><span class="op">,</span> <span class="dv">40</span><span class="op">,</span> <span class="dv">50</span><span class="op">};</span></span></code></pre></div>
+<p><code class="text">vals</code> is a fixed block of contiguous memory
+that holds 5 <code>32 bit</code> integers (32 bits = 4 bytes); each with
+their own addresses.</p>
+<p><img src="fig03.svg?v=8414efde" alt="Diagram" class="diagram" loading="lazy"
+width="409" /></p>
+</section>
+<section id="array-names-decay-to-pointers" class="level3">
+<h3>Array Names Decay to Pointers</h3>
+<p>In C, an <strong>array name is not a pointer</strong></p>
+<ul>
+<li><p>In most expressions it <strong>decays</strong> (automatically
+converts) to a pointer to its first element,</p></li>
+<li><p>meaning the compiler automatically replaces the array name with a
+pointer to its first element (<code>&amp;array[0]</code>).</p></li>
+</ul>
+<div class="sourceCode" id="cb11"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> vals<span class="op">[</span><span class="dv">5</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">10</span><span class="op">,</span> <span class="dv">20</span><span class="op">,</span> <span class="dv">30</span><span class="op">,</span> <span class="dv">40</span><span class="op">,</span> <span class="dv">50</span><span class="op">};</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>pVals <span class="op">=</span> vals<span class="op">;</span> <span class="co">// vals converted to &amp;vals[0]</span></span></code></pre></div>
+<div class="center">
+<p><img src="fig04.svg?v=9da2c7d9" alt="Diagram" class="diagram" loading="lazy"
+width="456" /></p>
+</div>
+</section>
+<section id="array-indexing" class="level3">
+<h3>Array Indexing</h3>
+<p>An array <code>name</code> and a <code>pointer</code> to an array can
+be used interchangeably when dealt with carefully.</p>
+<p>Example:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> vals<span class="op">[</span><span class="dv">5</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">10</span><span class="op">,</span> <span class="dv">20</span><span class="op">,</span> <span class="dv">30</span><span class="op">,</span> <span class="dv">40</span><span class="op">,</span> <span class="dv">50</span><span class="op">};</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">/* Equivalent pointer values */</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>pVals <span class="op">=</span> vals<span class="op">;</span> <span class="co">// vals converts to &amp;vals[0]</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>pVals2 <span class="op">=</span> <span class="op">&amp;</span>vals<span class="op">[</span><span class="dv">0</span><span class="op">];</span></span></code></pre></div>
+<p>In the above example, both <code
+class="sourceCode c"><span class="dt">int</span></code> pointers
+<code>pVals</code> and <code>pVals2</code>, point to the first member of
+the integer array <code>vals</code>.</p>
+<p>Example Continued:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1"></a><span class="dt">int</span> vals<span class="op">[</span><span class="dv">5</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">10</span><span class="op">,</span> <span class="dv">20</span><span class="op">,</span> <span class="dv">30</span><span class="op">,</span> <span class="dv">40</span><span class="op">,</span> <span class="dv">50</span><span class="op">};</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a></span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="co">/* Equivalent pointer values */</span></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="dt">int</span> <span class="op">*</span>pVals <span class="op">=</span> vals<span class="op">;</span> <span class="co">// vals converts to &amp;vals[0]</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="dt">int</span> <span class="op">*</span>pVals2 <span class="op">=</span> <span class="op">&amp;</span>vals<span class="op">[</span><span class="dv">0</span><span class="op">];</span></span>
+<span id="cb13-6"><a href="#cb13-6"></a></span>
+<span id="cb13-7"><a href="#cb13-7"></a><span class="co">/* Equivalent indexes*/</span></span>
+<span id="cb13-8"><a href="#cb13-8"></a>vals<span class="op">[</span><span class="dv">4</span><span class="op">]</span> <span class="op">=</span> <span class="dv">60</span><span class="op">;</span> <span class="co">// Re-assigning vals[4] to 60</span></span>
+<span id="cb13-9"><a href="#cb13-9"></a>pVals<span class="op">[</span><span class="dv">4</span><span class="op">]</span> <span class="op">=</span> <span class="dv">60</span><span class="op">;</span></span>
+<span id="cb13-10"><a href="#cb13-10"></a><span class="op">*(</span>vals <span class="op">+</span><span class="dv">4</span><span class="op">)</span> <span class="op">=</span> <span class="dv">60</span><span class="op">;</span></span>
+<span id="cb13-11"><a href="#cb13-11"></a><span class="op">*(</span>pVals2 <span class="op">+</span><span class="dv">4</span><span class="op">)</span> <span class="op">=</span> <span class="dv">60</span><span class="op">;</span></span></code></pre></div>
+<p>Each of the statements on lines 8 through 11 perform the same task:
+Re-assigning the fifth member of <code>vals</code> to
+<code>60</code>.</p>
+</section>
+<section id="using-printf-with-pointers" class="level3">
+<h3>Using <code>printf()</code> with Pointers</h3>
+<p>Using <code>printf()</code> with pointers requires a bit of care:</p>
+<ul>
+<li><p>When printing memory addresses, use the format specifier
+<code>%p</code>.</p></li>
+<li><p>The <code>%p</code> specifier expects a pointer of type
+<code>void *</code> (pointer to an unspecified type).</p></li>
+<li><p>Cast before printing to stay fully standard-compliant.</p></li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> vals<span class="op">[</span><span class="dv">5</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">10</span><span class="op">,</span> <span class="dv">20</span><span class="op">,</span> <span class="dv">30</span><span class="op">,</span> <span class="dv">40</span><span class="op">,</span> <span class="dv">50</span><span class="op">};</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>pVals <span class="op">=</span> vals<span class="op">;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;vals (array name): </span><span class="sc">%p\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">(</span><span class="dt">void</span> <span class="op">*)</span>vals<span class="op">);</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;&amp;vals[0] (first): </span><span class="sc">%p\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">(</span><span class="dt">void</span> <span class="op">*)&amp;</span>vals<span class="op">[</span><span class="dv">0</span><span class="op">]);</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;pVals (pointer var): </span><span class="sc">%p\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">(</span><span class="dt">void</span> <span class="op">*)</span>pVals<span class="op">);</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;pVals+1 (next int): </span><span class="sc">%p\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">(</span><span class="dt">void</span> <span class="op">*)(</span>pVals <span class="op">+</span> <span class="dv">1</span><span class="op">));</span></span></code></pre></div>
+<p><strong>Notes:</strong></p>
+<ul>
+<li><p>The cast to <code>(void *)</code> ensures your code is
+<strong>standards-compliant</strong> and
+<strong>portable</strong>.</p></li>
+<li><p>Never use <code>%d</code> or <code>%f</code> for addresses; only
+<code>%p</code>.</p></li>
+</ul>
+</section>
+<section id="printf-array-indexing-vs.-pointer-arithmetic"
+class="level3">
+<h3><code>printf</code>: Array Indexing vs. Pointer Arithmetic</h3>
+<p>Normal indexing,</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;The first array value is </span><span class="sc">%d</span><span class="st">.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> vals<span class="op">[</span><span class="dv">0</span><span class="op">]);</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;The second array value is </span><span class="sc">%d</span><span class="st">.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> vals<span class="op">[</span><span class="dv">1</span><span class="op">]);</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;The third array value is </span><span class="sc">%d</span><span class="st">.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> vals<span class="op">[</span><span class="dv">2</span><span class="op">]);</span></span></code></pre></div>
+<p>Indexing using pointers,</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;The first array value is </span><span class="sc">%d</span><span class="st">.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">*(</span>vals <span class="op">+</span> <span class="dv">0</span><span class="op">));</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;The second array value is </span><span class="sc">%d</span><span class="st">.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">*(</span>vals <span class="op">+</span> <span class="dv">1</span><span class="op">));</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;The third array value is </span><span class="sc">%d</span><span class="st">.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">*(</span>vals <span class="op">+</span> <span class="dv">2</span><span class="op">));</span></span></code></pre></div>
+<p><strong>Notes:</strong></p>
+<ul>
+<li><p>Here we are printing the <strong>values</strong> stored in memory
+(<code class="sourceCode c"><span class="dt">int</span></code>), not the
+<strong>addresses</strong>.</p></li>
+<li><p>The format specifier <code>%d</code> expects an <code>int</code>,
+and each expression like <code>*(vals + i)</code> produces an
+<code>int</code>.</p></li>
+<li><p>Casting to <code>(void *)</code> is only required when printing
+the <strong>address itself</strong> with <code>%p</code>, not the stored
+value.</p></li>
+</ul>
+</section>
+<section id="bonus-walking-a-2d-array-with-one-pointer" class="level3">
+<h3>Bonus: Walking a 2D Array with One Pointer</h3>
+<p>Recall W6’s row-major order: a 2D array is really one flat block of
+memory, so <code
+class="sourceCode c">grid<span class="op">[</span>row<span class="op">][</span>col<span class="op">]</span></code>
+lives at a single offset from the start:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">offset</mtext><mo>=</mo><mtext mathvariant="normal">row</mtext><mo>×</mo><mtext mathvariant="normal">NUM_COLS</mtext><mo>+</mo><mtext mathvariant="normal">col</mtext></mrow><annotation encoding="application/x-tex">\text{offset} = \text{row} \times \text{NUM\_COLS} + \text{col}</annotation></semantics></math></p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> grid<span class="op">[</span><span class="dv">2</span><span class="op">][</span><span class="dv">3</span><span class="op">]</span> <span class="op">=</span> <span class="op">{{</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">},</span> <span class="op">{</span><span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">,</span> <span class="dv">6</span><span class="op">}};</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>p <span class="op">=</span> <span class="op">&amp;</span>grid<span class="op">[</span><span class="dv">0</span><span class="op">][</span><span class="dv">0</span><span class="op">];</span>   <span class="co">// treat the whole grid as one flat block</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">2</span> <span class="op">*</span> <span class="dv">3</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> &quot;</span><span class="op">,</span> <span class="op">*(</span>p <span class="op">+</span> i<span class="op">));</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co">// prints: 1 2 3 4 5 6 (the row-major order from W6)</span></span></code></pre></div>
+<ul>
+<li><p><code
+class="sourceCode c">p<span class="op">[</span>row <span class="op">*</span> NUM_COLS <span class="op">+</span> col<span class="op">]</span></code>
+and <code
+class="sourceCode c">grid<span class="op">[</span>row<span class="op">][</span>col<span class="op">]</span></code>
+read the exact same value</p></li>
+<li><p>One loop, one pointer, no nested indices; this only works because
+the array is stored contiguously, in exactly that order</p></li>
+</ul>
+</section>
+<section id="arrays-are-not-pointers" class="level3">
+<h3>Arrays Are <em>Not</em> Pointers</h3>
+<p>An array is <em>not</em> equivalent to a pointer:</p>
+<ul>
+<li><p>An <strong>array’s name is not a variable</strong> – it
+represents a fixed address in memory and cannot be reassigned.</p></li>
+<li><p>A <strong>pointer is a variable</strong> that stores addresses
+that can be changed.</p></li>
+</ul>
+<div class="sourceCode" id="cb18"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> vals1<span class="op">[</span><span class="dv">10</span><span class="op">],</span> vals2<span class="op">[</span><span class="dv">10</span><span class="op">];</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>pVals1 <span class="op">=</span> vals1<span class="op">;</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>vals1 <span class="op">=</span> vals2<span class="op">;</span>   <span class="co">//  Error: array names are not assignable</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>vals1<span class="op">++;</span>      <span class="co">//  Error: address of vals[0] can&#39;t be changed</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>pVals1<span class="op">++;</span>      <span class="co">//  Valid: stored addresses in pVals1 can change</span></span></code></pre></div>
+<p><strong>Key idea:</strong> Arrays are fixed blocks of memory; they
+can’t "point" somewhere else. Pointers are flexible variables that can
+store different addresses.</p>
+</section>
+</section>
+<section id="character-arrays-and-pointers" class="level2">
+<h2>Character Arrays and Pointers</h2>
+<section id="character-arrays-and-pointers-1" class="level3">
+<h3>Character Arrays and Pointers</h3>
+<p>Let’s construct two similar strings,</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="dt">char</span> name<span class="op">[]</span> <span class="op">=</span> <span class="st">&quot;Ryan&quot;</span><span class="op">;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="dt">char</span> <span class="op">*</span>pName <span class="op">=</span> <span class="st">&quot;Ryan&quot;</span><span class="op">;</span></span></code></pre></div>
+<p>Since <code class="text">pName</code> is a pointer variable, you can
+use the assignment ‘<code class="text">=</code>’ operator.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pName <span class="op">=</span> <span class="st">&quot;Ryan B.&quot;</span><span class="op">;</span> <span class="co">// allowed</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>name <span class="op">=</span> <span class="st">&quot;Ryan B.&quot;</span><span class="op">;</span> <span class="co">// NOT ALLOWED</span></span></code></pre></div>
+<p>Note: C isn’t putting the new name into <code
+class="text">pName</code>, it is creating the new name in the memory and
+then setting the value of the <em>pointer</em> <code
+class="text">pName</code> equal to that address.<br />
+CAREFUL: There is a catch with overwriting memory which we will discuss
+in this week’s tutorial.</p>
+</section>
+<section id="arrays-of-pointers" class="level3">
+<h3>Arrays of Pointers</h3>
+<p>If you want to store an array of strings you have to use
+pointers,</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="dt">char</span> <span class="op">*</span>movies<span class="op">[</span><span class="dv">8</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="st">&quot;Amour&quot;</span><span class="op">,</span> <span class="st">&quot;Argo&quot;</span><span class="op">,</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>                   <span class="st">&quot;Django Unchained&quot;</span><span class="op">,</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                   <span class="st">&quot;Les Miserables&quot;</span><span class="op">,</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                   <span class="st">&quot;Life of Pi&quot;</span><span class="op">,</span> <span class="st">&quot;Lincoln&quot;</span><span class="op">,</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>                   <span class="st">&quot;Silver Linings Playbook&quot;</span><span class="op">,</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>                   <span class="st">&quot;Zero Dark Thirty&quot;</span><span class="op">};</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">8</span><span class="op">;</span> i<span class="op">++)</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Have you seen </span><span class="sc">%s</span><span class="st">? </span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> movies<span class="op">[</span>i<span class="op">]);</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</section>
+</section>
+<section id="this-weeks-tutorial" class="level2">
+<h2>This Week’s Tutorial</h2>
+<section id="this-weeks-tutorial-1" class="level3">
+<h3>This Week’s Tutorial</h3>
+<ul>
+<li><p><strong>Memory Diagrams quiz</strong> on Moodle: read, trace and
+pick memory diagrams.</p></li>
+<li><p><strong>Address and value</strong>: print <code>&amp;x</code>,
+<code class="sourceCode c">x</code>, <code class="sourceCode c">p</code>
+and <code class="sourceCode c"><span class="op">*</span>p</code>, change
+<code class="sourceCode c">x</code> through the pointer, then see what a
+mismatched pointer type does.</p></li>
+<li><p><strong><code class="sourceCode c">NULL</code> check</strong>:
+crash it once with no check, then guard the dereference with <code
+class="sourceCode c"><span class="cf">if</span> <span class="op">(</span>p <span class="op">!=</span> NULL<span class="op">)</span></code>.</p></li>
+<li><p><strong>Walking an array with a pointer</strong>: read with <code
+class="sourceCode c"><span class="op">*(</span>p <span class="op">+</span> i<span class="op">)</span></code>,
+write with all four index forms, then walk with <code
+class="sourceCode c">p<span class="op">++</span></code> (and see why
+<code class="sourceCode c">vals<span class="op">++</span></code> won’t
+compile).</p></li>
+<li><p><strong>Memory diagram</strong>: draw one by hand, then check it
+against the addresses your program prints with <code
+class="sourceCode c">printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%p</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">...)</span></code>.</p></li>
+<li><p><strong>2D array, one pointer</strong>: one loop over the whole
+grid, plus the <code
+class="sourceCode c">row <span class="op">*</span> NUM_COLS <span class="op">+</span> col</code>
+offset.</p></li>
+<li><p><strong>Strings and pointers</strong>: <code
+class="sourceCode c"><span class="dt">char</span> name<span class="op">[]</span></code>
+vs. <code
+class="sourceCode c"><span class="dt">char</span> <span class="op">*</span>pName</code>,
+the string-literal catch, and an array of strings.</p></li>
+</ul>
+</section>
+<section id="looking-ahead" class="level3">
+<h3>Looking Ahead</h3>
+<p>Today: pointer fundamentals; addresses, <code>&amp;</code>/<code
+class="sourceCode c"><span class="op">*</span></code>, memory diagrams,
+and how arrays decay to pointers.</p>
+<p>Part 2, next week: pass-by-reference (finally fixing <code
+class="sourceCode c">swap<span class="op">()</span></code>), and the
+rest of the functions story; passing arrays and strings to functions,
+and returning multiple values through pointers.</p>
+</section>
+</section>
+<nav class="pager" aria-label="Previous and next lecture">
+<a class="prev" href="../lecture08-part2/"><span class="label">← Previous</span>Week
+8: Functions and Scope Part 2: Scope</a>
+
+</nav>
+</main>
+<script>
+  // light/dark toggle: an explicit choice wins over the system setting
+  (function () {
+    var b = document.getElementById('theme-toggle'), r = document.documentElement;
+    function current() {
+      var t = r.getAttribute('data-theme');
+      return t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    function show() {
+      var dark = current() === 'dark';
+      b.textContent = dark ? '☀ Light' : '☾ Dark';
+      b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    b.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      r.setAttribute('data-theme', next);
+      try { localStorage.setItem('cpsc100-theme', next); } catch (e) {}
+      show();
+      b.blur();   // so Space goes back to the demo's "next step"
+    });
+    show();
+  })();
+</script>
+</body>
+</html>

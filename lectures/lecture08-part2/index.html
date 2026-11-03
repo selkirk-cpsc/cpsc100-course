@@ -183,7 +183,8 @@
 <nav class="pager top" aria-label="Previous and next lecture">
 <a class="prev" href="../lecture08-part1/"><span class="label">← Previous</span>Week
 8: Functions and Scope Part 1: Functions</a>
-
+<a class="next" href="../lecture09-part1/"><span class="label">Next →</span>Week
+9: Pointers Part 1: Pointer Fundamentals</a>
 </nav>
 <header class="title">
 <div class="week">Week 8</div>
@@ -238,7 +239,7 @@ class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span i
 <span id="cb1-2"><a href="#cb1-2"></a></span>
 <span id="cb1-3"><a href="#cb1-3"></a><span class="dt">void</span> test<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
 <span id="cb1-4"><a href="#cb1-4"></a></span>
-<span id="cb1-5"><a href="#cb1-5"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
 <span id="cb1-6"><a href="#cb1-6"></a>    <span class="dt">int</span> a <span class="op">=</span> <span class="dv">10</span><span class="op">;</span> <span class="co">// main&#39;s own variable</span></span>
 <span id="cb1-7"><a href="#cb1-7"></a>    printf<span class="op">(</span><span class="st">&quot;main: a = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> a<span class="op">);</span></span>
 <span id="cb1-8"><a href="#cb1-8"></a>    test<span class="op">();</span></span>
@@ -277,7 +278,7 @@ class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span i
 <span id="cb3-3"><a href="#cb3-3"></a><span class="dt">void</span> add_ten<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
 <span id="cb3-4"><a href="#cb3-4"></a><span class="dt">void</span> add_hundred<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
 <span id="cb3-5"><a href="#cb3-5"></a></span>
-<span id="cb3-6"><a href="#cb3-6"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
 <span id="cb3-7"><a href="#cb3-7"></a>    add_ten<span class="op">();</span></span>
 <span id="cb3-8"><a href="#cb3-8"></a>    add_hundred<span class="op">();</span></span>
 <span id="cb3-9"><a href="#cb3-9"></a>    add_ten<span class="op">();</span></span>
@@ -355,7 +356,7 @@ class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span i
 <span id="cb5-5"><a href="#cb5-5"></a><span class="dt">void</span> add_ten<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
 <span id="cb5-6"><a href="#cb5-6"></a><span class="dt">void</span> add_hundred<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
 <span id="cb5-7"><a href="#cb5-7"></a></span>
-<span id="cb5-8"><a href="#cb5-8"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
 <span id="cb5-9"><a href="#cb5-9"></a>    add_ten<span class="op">();</span></span>
 <span id="cb5-10"><a href="#cb5-10"></a>    add_hundred<span class="op">();</span></span>
 <span id="cb5-11"><a href="#cb5-11"></a>    add_ten<span class="op">();</span></span>
@@ -427,7 +428,7 @@ class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span i
 <span id="cb7-2"><a href="#cb7-2"></a></span>
 <span id="cb7-3"><a href="#cb7-3"></a><span class="dt">void</span> print_square<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
 <span id="cb7-4"><a href="#cb7-4"></a></span>
-<span id="cb7-5"><a href="#cb7-5"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
 <span id="cb7-6"><a href="#cb7-6"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span> <span class="co">// local to main</span></span>
 <span id="cb7-7"><a href="#cb7-7"></a>    print_square<span class="op">();</span></span>
 <span id="cb7-8"><a href="#cb7-8"></a>    printf<span class="op">(</span><span class="st">&quot;Done!</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
@@ -452,7 +453,7 @@ class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span i
 <span id="cb9-2"><a href="#cb9-2"></a></span>
 <span id="cb9-3"><a href="#cb9-3"></a><span class="dt">void</span> print_square<span class="op">(</span><span class="dt">int</span> n<span class="op">);</span></span>
 <span id="cb9-4"><a href="#cb9-4"></a></span>
-<span id="cb9-5"><a href="#cb9-5"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
 <span id="cb9-6"><a href="#cb9-6"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span> <span class="co">// local to main</span></span>
 <span id="cb9-7"><a href="#cb9-7"></a>    print_square<span class="op">(</span>x<span class="op">);</span></span>
 <span id="cb9-8"><a href="#cb9-8"></a>    printf<span class="op">(</span><span class="st">&quot;Done!</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
@@ -486,7 +487,7 @@ needs.</p>
 <div class="sourceCode" id="cb11"><pre
 class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb11-1"><a href="#cb11-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
 <span id="cb11-2"><a href="#cb11-2"></a></span>
-<span id="cb11-3"><a href="#cb11-3"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
 <span id="cb11-4"><a href="#cb11-4"></a>    <span class="dt">int</span> total <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
 <span id="cb11-5"><a href="#cb11-5"></a></span>
 <span id="cb11-6"><a href="#cb11-6"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> i <span class="op">&lt;=</span> <span class="dv">3</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
@@ -524,7 +525,7 @@ so it can be used inside the loop <em>and</em> after it.</p></li>
 <div class="sourceCode" id="cb13"><pre
 class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
 <span id="cb13-2"><a href="#cb13-2"></a></span>
-<span id="cb13-3"><a href="#cb13-3"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
 <span id="cb13-4"><a href="#cb13-4"></a>    <span class="dt">int</span> score <span class="op">=</span> <span class="dv">72</span><span class="op">;</span></span>
 <span id="cb13-5"><a href="#cb13-5"></a></span>
 <span id="cb13-6"><a href="#cb13-6"></a>    <span class="cf">if</span> <span class="op">(</span>score <span class="op">&gt;=</span> <span class="dv">50</span><span class="op">)</span> <span class="op">{</span></span>
@@ -543,7 +544,7 @@ class="sourceCode c"><span class="cf">if</span></code></strong></p>
 <div class="sourceCode" id="cb15"><pre
 class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb15-1"><a href="#cb15-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
 <span id="cb15-2"><a href="#cb15-2"></a></span>
-<span id="cb15-3"><a href="#cb15-3"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-3"><a href="#cb15-3"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
 <span id="cb15-4"><a href="#cb15-4"></a>    <span class="dt">int</span> score <span class="op">=</span> <span class="dv">72</span><span class="op">;</span></span>
 <span id="cb15-5"><a href="#cb15-5"></a>    <span class="dt">char</span> grade<span class="op">;</span></span>
 <span id="cb15-6"><a href="#cb15-6"></a></span>
@@ -618,7 +619,7 @@ class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span i
 <span id="cb17-2"><a href="#cb17-2"></a></span>
 <span id="cb17-3"><a href="#cb17-3"></a><span class="dt">void</span> count_calls<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
 <span id="cb17-4"><a href="#cb17-4"></a></span>
-<span id="cb17-5"><a href="#cb17-5"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-5"><a href="#cb17-5"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
 <span id="cb17-6"><a href="#cb17-6"></a>    count_calls<span class="op">();</span></span>
 <span id="cb17-7"><a href="#cb17-7"></a>    count_calls<span class="op">();</span></span>
 <span id="cb17-8"><a href="#cb17-8"></a>    count_calls<span class="op">();</span></span>
@@ -725,7 +726,8 @@ this is why one function can’t see another’s variables</p></li>
 <nav class="pager" aria-label="Previous and next lecture">
 <a class="prev" href="../lecture08-part1/"><span class="label">← Previous</span>Week
 8: Functions and Scope Part 1: Functions</a>
-
+<a class="next" href="../lecture09-part1/"><span class="label">Next →</span>Week
+9: Pointers Part 1: Pointer Fundamentals</a>
 </nav>
 </main>
 <script>
