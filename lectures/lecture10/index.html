@@ -556,41 +556,48 @@ variables</p></li>
 </ul>
 </div>
 </div>
-<p>&lt;handout:1-4&gt;[fragile]<span>Memory Diagram: Inside
-<code>swap(&amp;x, &amp;y)</code></span></p>
-<p>Inside <code
-class="sourceCode c">swap<span class="op">()</span></code>, just before
-it returns:</p>
-<div class="center">
-<p><img src="fig01.svg?v=d7c20844" alt="Diagram" class="diagram" loading="lazy"
-width="452" /></p>
-</div>
-<p>How it got there, one line at a time:</p>
-<ol>
-<li><p><strong>On entry:</strong> <code class="sourceCode c">a</code>
-and <code class="sourceCode c">b</code> are <code
+</section>
+<section id="memory-diagram-inside-swapx-y" class="level3">
+<h3>Memory Diagram: Inside <code>swap(&amp;x, &amp;y)</code></h3>
+<p><strong>On entry:</strong> <code class="sourceCode c">a</code> and
+<code class="sourceCode c">b</code> are <code
 class="sourceCode c">swap<span class="op">()</span></code>’s own boxes,
 holding the addresses of <code class="sourceCode c">x</code> and <code
 class="sourceCode c">y</code>. <code class="sourceCode c">temp</code>
-has no value yet.</p></li>
-<li><p><code
-class="sourceCode c"><span class="dt">int</span> temp <span class="op">=</span> <span class="op">*</span>a<span class="op">;</span></code>
+has no value yet.</p>
+<div class="center">
+<p><img src="fig01.svg?v=bbb56650" alt="Diagram" class="diagram" loading="lazy"
+width="452" /></p>
+</div>
+<p><strong><code
+class="sourceCode c"><span class="dt">int</span> temp <span class="op">=</span> <span class="op">*</span>a<span class="op">;</span></code></strong>
 follows <code class="sourceCode c">a</code> to <code
 class="sourceCode c">x</code> and copies its 3 into <code
-class="sourceCode c">temp</code>.</p></li>
-<li><p><code
-class="sourceCode c"><span class="op">*</span>a <span class="op">=</span> <span class="op">*</span>b<span class="op">;</span></code>
+class="sourceCode c">temp</code>.</p>
+<div class="center">
+<p><img src="fig02.svg?v=6b377fa9" alt="Diagram" class="diagram" loading="lazy"
+width="452" /></p>
+</div>
+<p><strong><code
+class="sourceCode c"><span class="op">*</span>a <span class="op">=</span> <span class="op">*</span>b<span class="op">;</span></code></strong>
 follows <code class="sourceCode c">b</code> to <code
 class="sourceCode c">y</code>, then writes its 7 through <code
 class="sourceCode c">a</code> into <code class="sourceCode c">x</code>.
 For a moment both hold 7; the 3 survives only in <code
-class="sourceCode c">temp</code>.</p></li>
-<li><p><code
-class="sourceCode c"><span class="op">*</span>b <span class="op">=</span> temp<span class="op">;</span></code>
+class="sourceCode c">temp</code>.</p>
+<div class="center">
+<p><img src="fig03.svg?v=5e7594c8" alt="Diagram" class="diagram" loading="lazy"
+width="452" /></p>
+</div>
+<p><strong><code
+class="sourceCode c"><span class="op">*</span>b <span class="op">=</span> temp<span class="op">;</span></code></strong>
 writes the saved 3 through <code class="sourceCode c">b</code> into
 <code class="sourceCode c">y</code>. <code class="sourceCode c">x</code>
-and <code class="sourceCode c">y</code> are swapped.</p></li>
-</ol>
+and <code class="sourceCode c">y</code> are swapped.</p>
+<div class="center">
+<p><img src="fig04.svg?v=ea5c02ad" alt="Diagram" class="diagram" loading="lazy"
+width="452" /></p>
+</div>
 </section>
 <section id="before-and-after-swapx-y" class="level3">
 <h3>Before and After <code>swap(&amp;x, &amp;y)</code></h3>
@@ -598,13 +605,13 @@ and <code class="sourceCode c">y</code> are swapped.</p></li>
 <div class="column figure-col">
 <p><strong>Before the call</strong></p>
 <div class="center">
-<p><img src="fig02.svg?v=21090144" alt="Diagram" class="diagram" loading="lazy"
+<p><img src="fig05.svg?v=21090144" alt="Diagram" class="diagram" loading="lazy"
 width="250" /></p>
 </div>
 </div><div class="column figure-col">
 <p><strong>After the call</strong></p>
 <div class="center">
-<p><img src="fig03.svg?v=d9bc25bd" alt="Diagram" class="diagram" loading="lazy"
+<p><img src="fig06.svg?v=d9bc25bd" alt="Diagram" class="diagram" loading="lazy"
 width="250" /></p>
 </div>
 </div>
