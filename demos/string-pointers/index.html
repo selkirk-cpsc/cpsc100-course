@@ -332,7 +332,7 @@
     };
   }
 
-  /* Code is copied from the Lecture 9 Part 1 slides. Addresses are made up. A string
+  /* Code is copied from the Lecture 9 slides. Addresses are made up. A string
      literal's letters exist before main() starts, so they are drawn from the first step. */
   const EXAMPLES = [
     {
@@ -380,17 +380,20 @@ for (int i = 0; i < 8; i++)
         T.array('char *', 'movies', '*movies[8]', 0x7F00, 8, titles.map(() => '?'), true);
         titles.forEach((t, k) => T.pointAt(`movies[${k}]`, t));
         T.snap(6, '<code>movies</code> is an array of eight <b>pointers</b>, side by side. The letters aren\'t in the array: each element holds the address of one string\'s first letter. That lets every string be a different length.');
-        T.decl('int', 'i', '0x7EF4', 0);
         titles.forEach((t, k) => {
-          if (k > 0) T.set('i', k);
+          // every pass starts back on the for line: the start (or i++), then the test
+          if (k > 0) T.set('i', k); else T.decl('int', 'i', '0x7EF4', 0);
+          T.snap(8, k === 0
+            ? 'The <code>for</code> loop starts: <code>int i = 0</code> creates <b>i</b>. Test <code>i &lt; 8</code>: 0 &lt; 8 is <b>True</b>, so run the loop body.'
+            : `Back to the top of the loop: <code>i++</code> makes i ${k}. Test <code>i &lt; 8</code>: ${k} &lt; 8 is <b>True</b>, so run the body again.`);
           T.via(`movies[${k}]`);
           T.print(`Have you seen ${t}? \n`);
           T.snap(10, k === 0
             ? '<code>movies[0]</code> reads the address in that box. <code>%s</code> follows it and prints letters until it reaches <code>\\0</code>.'
-            : `<code>i</code> is ${k}, so this pass follows <code>movies[${k}]</code>.`);
+            : `This pass follows <code>movies[${k}]</code> to "${t}".`);
         });
         T.set('i', 8);
-        T.snap(8, '<code>i</code> is 8, so <code>i &lt; 8</code> is <b>False</b> and the loop ends. Same loop, same <code>%s</code>, and it never needed to know how long each string was.', { done: true });
+        T.snap(8, 'Back to the top of the loop: <code>i++</code> makes i 8. Test <code>i &lt; 8</code>: 8 &lt; 8 is <b>False</b>, so the loop ends. Same loop, same <code>%s</code>, and it never needed to know how long each string was.', { done: true });
       },
     },
   ];

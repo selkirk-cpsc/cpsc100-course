@@ -21,7 +21,8 @@ Each week's lecture written out as a chapter you can read top to bottom, with th
 | 7 | [Midterm 1 Review](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture07/) |
 | 8 | [Functions and Scope Part 1: Functions](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture08-part1/) |
 | 8 | [Functions and Scope Part 2: Scope](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture08-part2/) |
-| 9 | [Pointers Part 1: Pointer Fundamentals](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture09-part1/) |
+| 9 | [Pointer Fundamentals](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture09/) |
+| 10 | [Pointers and Functions](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture10/) |
 
 ## Interactive Demos
 
@@ -66,13 +67,23 @@ Each demo steps through a flow diagram one box at a time. As you follow the arro
 | [Scope Explorer](https://selkirk-cpsc.github.io/cpsc100-course/demos/scope-explorer/) | Run the lecture's scope examples one line at a time and watch each call's variables appear and disappear. Click any variable to shade every line where it can be used, or to see why a use is out of scope, including a loop's block scope. |
 | [Ordinary Local vs. static](https://selkirk-cpsc.github.io/cpsc100-course/demos/static-local/) | Call `count_calls()` three times with `calls` declared `static`, then as an ordinary local. One version counts 1, 2, 3; the other starts over every call. |
 
-### Week 9: Pointers, Part 1
+### Week 9: Pointer Fundamentals
 
 | Demo | What it shows |
 |---|---|
 | [Pointer Explorer](https://selkirk-cpsc.github.io/cpsc100-course/demos/pointer-explorer/) | Run the lecture's `&` and `*` examples one line at a time. Every variable is a box with an address; a pointer's box holds another box's address. Watch `*pAge = 25` change `age`, a `NULL` pointer crash the program when nobody checks it, and an uninitialized pointer print a junk number that gets past the check. |
 | [Array Pointers](https://selkirk-cpsc.github.io/cpsc100-course/demos/array-pointers/) | Run the lecture's array and pointer examples one line at a time. Two pointers land on the same element, four spellings all reach `vals[4]`, and `pVals1++` moves its arrow while the array's name can't move at all. |
 | [String Pointers](https://selkirk-cpsc.github.io/cpsc100-course/demos/string-pointers/) | Compare `char name[]`, which holds its own letters, with `char *pName`, which holds an address. Watch the arrow move while the letters stay put, then see an array of pointers reach strings of different lengths. |
+
+### Week 10: Pointers and Functions
+
+| Demo | What it shows |
+|---|---|
+| [addOne: Copies vs. Addresses](https://selkirk-cpsc.github.io/cpsc100-course/demos/add-one-pointer/) | Step through `addOne()` twice: first with `int n`, which gets a copy of 5 that is lost when it returns, then with `int *n`, whose `*n` follows an arrow back into `main()` and changes `x` itself. |
+| [Swap: Copies vs. Addresses](https://selkirk-cpsc.github.io/cpsc100-course/demos/swap/) | Step through `swap()` with values and then with pointers. The broken `swap(int a, int b)` swaps its own copies, which vanish when it returns; the fixed `swap(int *a, int *b)` follows arrows back into `main()` and swaps `x` and `y`. |
+| [Arrays to Functions](https://selkirk-cpsc.github.io/cpsc100-course/demos/array-functions/) | Pass `nums` to `square_elements()` and watch `arr` get one address, not a copy of the array, so every `arr[i]` lands in `main()`'s boxes. Then see why `sizeof(arr)` inside a function measures only the pointer: 8 bytes, not 20. |
+| [Read-Only Strings](https://selkirk-cpsc.github.io/cpsc100-course/demos/read-only-strings/) | Run `make_upper()` on a `char` array, which gets its own copy of the letters, then on the literal `"turing"`, whose letters are in read-only memory: the first write crashes the program. `greet(const char *name)` shows that reading a literal is safe, and that gcc won't build a `greet()` that tries to change it. |
+| [Returning Multiple Values](https://selkirk-cpsc.github.io/cpsc100-course/demos/multiple-results/) | Step through `sum_diff()` and `min_max()`. `main()`'s result variables start as garbage, then the function fills them in through pointers: one call, two results, and no `return` value. |
 
 ### Other Topics
 

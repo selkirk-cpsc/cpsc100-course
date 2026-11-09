@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Returning Multiple Values</title>
+<style>
+  :root {
+    --bg: #f6f6f3;
+    --panel: #ffffff;
+    --ink: #1d1d1f;
+    --muted: #6b6b72;
+    --line: #a9aab2;
+    --node: #ffffff;
+    --visited: #eef1f6;
+    --accent: #2f6fde;
+    --accent-soft: #dce8fd;
+    --left: #d9480f;
+    --right: #7048e8;
+    --ok: #2b8a3e;
+    --ok-soft: #d3f9d8;
+    --bad: #c92a2a;
+    --bad-soft: #ffe0e0;
+    --term: #e9e9ec;
+    --type: #0c8599;
+    --kwc: #0c8599; --str: #a6501a; --cmt: #868e96;
+    --out-bg: #ffffff; --out-ink: #1d1d1f; --out-line: #c9c9cf; --out-dim: #6b6b72;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5; --line: #5a5b63;
+      --node: #25262b; --visited: #2b2e36; --accent: #6ea0ff; --accent-soft: #1d3157;
+      --left: #ff8a50; --right: #a98bff; --ok: #69db7c; --ok-soft: #1c3a24;
+      --bad: #ff8787; --bad-soft: #4a1f22; --term: #2c2d33; --type: #3bc9db;
+      --kwc: #3bc9db; --str: #ffa94d; --cmt: #8a8f98;
+      --out-bg: #111111; --out-ink: #e6e6e6; --out-line: #2c2d33; --out-dim: #8a8a8a;
+      --shadow: 0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5; --line: #5a5b63;
+    --node: #25262b; --visited: #2b2e36; --accent: #6ea0ff; --accent-soft: #1d3157;
+    --left: #ff8a50; --right: #a98bff; --ok: #69db7c; --ok-soft: #1c3a24;
+    --bad: #ff8787; --bad-soft: #4a1f22; --term: #2c2d33; --type: #3bc9db;
+    --kwc: #3bc9db; --str: #ffa94d; --cmt: #8a8f98;
+    --out-bg: #111111; --out-ink: #e6e6e6; --out-line: #2c2d33; --out-dim: #8a8a8a;
+    --shadow: 0 1px 3px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+  header { max-width: 1280px; margin: 0 auto; padding: 20px 16px 4px; }
+  h1 { font-size: 1.45rem; margin: 0 0 4px; letter-spacing: -.01em; }
+  header p { margin: 0; color: var(--muted); }
+
+  main {
+    max-width: 1280px; margin: 0 auto; padding: 12px 16px 32px;
+    display: grid; gap: 16px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    align-items: start;
+  }
+  @media (max-width: 920px) { main { grid-template-columns: minmax(0, 1fr); } }
+
+  .card {
+    background: var(--panel); border-radius: 14px; box-shadow: var(--shadow);
+    padding: 16px; min-width: 0;
+  }
+  .card h2 {
+    font-size: .78rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); margin: 0 0 10px;
+  }
+  .side { display: grid; gap: 16px; min-width: 0; }
+
+  button {
+    font: inherit; cursor: pointer; border-radius: 8px; border: 1.5px solid var(--line);
+    background: var(--node); color: var(--ink); padding: 6px 12px;
+  }
+  button:hover { border-color: var(--accent); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button:disabled { opacity: .4; cursor: default; border-color: var(--line); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .hint { color: var(--muted); font-size: .85rem; }
+  .note { font-size: .88rem; color: var(--muted); margin: 10px 0 0; }
+  kbd { font: 12px ui-monospace, Menlo, Consolas, monospace; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+
+  .theme-toggle { font: inherit; font-size: .85rem; line-height: 1.2; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
+  .theme-toggle:hover { border-color: var(--ink); }
+  header .theme-toggle { float: right; margin: 0 0 8px 12px; }
+
+  /* ---------- code, stepped one line at a time ---------- */
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .tabs button.on { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+  .from { color: var(--muted); font-size: .85rem; margin: 0 0 10px; }
+  .codewrap { overflow-x: auto; border: 1px solid var(--out-line); border-radius: 10px; background: var(--out-bg); }
+  .code { margin: 0; padding: 8px 0; font: 14px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--out-ink); min-width: max-content; }
+  .ln { display: block; padding: 0 14px 0 0; border-left: 4px solid transparent; transition: background .2s; }
+  .ln .no { display: inline-block; width: 2.6em; padding-right: .9em; text-align: right; color: var(--out-dim); user-select: none; }
+  .ln .mark { display: inline-block; width: 1.4em; text-align: center; color: var(--accent); font-weight: 700; }
+  .ln.cur { box-shadow: inset 0 0 0 2px var(--accent); background: var(--accent-soft); }
+  .ln.skip { box-shadow: inset 0 0 0 2px var(--bad); background: var(--bad-soft); }
+  .ln.skip .mark { color: var(--bad); }
+  .code .k { color: var(--kwc); font-weight: 700; }
+  .code .s { color: var(--str); }
+  .code .c, .code .c .k, .code .c .s { color: var(--cmt); font-weight: 400; }
+
+  .stepctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+  .stepctl input[type=range] { flex: 1 1 8em; min-width: 6em; accent-color: var(--accent); }
+  .counter { color: var(--muted); font-size: .9rem; }
+  .runmsg { margin-top: 12px; border: 1px solid var(--out-line); border-radius: 10px; padding: 10px 14px; }
+  .runmsg .status { font-weight: 700; margin-bottom: 2px; }
+  .runmsg .status.bad { color: var(--bad); }
+  .runmsg #say { min-height: 4.5em; }
+  .runmsg b { color: var(--accent); }
+  .runmsg h2, .outbox h2 { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 6px; }
+
+  /* ---------- memory: one box per call, one cell per variable ---------- */
+  .memhead { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between; }
+  .memhead label { font-size: .9rem; cursor: pointer; user-select: none; }
+  .memhead input { accent-color: var(--accent); }
+  .memwrap { position: relative; margin-top: 6px; }
+  .frames { display: grid; gap: 44px; }
+  .mframe { position: relative; border: 2px solid var(--line); border-radius: 12px; padding: 14px 14px 10px; background: var(--node); }
+  .mframe.call { border-color: var(--accent); }
+  .mframe .fh { position: absolute; top: -11px; left: 12px; padding: 0 6px; background: var(--node); font: 700 14px/20px ui-monospace, Menlo, Consolas, monospace; }
+  .mframe .fh .tag { font: 600 12px system-ui, sans-serif; color: var(--muted); margin-left: 4px; }
+  .mframe .none { color: var(--muted); font-size: .85rem; font-style: italic; padding: 8px 0; }
+  .cells { display: flex; flex-wrap: wrap; gap: 14px 56px; padding-top: 30px; }
+  .mv { width: 8.2em; display: flex; flex-direction: column; align-items: center; }
+  .mv .nm { font: 700 14px ui-monospace, Menlo, Consolas, monospace; white-space: nowrap; }
+  .mv .nm .ty { color: var(--type); font-weight: 700; }
+  .mv .box {
+    width: 100%; height: 52px; margin: 3px 0; border: 2px solid var(--line); border-radius: 8px;
+    display: grid; place-items: center; background: var(--panel);
+    font: 700 20px ui-monospace, Menlo, Consolas, monospace;
+    transition: background .3s, border-color .3s, box-shadow .3s;
+  }
+  .mv .box.ptr { font-size: 16px; }
+  .mv .box.garbage { color: var(--muted); border-style: dashed; }
+  .mv .box.null { color: var(--muted); font-size: 15px; }
+  .mv .box.read { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .mv .box.chg { border-color: var(--accent); background: var(--accent-soft); animation: pulse .9s ease-out; }
+  .mv .box.bad { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); box-shadow: 0 0 0 3px var(--bad-soft); }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--accent); } 100% { box-shadow: 0 0 0 10px transparent; } }
+  .mv .ad { font: 12px ui-monospace, Menlo, Consolas, monospace; color: var(--muted); }
+  .empty { color: var(--muted); font-style: italic; }
+
+  svg.wires { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; z-index: 1; }
+  .mframe .fh { z-index: 2; }
+  .wire { fill: none; stroke: var(--muted); stroke-width: 2; marker-end: url(#wire-head); }
+  .wire.active { stroke: var(--accent); stroke-width: 3; marker-end: url(#wire-head-active); stroke-dasharray: 8 6; animation: flow .6s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -14; } }
+  #wire-head path { fill: var(--muted); }
+  #wire-head-active path { fill: var(--accent); }
+  .wires-off svg.wires { display: none; }
+
+  .outbox { margin-top: 12px; }
+  .outbox pre { margin: 0; min-height: 2.4em; font: 14px ui-monospace, Menlo, Consolas, monospace; background: var(--out-bg); color: var(--out-ink); border: 1px solid var(--out-line); border-radius: 8px; padding: 8px 12px; white-space: pre-wrap; }
+  .outbox pre .crash { color: var(--bad); font-weight: 700; }
+
+  /* ---------- arrays as rows of connected boxes; read-only memory below the calls ---------- */
+  .cells { padding: 8px 0 26px; gap: 14px 40px; }
+  .arr { padding: 34px 0 6px; }
+  .arrh { text-align: right; font: 700 14px ui-monospace, Menlo, Consolas, monospace; margin-top: 26px; }
+  .arrh .ty { color: var(--type); }
+  .arrcells { display: grid; gap: 8px 4px; }
+  .mv.el { width: auto; min-width: 0; }
+  .mv.el .nm { font-size: 11px; font-weight: 600; }
+  .mv.el .box { height: 44px; font-size: 18px; }
+  .mv .box.nul { color: var(--muted); font-weight: 400; border-style: dashed; }
+  .many .mv.el .box { font-size: 14px; height: 38px; }
+  .many .mv.el .nm, .many .mv.el .ad { font-size: 9px; }
+  .mframe.ro { border-style: dashed; background: var(--term); }
+  .mframe.ro .fh { background: var(--term); color: var(--muted); }
+  .mframe.ro .mv .box { background: var(--term); }
+  .mframe.ro .mv .box.read { background: var(--panel); }
+  .mframe.ro .mv .box.bad { background: var(--bad-soft); }
+  .hoptxt, .spantxt { fill: var(--accent); font: 700 13px ui-monospace, Menlo, Consolas, monospace; text-anchor: middle; }
+  .span { fill: none; stroke: var(--accent); stroke-width: 2; }
+  @media (max-width: 560px) {
+    .cells { gap: 14px 16px; }
+    .mv { width: 7em; }
+    .mv.el .nm { font-size: 9.5px; }
+    .mv.el .ad { font-size: 10.5px; }
+    .many .mv.el .nm, .many .mv.el .ad { font-size: 7px; }
+    .many .mv.el .box { font-size: 12px; }
+    .many .arrcells { gap: 8px 2px; }
+    .arrh { font-size: 12px; }
+    .hoptxt, .spantxt { font-size: 11px; }
+  }
+
+  .legend2 { display: grid; gap: 8px; font-size: .9rem; }
+  .sw { display: inline-block; width: 26px; height: 16px; border-radius: 4px; vertical-align: -3px; margin-right: 6px; border: 2px solid var(--line); background: var(--panel); }
+  .sw.garbage { border-style: dashed; }
+  .sw.read { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .sw.chg { border-color: var(--accent); background: var(--accent-soft); }
+  .sw.ro { border-style: dashed; background: var(--term); }
+  .swline { display: inline-block; width: 26px; height: 0; border-top: 3px dashed var(--accent); vertical-align: 4px; margin-right: 6px; }
+</style>
+<script>
+  // apply a saved light/dark choice before the page draws (no flash)
+  try { var t = localStorage.getItem('cpsc100-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+</head>
+<body>
+<header>
+  <button type="button" class="theme-toggle" id="theme-toggle">☾ Dark</button>
+  <h1>Returning Multiple Values: the results go out through pointers</h1>
+  <p>The <code>sum_diff()</code> and <code>min_max()</code> examples from the lecture slides, run one line at a time. A function can <code>return</code> only one value, so <code>main()</code> hands over the <b>addresses</b> of its result variables, drawn as arrows, and the function fills them in through those pointers.
+     Keys: <kbd>→</kbd>/<kbd>Space</kbd> next, <kbd>←</kbd> back.</p>
+</header>
+
+<main>
+  <section class="card" aria-label="Example code">
+    <div class="tabs" id="tabs"></div>
+    <p class="from" id="from"></p>
+    <div class="codewrap"><pre class="code" id="code"></pre></div>
+    <div class="stepctl">
+      <button type="button" id="first" title="First step">⏮ First</button>
+      <button type="button" id="back" title="Back (←)">◀ Back</button>
+      <button type="button" id="next" class="primary" title="Next (→ or Space)">Next ▶</button>
+      <button type="button" id="last" title="Last step">Last ⏭</button>
+      <input type="range" id="slider" min="0" value="0" aria-label="Step">
+      <span class="counter" id="counter"></span>
+    </div>
+    <div class="runmsg" aria-live="polite">
+      <h2>What's happening</h2>
+      <div class="status" id="status"></div>
+      <div id="say"></div>
+    </div>
+    <div class="outbox"><h2>Output</h2><pre id="out"></pre></div>
+  </section>
+
+  <div class="side">
+    <section class="card">
+      <div class="memhead">
+        <h2>Memory right now</h2>
+        <label><input type="checkbox" id="wires" checked> Show pointers as arrows</label>
+      </div>
+      <div class="memwrap" id="memwrap">
+        <div class="frames" id="frames"></div>
+        <svg class="wires" id="wiresvg" aria-hidden="true">
+          <defs>
+            <marker id="wire-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+            <marker id="wire-head-active" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+          </defs>
+          <g id="wirepaths"></g>
+        </svg>
+      </div>
+      <p class="note">Turn the arrows off to see what is really stored: a pointer's box holds nothing but a number, the address of another box. The arrow is just a picture of where that number leads.</p>
+    </section>
+
+    <section class="card">
+      <h2>Key</h2>
+      <div class="legend2">
+        <div><span class="sw"></span>a variable: its type and name above, its value inside, its address below</div>
+        <div><span class="sw garbage"></span>never given a value: it holds leftover garbage, shown as <code>?</code></div>
+        <div><span class="sw read"></span>read by the line that just ran</div>
+        <div><span class="sw chg"></span>changed by the line that just ran</div>
+        <div><span class="swline"></span>a pointer being followed, or the hop from the first element to element <code>i</code></div>
+      </div>
+      <p class="note">The result variables start out holding garbage. That's fine: the function writes them through its pointers before <code>main()</code> ever reads them.</p>
+    </section>
+  </div>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  /* Records the program one line at a time. Each snapshot is taken just after its
+     line runs: every call's variables (with addresses), which boxes the line read
+     or changed, which pointers it followed, and the output so far. Frame 0 is
+     read-only memory, where string literals live; the calls start at frame 1. */
+  function makeTracer() {
+    const steps = [], frames = [{ fn: null, ro: true, vars: [] }];
+    let out = '', marks = {}, follow = [];
+    // a variable's key is "<frame number>:<name>"; look in the newest call first
+    const key = name => {
+      for (let f = frames.length - 1; f >= 0; f--)
+        if (frames[f].vars.some(v => v.name === name)) return f + ':' + name;
+      throw new Error('no variable ' + name);
+    };
+    const cell = name => { const [f, n] = key(name).split(':'); return frames[f].vars.find(v => v.name === n); };
+    const hex = n => '0x' + n.toString(16).toUpperCase();
+    // one cell per element, size bytes apart, in frame f
+    const array = (f, type, name, head, base, size, vals) => vals.forEach((val, i) => frames[f].vars.push({
+      type, name: `${name}[${i}]`, lbl: f === 0 ? `[${i}]` : `${name}[${i}]`, addr: hex(base + size * i),
+      val, ref: null, arr: name, head, n: vals.length,
+    }));
+    return {
+      steps,
+      snap(line, say, opt = {}) {
+        const o = Object.assign({}, opt);
+        // a hop (element to element) or a span (a bracket under some boxes) names its boxes
+        if (o.hop) o.hop = [key(o.hop[0]), key(o.hop[1]), o.hop[2]];
+        if (o.span) o.span = [key(o.span[0]), key(o.span[1]), o.span[2]];
+        steps.push(Object.assign({
+          line, say, out, marks, follow,
+          frames: frames.map(f => ({ fn: f.fn, ro: f.ro, vars: f.vars.map(v => Object.assign({}, v)) })),
+        }, o));
+        marks = {}; follow = [];
+      },
+      call(fn) { frames.push({ fn, vars: [] }); },
+      ret() { frames.pop(); },
+      // a new variable in the current call; type is shown above its name
+      decl(type, name, addr, val = '?') {
+        frames[frames.length - 1].vars.push({ type, name, lbl: name, addr, val, ref: null });
+        marks[key(name)] = 'chg';
+      },
+      array(type, name, head, base, size, vals) {
+        array(frames.length - 1, type, name, head, base, size, vals);
+        vals.forEach((_, i) => { marks[key(`${name}[${i}]`)] = 'chg'; });
+      },
+      // a string literal: its letters and '\0', in read-only memory from the start
+      literal(text, base) {
+        array(0, 'char', `"${text}"`, `"${text}"`, base, 1, [...text, '\\0']);
+      },
+      set(name, val) { const v = cell(name); v.val = val; marks[key(name)] = 'chg'; },
+      // store target's address in pointer name: name = &target
+      point(name, target) {
+        const v = cell(name);
+        v.val = cell(target).addr; v.ref = key(target);
+        marks[key(name)] = 'chg';
+      },
+      read(...names) { names.forEach(n => { marks[key(n)] = marks[key(n)] || 'read'; }); },
+      // *name: follow the pointer
+      via(name) { const v = cell(name); follow = follow.concat(key(name)); marks[key(name)] = marks[key(name)] || 'read'; },
+      // *name = val: follow the pointer and change the box at the other end
+      store(name, val) {
+        const v = cell(name); follow = follow.concat(key(name)); marks[key(name)] = marks[key(name)] || 'read';
+        const [f, n] = v.ref.split(':'); frames[f].vars.find(w => w.name === n).val = val; marks[v.ref] = 'chg';
+      },
+      bad(name) { marks[key(name)] = 'bad'; },
+      print(s) { out += s; },
+    };
+  }
+
+  /* Code is copied from the Lecture 10 slides (each Calling It slide's main(),
+     then the function's definition). Addresses are made up; an int is 4 bytes and an
+     address is 8, as on the slides. */
+  const EXAMPLES = [
+    {
+      tab: 'sum_diff',
+      from: 'From the slides "Returning Multiple Values: The Function" and "Calling It".',
+      code: String.raw`#include <stdio.h>
+
+// defined after main():
+void sum_diff(int a, int b, int *sum, int *diff);
+
+int main() {
+    int x = 8, y = 3;
+    int total, difference;
+    sum_diff(x, y, &total, &difference);
+    printf("Sum = %d\n", total);
+    printf("Difference = %d\n", difference);
+    return 0;
+}
+
+void sum_diff(int a, int b, int *sum, int *diff) {
+    *sum  = a + b;
+    *diff = a - b;
+}`,
+      run(T) {
+        T.call('main');
+        T.snap(6, 'The program starts by calling <code>main()</code>, which gets its own box.');
+        T.decl('int', 'x', '0x7F00', 8);
+        T.decl('int', 'y', '0x7F04', 3);
+        T.snap(7, '<code>int x = 8, y = 3;</code> creates the two numbers.');
+        T.decl('int', 'total', '0x7F08');
+        T.decl('int', 'difference', '0x7F0C');
+        T.snap(8, '<b>total</b> and <b>difference</b> are created but never given a value, so they hold leftover garbage, shown as <code>?</code>. They are where the two results will go.');
+        T.read('x', 'y');
+        T.snap(9, 'main calls <code>sum_diff(x, y, &amp;total, &amp;difference)</code>. The first two arguments are the <b>values</b> 8 and 3; the last two are <b>addresses</b>: <code>&amp;total</code> is <code>0x7F08</code> and <code>&amp;difference</code> is <code>0x7F0C</code>. main pauses here until sum_diff returns.');
+        T.call('sum_diff');
+        T.decl('int', 'a', '0x7EE0', 8);
+        T.decl('int', 'b', '0x7EE4', 3);
+        T.decl('int *', 'sum', '0x7EE8');
+        T.point('sum', 'total');
+        T.decl('int *', 'diff', '0x7EF0');
+        T.point('diff', 'difference');
+        T.snap(15, 'Enter <code>sum_diff()</code>, with its own box. <b>a</b> and <b>b</b> are copies of 8 and 3. <b>sum</b> and <b>diff</b> hold the addresses of main\'s <b>total</b> and <b>difference</b>: the two arrows back into main\'s box.');
+        T.read('a', 'b');
+        T.store('sum', 11);
+        T.snap(16, '<code>*sum = a + b;</code> works out 8 + 3 = 11, then follows <b>sum</b> to main\'s <b>total</b> and stores 11 there. The garbage is gone.');
+        T.read('a', 'b');
+        T.store('diff', 5);
+        T.snap(17, '<code>*diff = a - b;</code> works out 8 - 3 = 5 and stores it through <b>diff</b> in main\'s <b>difference</b>.');
+        T.ret();
+        T.snap(18, 'sum_diff() returns. It has no <code>return</code> value, and its box is destroyed: a, b, sum and diff are gone. But both results were stored in <b>main\'s</b> boxes, so they stay.');
+        T.read('total');
+        T.print('Sum = 11\n');
+        T.snap(10, 'Back in main, <b>total</b> holds 11.');
+        T.read('difference');
+        T.print('Difference = 5\n');
+        T.snap(11, '<b>difference</b> holds 5. One call, two results, with no <code>return</code> value at all.');
+        T.ret();
+        T.snap(12, '<code>return 0;</code> main() is finished and the program ends. Now try the <b>min_max</b> tab.', { done: true });
+      },
+    },
+    {
+      tab: 'min_max',
+      from: 'From the slides "Smallest and Largest: The Function" and "Calling It".',
+      code: String.raw`#include <stdio.h>
+
+// defined after main():
+void min_max(int arr[], int size, int *min, int *max);
+
+int main() {
+    int nums[6] = {7, 2, 9, 4, 1, 8};
+    int length = sizeof(nums) / sizeof(nums[0]);
+    int smallest, largest;
+    min_max(nums, length, &smallest, &largest);
+    printf("Smallest = %d\n", smallest);
+    printf("Largest = %d\n", largest);
+    return 0;
+}
+
+void min_max(int arr[], int size, int *min, int *max) {
+    *min = arr[0];
+    *max = arr[0];
+    for (int i = 1; i < size; i++) {
+        if (arr[i] < *min)
+            *min = arr[i];
+        if (arr[i] > *max)
+            *max = arr[i];
+    }
+}`,
+      run(T) {
+        const vals = [7, 2, 9, 4, 1, 8];
+        const hop = k => k ? { hop: ['nums[0]', `nums[${k}]`, `+${k}`] } : {};
+        T.call('main');
+        T.array('int', 'nums', 'nums[6]', 0x7F00, 4, vals);
+        T.snap(7, '<code>nums</code> is six ints side by side in main\'s memory.');
+        T.decl('int', 'length', '0x7F18', 6);
+        T.snap(8, 'In main, <code>nums</code> is still an array, so <code>sizeof(nums)</code> is 24 bytes. 24 / 4 = 6, so <b>length</b> is 6.');
+        T.decl('int', 'smallest', '0x7F1C');
+        T.decl('int', 'largest', '0x7F20');
+        T.snap(9, '<b>smallest</b> and <b>largest</b> are created but never given a value: garbage, shown as <code>?</code>. min_max() will fill them in.');
+        T.read('length');
+        T.snap(10, 'main calls <code>min_max(nums, length, &amp;smallest, &amp;largest)</code>. Three of the four arguments are addresses: <code>nums</code> converts to the address of <code>nums[0]</code> by itself, and <code>&amp;</code> gives the addresses of smallest and largest. main pauses here until min_max returns.');
+        T.call('min_max');
+        // drawn in this order so min and max sit under the boxes they point to
+        T.decl('int *', 'arr', '0x7EE0');
+        T.point('arr', 'nums[0]');
+        T.decl('int *', 'min', '0x7EF0');
+        T.point('min', 'smallest');
+        T.decl('int *', 'max', '0x7EF8');
+        T.point('max', 'largest');
+        T.decl('int', 'size', '0x7EE8', 6);
+        T.snap(16, 'Enter <code>min_max()</code>. <b>arr</b> points to <code>nums[0]</code>, <b>size</b> is a copy of 6, and <b>min</b> and <b>max</b> point to main\'s <b>smallest</b> and <b>largest</b>. Three arrows, all back into main\'s box.');
+        T.via('arr');
+        T.read('nums[0]');
+        T.store('min', 7);
+        T.snap(17, '<code>*min = arr[0];</code> reads <code>nums[0]</code>, 7, and stores it through <b>min</b> in main\'s <b>smallest</b>. Before looking at the rest, the first element is both the smallest and the largest so far.');
+        T.via('arr');
+        T.read('nums[0]');
+        T.store('max', 7);
+        T.snap(18, '<code>*max = arr[0];</code> stores 7 in main\'s <b>largest</b> too.');
+
+        // the loop, one line at a time: the for line, both tests, and any line a test lets run
+        let lo = 7, hi = 7;
+        for (let k = 1; k < vals.length; k++) {
+          const v = vals[k];
+          // every pass starts back on the for line: the start (or i++), then the test
+          if (k === 1) T.decl('int', 'i', '0x7EDC', 1); else T.set('i', k);
+          T.read('size');
+          T.snap(19, k === 1
+            ? 'The <code>for</code> loop starts at <code>int i = 1</code>, since <code>arr[0]</code> is already counted. Test <code>i &lt; size</code>: 1 &lt; 6 is <b>True</b>, so run the loop body.'
+            : `Back to the top of the loop: <code>i++</code> makes i ${k}. Test <code>i &lt; size</code>: ${k} &lt; 6 is <b>True</b>, so run the body again.`);
+          // first test: smaller than the smallest so far?
+          T.via('arr');
+          T.read(`nums[${k}]`);
+          T.via('min');
+          T.read('smallest');
+          T.snap(20, v < lo
+            ? `Test <code>arr[i] &lt; *min</code>: <code>arr[${k}]</code> is ${v} and <code>*min</code> follows min to main's smallest, ${lo}. ${v} &lt; ${lo} is <b>True</b>, so run the line under the <code>if</code>.`
+            : `Test <code>arr[i] &lt; *min</code>: <code>arr[${k}]</code> is ${v} and <code>*min</code> is ${lo}. ${v} &lt; ${lo} is <b>False</b>, so skip the line under the <code>if</code>.`, hop(k));
+          if (v < lo) {
+            T.via('arr');
+            T.read(`nums[${k}]`);
+            T.store('min', v);
+            T.snap(21, `<code>*min = arr[i];</code> stores ${v} through min in main's <b>smallest</b>.`, hop(k));
+            lo = v;
+          }
+          // second test: larger than the largest so far?
+          T.via('arr');
+          T.read(`nums[${k}]`);
+          T.via('max');
+          T.read('largest');
+          T.snap(22, v > hi
+            ? `Test <code>arr[i] &gt; *max</code>: ${v} &gt; ${hi} is <b>True</b>, so run the line under the <code>if</code>.`
+            : `Test <code>arr[i] &gt; *max</code>: ${v} &gt; ${hi} is <b>False</b>, so skip the line under the <code>if</code>.`, hop(k));
+          if (v > hi) {
+            T.via('arr');
+            T.read(`nums[${k}]`);
+            T.store('max', v);
+            T.snap(23, `<code>*max = arr[i];</code> stores ${v} through max in main's <b>largest</b>.`, hop(k));
+            hi = v;
+          }
+        }
+        T.set('i', 6);
+        T.read('size');
+        T.snap(19, 'Back to the top of the loop: <code>i++</code> makes i 6. Test <code>i &lt; size</code>: 6 &lt; 6 is <b>False</b>, so the loop ends.');
+        T.ret();
+        T.snap(25, 'min_max() returns and its box is destroyed: arr, size, min, max and i are gone. The two results were stored in <b>main\'s</b> boxes, so they stay.');
+        T.read('smallest');
+        T.print('Smallest = 1\n');
+        T.snap(11, 'Back in main, <b>smallest</b> holds 1.');
+        T.read('largest');
+        T.print('Largest = 9\n');
+        T.snap(12, '<b>largest</b> holds 9.');
+        T.ret();
+        T.snap(13, '<code>return 0;</code> main() is finished and the program ends. The output matches the slide.', { done: true });
+      },
+    },
+  ];
+
+  let ex = null, steps = [], cur = 0;
+
+  // highlight one piece of plain code as HTML
+  function hl(text) {
+    let html = '', m, rest = text;
+    const re = /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|\b(int|void|return|if|else|for|NULL|float|char|const)\b|(#include)/;
+    while ((m = rest.match(re))) {
+      html += esc(rest.slice(0, m.index));
+      html += m[1] ? `<span class="s">${esc(m[1])}</span>` : `<span class="k">${esc(m[0])}</span>`;
+      rest = rest.slice(m.index + m[0].length);
+    }
+    return html + esc(rest);
+  }
+  function renderLine(raw, no) {
+    const cut = raw.indexOf('//');
+    const code = cut < 0 ? hl(raw) : hl(raw.slice(0, cut)) + `<span class="c">${esc(raw.slice(cut))}</span>`;
+    return `<span class="ln" data-no="${no}"><span class="mark"></span><span class="no">${no}</span>${code}</span>`;
+  }
+
+  function cellHTML(v, f, s) {
+    const k = f + ':' + v.name, m = s.marks[k] || '';
+    const cls = [v.type.includes('*') ? 'ptr' : '', v.val === '?' ? 'garbage' : '', v.val === '\\0' ? 'nul' : '', m].join(' ');
+    // "int *arr", not "int * arr"; an array element's type is in its array's heading
+    const ty = v.arr ? '' : v.type.endsWith('*') ? esc(v.type.slice(0, -1).trimEnd()) + ' *' : esc(v.type) + ' ';
+    return `<div class="mv ${v.arr ? 'el' : ''}" data-key="${esc(k)}"><div class="nm"><span class="ty">${ty}</span>${esc(v.lbl)}</div>` +
+           `<div class="box ${cls}">${esc(v.val)}</div><div class="ad">${esc(v.addr)}</div></div>`;
+  }
+
+  // each array as a row of connected cells, then the other variables
+  function frameBody(f, i, s) {
+    const names = [...new Set(f.vars.filter(v => v.arr).map(v => v.arr))];
+    const cells = vs => vs.map(v => cellHTML(v, i, s)).join('');
+    const rest = f.vars.filter(v => !v.arr);
+    const arrs = names.map(a => {
+      const vs = f.vars.filter(v => v.arr === a);
+      return `<div class="arr ${vs.length > 8 ? 'many' : ''}"><div class="arrcells" style="grid-template-columns: repeat(${vs.length}, minmax(0, 1fr))">${cells(vs)}</div>` +
+             `<div class="arrh">${f.ro ? '' : `<span class="ty">${esc(vs[0].type)}</span> `}${esc(vs[0].head)}</div></div>`;
+    }).join('');
+    const body = arrs + (rest.length ? `<div class="cells">${cells(rest)}</div>` : '');
+    return body || `<div class="none">no variables</div>`;
+  }
+
+  function showStep() {
+    const s = steps[cur];
+    document.querySelectorAll('#code .ln').forEach(l => {
+      const hit = +l.dataset.no === s.line;
+      l.classList.toggle('cur', hit && !s.skip);
+      l.classList.toggle('skip', hit && !!s.skip);
+      l.querySelector('.mark').textContent = hit ? (s.skip ? '✗' : '➜') : '';
+    });
+    const calls = s.frames.slice(1), ro = s.frames[0];
+    let html = calls.map((f, j, all) => {
+      const last = j === all.length - 1;
+      const wait = last ? '' : `<span class="tag">paused until ${esc(all[j + 1].fn)}() returns</span>`;
+      return `<div class="mframe ${last ? 'call' : ''}"><div class="fh">${esc(f.fn)}()${wait}</div>${frameBody(f, j + 1, s)}</div>`;
+    }).join('') || `<span class="empty">${s.line === null ? 'nothing yet: the program hasn\'t started' : (s.gone || 'nothing: the program has ended')}</span>`;
+    if (ro.vars.length)
+      html += `<div class="mframe ro"><div class="fh">🔒 read-only memory<span class="tag">string literals</span></div>${frameBody(ro, 0, s)}</div>`;
+    $('frames').innerHTML = html;
+    drawWires();
+    const st = $('status');
+    st.classList.toggle('bad', !!s.bad);
+    st.textContent = s.status || (s.line === null ? 'Ready to run'
+      : s.done ? `Line ${s.line} ran · the program has finished`
+      : `Line ${s.line} just ran`);
+    $('say').innerHTML = s.say;
+    // a leading \0 marks text the program didn't print itself (the crash message)
+    $('out').innerHTML = esc(s.out).replace(/\u0000([^\n]*)/g, '<span class="crash">$1</span>');
+    $('counter').textContent = `Step ${cur + 1} of ${steps.length}`;
+    $('slider').value = cur;
+    $('first').disabled = $('back').disabled = cur === 0;
+    $('next').disabled = $('last').disabled = cur === steps.length - 1;
+  }
+
+  /* An arrow from each pointer's box to the box it points to: up into an earlier call,
+     or down into read-only memory. A step's hop is a curve over an array, from one
+     element to another; its span is a bracket under the boxes sizeof measured. */
+  function drawWires() {
+    const s = steps[cur], wrap = $('memwrap'), svg = $('wiresvg');
+    const W = wrap.getBoundingClientRect();
+    svg.setAttribute('width', W.width);
+    svg.setAttribute('height', W.height);
+    const box = k => { const e = wrap.querySelector(`[data-key="${CSS.escape(k)}"] .box`); if (!e) return null; const r = e.getBoundingClientRect(); const c = e.parentElement.getBoundingClientRect(); return { l: r.left - W.left, r: r.right - W.left, t: r.top - W.top, b: r.bottom - W.top, w: r.width, top: c.top - W.top, bot: c.bottom - W.top }; };
+    let paths = '';
+    s.frames.forEach((f, i) => f.vars.forEach(v => {
+      if (!v.ref) return;
+      const k = i + ':' + v.name, a = box(k), b = box(v.ref);
+      if (!a || !b) return;
+      const cls = s.follow.includes(k) ? 'wire active' : 'wire';
+      const sx = (a.l + a.r) / 2 + a.w * 0.36, tx = (b.l + b.r) / 2;
+      const d = b.t < a.t
+        ? `M${sx},${a.t} C${sx},${a.t - 40} ${tx},${b.bot + 40} ${tx},${b.bot + 1}`
+        : `M${sx},${a.b} C${sx},${a.b + 30} ${tx},${b.top - 30} ${tx},${b.top - 1}`;
+      paths += `<path class="${cls}" d="${d}"/>`;
+    }));
+    if (s.hop) {
+      const a = box(s.hop[0]), b = box(s.hop[1]);
+      const ax = (a.l + a.r) / 2, bx = (b.l + b.r) / 2;
+      paths += `<path class="wire active" d="M${ax},${a.top - 1} C${ax},${a.top - 24} ${bx},${b.top - 24} ${bx},${b.top - 2}"/>` +
+               `<text class="hoptxt" x="${(ax + bx) / 2}" y="${a.top - 23}">${esc(s.hop[2])}</text>`;
+    }
+    if (s.span) {
+      const a = box(s.span[0]), b = box(s.span[1]), y = Math.max(a.bot, b.bot) + 4;
+      paths += `<path class="span" d="M${a.l},${y - 5} V${y} H${b.r} V${y - 5}"/>` +
+               `<text class="spantxt" x="${(a.l + b.r) / 2}" y="${y + 15}">${esc(s.span[2])}</text>`;
+    }
+    $('wirepaths').innerHTML = paths;
+  }
+
+  function go(k) { cur = Math.max(0, Math.min(steps.length - 1, k)); showStep(); }
+
+  function load(k) {
+    ex = EXAMPLES[k];
+    document.querySelectorAll('#tabs button').forEach((b, j) => b.classList.toggle('on', j === k));
+    $('from').textContent = ex.from;
+    $('code').innerHTML = ex.code.split('\n').map((l, j) => renderLine(l, j + 1)).join('');
+    const T = makeTracer();
+    if (ex.literals) ex.literals.forEach(([text, base]) => T.literal(text, base));
+    T.snap(null, 'Press <b>Next</b> to run the code one line at a time. The highlighted line is the one that just ran.');
+    ex.run(T);
+    steps = T.steps;
+    $('slider').max = steps.length - 1;
+    go(0);
+  }
+
+  $('tabs').innerHTML = EXAMPLES.map(e => `<button type="button">${esc(e.tab)}</button>`).join('');
+  document.querySelectorAll('#tabs button').forEach((b, k) => b.onclick = () => { load(k); b.blur(); });
+  $('first').onclick = () => go(0);
+  $('back').onclick = () => go(cur - 1);
+  $('next').onclick = () => go(cur + 1);
+  $('last').onclick = () => go(steps.length - 1);
+  $('slider').oninput = e => go(+e.target.value);
+  $('wires').onchange = e => { $('memwrap').classList.toggle('wires-off', !e.target.checked); e.target.blur(); };
+  window.addEventListener('resize', drawWires);
+  document.addEventListener('keydown', e => {
+    if (['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON'].includes(e.target.tagName) && e.key === ' ') return;
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); go(cur - 1); }
+  });
+  load(0);
+})();
+</script>
+<script>
+  // light/dark toggle: an explicit choice wins over the system setting
+  (function () {
+    var b = document.getElementById('theme-toggle'), r = document.documentElement;
+    function current() {
+      var t = r.getAttribute('data-theme');
+      return t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    function show() {
+      var dark = current() === 'dark';
+      b.textContent = dark ? '☀ Light' : '☾ Dark';
+      b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    b.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      r.setAttribute('data-theme', next);
+      try { localStorage.setItem('cpsc100-theme', next); } catch (e) {}
+      show();
+      b.blur();   // so Space goes back to the demo's "next step"
+    });
+    show();
+  })();
+</script>
+</body>
+</html>

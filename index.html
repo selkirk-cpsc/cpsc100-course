@@ -267,8 +267,14 @@ and Scope Part 2: Scope</a></td>
 <tr class="even">
 <td>9</td>
 <td><a
-href="https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture09-part1/">Pointers
-Part 1: Pointer Fundamentals</a></td>
+href="https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture09/">Pointer
+Fundamentals</a></td>
+</tr>
+<tr class="odd">
+<td>10</td>
+<td><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture10/">Pointers
+and Functions</a></td>
 </tr>
 </tbody>
 </table>
@@ -459,8 +465,8 @@ counts 1, 2, 3; the other starts over every call.</td>
 </tbody>
 </table>
 </section>
-<section id="week-9-pointers-part-1" class="level3">
-<h3>Week 9: Pointers, Part 1</h3>
+<section id="week-9-pointer-fundamentals" class="level3">
+<h3>Week 9: Pointer Fundamentals</h3>
 <table>
 <thead>
 <tr class="header">
@@ -497,6 +503,68 @@ Pointers</a></td>
 <code>char *pName</code>, which holds an address. Watch the arrow move
 while the letters stay put, then see an array of pointers reach strings
 of different lengths.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="week-10-pointers-and-functions" class="level3">
+<h3>Week 10: Pointers and Functions</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Demo</th>
+<th>What it shows</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/add-one-pointer/">addOne:
+Copies vs. Addresses</a></td>
+<td>Step through <code>addOne()</code> twice: first with
+<code>int n</code>, which gets a copy of 5 that is lost when it returns,
+then with <code>int *n</code>, whose <code>*n</code> follows an arrow
+back into <code>main()</code> and changes <code>x</code> itself.</td>
+</tr>
+<tr class="even">
+<td><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/swap/">Swap:
+Copies vs. Addresses</a></td>
+<td>Step through <code>swap()</code> with values and then with pointers.
+The broken <code>swap(int a, int b)</code> swaps its own copies, which
+vanish when it returns; the fixed <code>swap(int *a, int *b)</code>
+follows arrows back into <code>main()</code> and swaps <code>x</code>
+and <code>y</code>.</td>
+</tr>
+<tr class="odd">
+<td><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/array-functions/">Arrays
+to Functions</a></td>
+<td>Pass <code>nums</code> to <code>square_elements()</code> and watch
+<code>arr</code> get one address, not a copy of the array, so every
+<code>arr[i]</code> lands in <code>main()</code>'s boxes. Then see why
+<code>sizeof(arr)</code> inside a function measures only the pointer: 8
+bytes, not 20.</td>
+</tr>
+<tr class="even">
+<td><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/read-only-strings/">Read-Only
+Strings</a></td>
+<td>Run <code>make_upper()</code> on a <code>char</code> array, which
+gets its own copy of the letters, then on the literal
+<code>"turing"</code>, whose letters are in read-only memory: the first
+write crashes the program. <code>greet(const char *name)</code> shows
+that reading a literal is safe, and that gcc won't build a
+<code>greet()</code> that tries to change it.</td>
+</tr>
+<tr class="odd">
+<td><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/multiple-results/">Returning
+Multiple Values</a></td>
+<td>Step through <code>sum_diff()</code> and <code>min_max()</code>.
+<code>main()</code>'s result variables start as garbage, then the
+function fills them in through pointers: one call, two results, and no
+<code>return</code> value.</td>
 </tr>
 </tbody>
 </table>

@@ -1,0 +1,1356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pointers and Functions · CPSC 100 Notes</title>
+<style>
+  :root {
+    --bg: #f6f6f3;
+    --panel: #ffffff;
+    --ink: #1d1d1f;
+    --muted: #6b6b72;
+    --line: #d6d6db;
+    --accent: #2f6fde;
+    --accent-soft: #dce8fd;
+    --alert: #911a28;
+    --code-bg: #f1f1ee;
+    --tok-kw: #7048e8; --tok-type: #0e7178; --tok-num: #b35a00;
+    --tok-str: #2b8a3e; --tok-com: #8a8a93; --tok-pre: #c2255c; --tok-fn: #1c4fb8;
+    --term-bg: #ffffff; --term-ink: #1d1d1f; --term-line: #c9c9cf; --term-in: #1a7f37;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5;
+      --line: #3a3b42; --accent: #6ea0ff; --accent-soft: #1d3157; --alert: #ff8f9c;
+      --code-bg: #25262b;
+      --tok-kw: #b197fc; --tok-type: #3bc9db; --tok-num: #ffa94d;
+      --tok-str: #69db7c; --tok-com: #868e96; --tok-pre: #f783ac; --tok-fn: #74c0fc;
+      --term-bg: #1d1f23; --term-ink: #e6e6e9; --term-line: #33363d; --term-in: #7ee787;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5;
+    --line: #3a3b42; --accent: #6ea0ff; --accent-soft: #1d3157; --alert: #ff8f9c;
+    --code-bg: #25262b;
+    --tok-kw: #b197fc; --tok-type: #3bc9db; --tok-num: #ffa94d;
+    --tok-str: #69db7c; --tok-com: #868e96; --tok-pre: #f783ac; --tok-fn: #74c0fc;
+    --term-bg: #1d1f23; --term-ink: #e6e6e9; --term-line: #33363d; --term-in: #7ee787;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 17px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  a { color: var(--accent); }
+  code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .9em; }
+
+  .topbar { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .topbar .in { max-width: 820px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 16px; align-items: center; }
+  .topbar a { text-decoration: none; font-weight: 600; }
+  .topbar .crumb { color: var(--muted); font-size: .9rem; }
+
+  main { max-width: 820px; margin: 0 auto; padding: 8px 16px 48px; }
+  header.title { margin: 28px 0 8px; }
+  header.title .week { color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: .85rem; }
+  header.title h1 { margin: 4px 0 0; font-size: 2.1rem; line-height: 1.2; }
+
+  nav#TOC { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 18px; margin: 20px 0 8px; }
+  nav#TOC::before { content: "In this chapter"; display: block; font-weight: 700; margin-bottom: 4px; }
+  nav#TOC ul { margin: 0; padding-left: 1.2em; }
+
+  h2 { font-size: 1.6rem; margin: 2.4em 0 .4em; padding-bottom: .2em; border-bottom: 2px solid var(--line); }
+  h3 { font-size: 1.2rem; margin: 1.8em 0 .3em; }
+  p, li { max-width: 72ch; }
+  li { margin: .2em 0; }
+  li > p { margin: 0; }
+  .alert { color: var(--alert); font-weight: 600; }
+  :not(pre) > code { background: var(--code-bg); padding: .08em .3em; border-radius: 4px; overflow-wrap: anywhere; }
+  math[display="block"] { overflow-x: auto; max-width: 100%; }
+
+  div.sourceCode { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; margin: 1em 0; overflow-x: auto; }
+  pre.sourceCode { margin: 0; padding: 12px 14px; line-height: 1.5; }
+  /* program output and shell sessions (minted text blocks) */
+  pre:not(.sourceCode) { background: var(--panel); border: 1px dashed var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; line-height: 1.5; }
+  /* sample runs of a program (make_notes.py compiles and runs it): a terminal
+     box in the page's theme, with what the user typed highlighted in green */
+  .runoutput { margin: -.3em 0 1.2em; }
+  .run-label { color: var(--muted); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin: .7em 0 .25em; }
+  pre.terminal { background: var(--term-bg); color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 8px; padding: 10px 14px; margin: 0 0 .5em; overflow-x: auto; line-height: 1.5; }
+  pre.terminal .in { color: var(--term-in); font-weight: 700; }
+  .run-label .run-setup { text-transform: none; letter-spacing: 0; font-weight: 400; }
+  pre.numberSource code > span { position: relative; left: -4em; }
+  pre.numberSource { margin-left: 3em; border-left: 1px solid var(--line); padding-left: 4px; }
+  pre.numberSource code > span > a:first-child::before {
+    content: counter(source-line); counter-increment: source-line; position: relative; left: -1em;
+    text-align: right; vertical-align: baseline; display: inline-block; width: 4em; color: var(--tok-com);
+  }
+  pre.numberSource code { counter-reset: source-line 0; }
+  pre > code.sourceCode > span { display: inline-block; line-height: 1.5; }
+  code.sourceCode > span > a:first-child { text-decoration: none; }
+  code span.kw, code span.cf { color: var(--tok-kw); font-weight: 600; }
+  code span.dt { color: var(--tok-type); }
+  code span.dv, code span.fl, code span.bn, code span.cn { color: var(--tok-num); }
+  code span.st, code span.ch, code span.sc, code span.ss, code span.vs { color: var(--tok-str); }
+  code span.co, code span.cv, code span.do, code span.an { color: var(--tok-com); font-style: italic; }
+  code span.pp, code span.im { color: var(--tok-pre); }
+  code span.fu, code span.bu { color: var(--tok-fn); }
+
+  img { max-width: 100%; height: auto; }
+  img.diagram { background: #fff; border-radius: 8px; padding: 8px; display: block; margin: 0 auto; }
+  /* PNGs are drawings (some with transparent backgrounds): same white card, so dark lines stay visible in dark mode */
+  img[src*=".png"] { background: #fff; border-radius: 8px; padding: 8px; }
+  .center, figure { text-align: center; }
+  figure { margin: 1em 0; }
+  figcaption { color: var(--muted); font-size: .9rem; }
+  .credit { text-align: center; color: var(--muted); font-size: .78rem; margin-top: -.6em; }
+  .credit p { max-width: none; }
+
+  /* slide columns: a figure keeps its natural width and the other column
+     fills the rest; when both can't fit, they stack (see notes.lua) */
+  .columns { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .columns > .column { flex: 1 1 280px; min-width: 0; }
+  .columns > .column.figure-col { flex: 0 1 auto; max-width: 100%; margin: 0 auto; }
+  .columns > .column.figure-col img:not(.diagram) { width: 320px; }
+
+  .multicol ul { columns: 4 8em; list-style: none; padding-left: 0; }
+
+  .callout { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 4px 16px; margin: 1em 0; }
+  .tryit { background: var(--accent-soft); border-radius: 10px; padding: 6px 18px; margin: 1.2em 0; }
+  .tryit .center { text-align: left; }
+  a.demo-link { display: inline-block; background: var(--accent); color: var(--bg); padding: 6px 14px; border-radius: 8px; text-decoration: none; }
+  a.demo-link code { background: none; color: inherit; }
+
+  table { border-collapse: collapse; margin: 1em auto; display: block; overflow-x: auto; max-width: 100%; width: fit-content; }
+  th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--panel); }
+
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .pager a { text-decoration: none; max-width: 48%; }
+  .pager .label { display: block; color: var(--muted); font-size: .85rem; }
+  .pager .next { margin-left: auto; text-align: right; }
+  .pager.top { margin-top: 16px; padding: 0 0 12px; border-top: none; border-bottom: 1px solid var(--line); font-size: .95rem; }
+  .pager.top + header.title { margin-top: 18px; }
+  .theme-toggle { font: inherit; font-size: .85rem; line-height: 1.2; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
+  .theme-toggle:hover { border-color: var(--ink); }
+  .topbar .theme-toggle { margin-left: auto; }
+  .topbar .print-btn + .theme-toggle { margin-left: 0; }
+  .topbar a { white-space: nowrap; }
+  @media (max-width: 480px) { .topbar .in:has(.print-btn) .crumb { display: none; } }
+
+  /* printing (the Print / PDF button, or the browser's own Print): light colours
+     on white, no site navigation, code wrapped instead of scrolling, and
+     headings, figures and code kept off page breaks where they fit */
+  @media print {
+    :root:not([data-print]), :root[data-theme] {   /* outranks the dark-mode rules */
+      --bg: #ffffff; --panel: #ffffff; --ink: #1d1d1f; --muted: #6b6b72;
+      --line: #d6d6db; --accent: #2f6fde; --accent-soft: #eef3fd; --alert: #911a28;
+      --code-bg: #f6f6f3;
+      --tok-kw: #7048e8; --tok-type: #0e7178; --tok-num: #b35a00;
+      --tok-str: #2b8a3e; --tok-com: #8a8a93; --tok-pre: #c2255c; --tok-fn: #1c4fb8;
+      --term-bg: #ffffff; --term-ink: #1d1d1f; --term-line: #c9c9cf; --term-in: #1a7f37;
+    }
+    @page { margin: 15mm 14mm; }
+    body { background: #fff; font-size: 11pt; line-height: 1.5; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .topbar, .pager, .theme-toggle, .print-btn { display: none !important; }
+    main { max-width: none; padding: 0; }
+    header.title { margin-top: 0; }
+    h1, h2, h3, h4, .run-label, .label { break-after: avoid; page-break-after: avoid; }
+    figure, img, svg, .columns, .callout, .tryit, table, nav#TOC,
+    div.sourceCode, pre, .runoutput { break-inside: avoid; page-break-inside: avoid; }
+    div.sourceCode, pre, pre.terminal, table, .animation { overflow: visible !important; }
+    pre, pre code, pre.terminal { white-space: pre-wrap !important; overflow-wrap: anywhere; }
+    pre > code.sourceCode > span { display: inline; }
+    a { text-decoration: none; }
+  }
+</style>
+<script>
+  // apply a saved light/dark choice before the page draws (no flash)
+  try { var t = localStorage.getItem('cpsc100-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+</head>
+<body>
+<div class="topbar"><div class="in">
+  <a href="../../">CPSC 100</a>
+  <span class="crumb">Lecture notes</span>
+  <button type="button" class="theme-toggle print-btn" onclick="window.print()" title="Print this page, or choose Save as PDF in the print dialog">⎙ Print / PDF</button>
+  <button type="button" class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</div></div>
+<main>
+<nav class="pager top" aria-label="Previous and next lecture">
+<a class="prev" href="../lecture09/"><span class="label">← Previous</span>Week
+9: Pointer Fundamentals</a>
+
+</nav>
+<header class="title">
+<div class="week">Week 10</div>
+<h1>Pointers and Functions</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#pass-by-reference"
+id="toc-pass-by-reference">Pass-by-Reference</a></li>
+<li><a href="#swapping-two-variables"
+id="toc-swapping-two-variables">Swapping Two Variables</a></li>
+<li><a href="#passing-arrays-to-functions"
+id="toc-passing-arrays-to-functions">Passing Arrays to
+Functions</a></li>
+<li><a href="#passing-strings-to-functions"
+id="toc-passing-strings-to-functions">Passing Strings to
+Functions</a></li>
+<li><a href="#returning-multiple-values"
+id="toc-returning-multiple-values">Returning Multiple Values</a></li>
+<li><a href="#summary" id="toc-summary">Summary</a></li>
+</ul>
+</nav>
+<section id="pass-by-reference" class="level2">
+<h2>Pass-by-Reference</h2>
+<section id="recall-pass-by-value" class="level3">
+<h3>Recall: Pass-by-Value</h3>
+<p>Look back to the lecture on functions and scope: a function only ever
+receives a <em>copy</em> of its argument.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> addOne<span class="op">(</span><span class="dt">int</span> n<span class="op">);</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    addOne<span class="op">(</span>x<span class="op">);</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span>  <span class="co">// still 5</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> addOne<span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> n <span class="op">+</span> <span class="dv">1</span><span class="op">;</span>   <span class="co">// changes the copy, not x</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>This is fine for reading a value; but it means a function
+<em>cannot</em> modify a variable back in the caller. What if we need it
+to?</p>
+</section>
+<section id="fixing-addone" class="level3">
+<h3>Fixing <code
+class="sourceCode c">addOne<span class="op">()</span></code></h3>
+<p>Pass the variable’s <em>address</em> instead, and the function can
+reach the original:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> addOne<span class="op">(</span><span class="dt">int</span> <span class="op">*</span>n<span class="op">);</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    addOne<span class="op">(&amp;</span>x<span class="op">);</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span>  <span class="co">// now 6</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> addOne<span class="op">(</span><span class="dt">int</span> <span class="op">*</span>n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>n <span class="op">=</span> <span class="op">*</span>n <span class="op">+</span> <span class="dv">1</span><span class="op">;</span>   <span class="co">// follows n to x itself</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p><code>addOne(&amp;x)</code> passes the address of <code
+class="sourceCode c">x</code>, so <code class="sourceCode c">n</code>
+points to <code class="sourceCode c">x</code></p></li>
+<li><p><code class="sourceCode c"><span class="op">*</span>n</code> is
+<code class="sourceCode c">x</code> itself, so the change is still there
+after <code class="sourceCode c">addOne<span class="op">()</span></code>
+returns</p></li>
+</ul>
+</section>
+<section id="pass-by-reference-1" class="level3">
+<h3>Pass-by-Reference</h3>
+<p><strong>Pass-by-reference</strong>: hand a function a variable’s
+<strong>address</strong> instead of a copy of its value, so the function
+can reach and change the original.</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;"><strong>Pass-by-value</strong></th>
+<th style="text-align: left;"><strong>Pass-by-reference</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Parameter</td>
+<td style="text-align: left;"><code
+class="sourceCode c"><span class="dt">int</span> n</code></td>
+<td style="text-align: left;"><code
+class="sourceCode c"><span class="dt">int</span> <span class="op">*</span>n</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Call</td>
+<td style="text-align: left;"><code
+class="sourceCode c">addOne<span class="op">(</span>x<span class="op">)</span></code></td>
+<td style="text-align: left;"><code>addOne(&amp;x)</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">The function gets</td>
+<td style="text-align: left;">a copy of the value</td>
+<td style="text-align: left;">the address of <code
+class="sourceCode c">x</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Can it change <code
+class="sourceCode c">x</code>?</td>
+<td style="text-align: left;">no</td>
+<td style="text-align: left;">yes, through <code
+class="sourceCode c"><span class="op">*</span>n</code></td>
+</tr>
+</tbody>
+</table>
+<p>C still copies the argument; with pass-by-reference the copy is an
+address, and that address leads back to the original.</p>
+</section>
+<section id="two-different-places-two-different-rules" class="level3">
+<h3>Two Different Places, Two Different Rules</h3>
+<p>The <code class="sourceCode c"><span class="op">*</span></code> and
+<code>&amp;</code> go in two different places, and each one has its own
+job:</p>
+<div class="columns">
+<div class="column">
+<div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> addOne<span class="op">(</span><span class="dt">int</span> <span class="op">*</span>n<span class="op">);</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    addOne<span class="op">(&amp;</span>x<span class="op">);</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> addOne<span class="op">(</span><span class="dt">int</span> <span class="op">*</span>n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>n <span class="op">=</span> <span class="op">*</span>n <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div><div class="column">
+<ul>
+<li><p><strong>Signature</strong>, <code
+class="sourceCode c"><span class="dt">int</span> <span class="op">*</span>n</code>:
+the <code class="sourceCode c"><span class="op">*</span></code> is part
+of the <strong>type</strong>. It says “<code
+class="sourceCode c">n</code> is a pointer to an <code
+class="sourceCode c"><span class="dt">int</span></code>”. The prototype
+and the definition both say it.</p></li>
+<li><p><strong>Call</strong>, <code>&amp;x</code>: <code>&amp;</code>
+<strong>gets the address</strong> of <code
+class="sourceCode c">x</code>, and that address is copied into <code
+class="sourceCode c">n</code>.</p></li>
+<li><p><strong>Body</strong>, <code
+class="sourceCode c"><span class="op">*</span>n</code>: here <code
+class="sourceCode c"><span class="op">*</span></code>
+<strong>follows</strong> the pointer to the <code
+class="sourceCode c"><span class="dt">int</span></code> at the other
+end.</p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="quick-summary-pointers-and-functions" class="level3">
+<h3>Quick Summary: Pointers and Functions</h3>
+<p>Three places, three jobs:</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><strong>Where</strong></th>
+<th style="text-align: left;"><strong>Write</strong></th>
+<th style="text-align: left;"><strong>What it does</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Function signature</td>
+<td style="text-align: left;"><code
+class="sourceCode c"><span class="dt">void</span> addOne<span class="op">(</span><span class="dt">int</span> <span class="op">*</span>n<span class="op">)</span></code></td>
+<td style="text-align: left;"><code class="sourceCode c">n</code> is a
+pointer to an <code
+class="sourceCode c"><span class="dt">int</span></code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Function call</td>
+<td style="text-align: left;"><code>addOne(&amp;x)</code></td>
+<td style="text-align: left;">passes the <strong>address</strong> of
+<code class="sourceCode c">x</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Function body</td>
+<td style="text-align: left;"><code
+class="sourceCode c"><span class="op">*</span>n <span class="op">=</span> <span class="op">*</span>n <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></code></td>
+<td style="text-align: left;">follows <code
+class="sourceCode c">n</code> to change <code
+class="sourceCode c">x</code></td>
+</tr>
+</tbody>
+</table>
+<p>Pointer in the <strong>signature</strong>, address in the
+<strong>call</strong>, dereference in the <strong>body</strong>.</p>
+</section>
+<section id="try-it-passing-an-address" class="level3">
+<h3>Try It: Passing an Address</h3>
+<div class="tryit">
+<p>Step through the broken and fixed versions of <code
+class="sourceCode c">addOne<span class="op">()</span></code>, and watch
+which boxes change:</p>
+<div class="center">
+<p><span><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/add-one-pointer/"
+class="demo-link" target="_blank"
+rel="noopener"><code>selkirk-cpsc.github.io/cpsc100-course/demos/add-one-pointer/</code></a></span></p>
+</div>
+<ul>
+<li><p><strong>Recall: addOne</strong>: <code
+class="sourceCode c">n</code> is a copy of 5, with no arrow back to
+<code class="sourceCode c">x</code>; the 6 is lost when <code
+class="sourceCode c">addOne<span class="op">()</span></code>
+returns</p></li>
+<li><p><strong>Fixed addOne</strong>: <code
+class="sourceCode c">n</code> holds <code
+class="sourceCode c">x</code>’s address, so <code
+class="sourceCode c"><span class="op">*</span>n</code> follows the arrow
+into <code class="sourceCode c">main</code>’s box</p></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="swapping-two-variables" class="level2">
+<h2>Swapping Two Variables</h2>
+<section id="swapping-two-variables-1" class="level3">
+<h3>Swapping Two Variables</h3>
+<p>A common job: exchange the values of two variables. If <code
+class="sourceCode c">x</code> is 3 and <code
+class="sourceCode c">y</code> is 7, we want <code
+class="sourceCode c">x</code> to end up 7 and <code
+class="sourceCode c">y</code> to end up 3.</p>
+<div class="columns">
+<div class="column">
+<p><strong>The obvious way fails:</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> y<span class="op">;</span>  <span class="co">// x is now 7</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> x<span class="op">;</span>  <span class="co">// y is still 7</span></span></code></pre></div>
+<p>the 3 is lost!</p>
+</div><div class="column">
+<p><strong>Save one value first:</strong></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> temp <span class="op">=</span> x<span class="op">;</span>  <span class="co">// temp is 3</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> y<span class="op">;</span>         <span class="co">// x is now 7</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> temp<span class="op">;</span>      <span class="co">// y is now 3</span></span></code></pre></div>
+</div>
+</div>
+<p>We’ll want to do this often, so let’s write a function called <code
+class="sourceCode c">swap<span class="op">()</span></code>. It has to
+change <em>two</em> of the caller’s variables, so a single return value
+can’t do the job.</p>
+</section>
+<section id="the-broken-swap-the-function" class="level3">
+<h3>The Broken <code
+class="sourceCode c">swap<span class="op">()</span></code>: The
+Function</h3>
+<p>First, let’s put those three lines in a function, without
+pointers:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> swap<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> temp <span class="op">=</span> a<span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  a <span class="op">=</span> b<span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  b <span class="op">=</span> temp<span class="op">;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  printf<span class="op">(</span><span class="st">&quot;Inside swap: &quot;</span><span class="op">);</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  printf<span class="op">(</span><span class="st">&quot;a = </span><span class="sc">%d</span><span class="st">, b = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> a<span class="op">,</span> b<span class="op">);</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p><code
+class="sourceCode c"><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b</code>:
+the parameters receive <strong>copies</strong> of the caller’s
+values</p></li>
+<li><p>The body starts with the same three lines as before</p></li>
+<li><p>The two <code class="sourceCode c">printf</code>s show <code
+class="sourceCode c">a</code> and <code class="sourceCode c">b</code>,
+so we can see inside</p></li>
+</ul>
+</section>
+<section id="the-broken-swap-calling-it" class="level3">
+<h3>The Broken <code
+class="sourceCode c">swap<span class="op">()</span></code>: Calling
+It</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> swap<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">);</span>  <span class="co">// defined after main()</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> x <span class="op">=</span> <span class="dv">3</span><span class="op">,</span> y <span class="op">=</span> <span class="dv">7</span><span class="op">;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  printf<span class="op">(</span><span class="st">&quot;Before: x = </span><span class="sc">%d</span><span class="st">, y = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">,</span> y<span class="op">);</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  swap<span class="op">(</span>x<span class="op">,</span> y<span class="op">);</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  printf<span class="op">(</span><span class="st">&quot;After:  x = </span><span class="sc">%d</span><span class="st">, y = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">,</span> y<span class="op">);</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="columns">
+<div class="column">
+<p><strong>Output:</strong></p>
+<pre class="text"><code>Before: x = 3, y = 7
+Inside swap: a = 7, b = 3
+After:  x = 3, y = 7</code></pre>
+</div><div class="column">
+<ul>
+<li><p>Inside, <code class="sourceCode c">a</code> and <code
+class="sourceCode c">b</code> are swapped</p></li>
+<li><p>But they are copies, like <code class="sourceCode c">n</code> in
+the first <code
+class="sourceCode c">addOne<span class="op">()</span></code></p></li>
+<li><p>Back in <code
+class="sourceCode c">main<span class="op">()</span></code>, <code
+class="sourceCode c">x</code> and <code class="sourceCode c">y</code>
+are <span class="alert">unchanged</span></p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="fixing-swap-the-function" class="level3">
+<h3>Fixing <code
+class="sourceCode c">swap<span class="op">()</span></code>: The
+Function</h3>
+<p>The fix is the same as for <code
+class="sourceCode c">addOne<span class="op">()</span></code>: make the
+parameters pointers.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> swap<span class="op">(</span><span class="dt">int</span> <span class="op">*</span>a<span class="op">,</span> <span class="dt">int</span> <span class="op">*</span>b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> temp <span class="op">=</span> <span class="op">*</span>a<span class="op">;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>a <span class="op">=</span> <span class="op">*</span>b<span class="op">;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>b <span class="op">=</span> temp<span class="op">;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  printf<span class="op">(</span><span class="st">&quot;Inside swap: &quot;</span><span class="op">);</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  printf<span class="op">(</span><span class="st">&quot;*a = </span><span class="sc">%d</span><span class="st">, *b = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">*</span>a<span class="op">,</span> <span class="op">*</span>b<span class="op">);</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p><code
+class="sourceCode c"><span class="dt">int</span> <span class="op">*</span>a<span class="op">,</span> <span class="dt">int</span> <span class="op">*</span>b</code>:
+the parameters are <strong>pointers</strong> to the caller’s
+variables</p></li>
+<li><p>The same three lines, with <code
+class="sourceCode c"><span class="op">*</span></code> in front of <code
+class="sourceCode c">a</code> and <code
+class="sourceCode c">b</code></p></li>
+<li><p><code class="sourceCode c"><span class="op">*</span>a</code> and
+<code class="sourceCode c"><span class="op">*</span>b</code> swap the
+caller’s variables, not copies</p></li>
+</ul>
+</section>
+<section id="fixing-swap-calling-it" class="level3">
+<h3>Fixing <code
+class="sourceCode c">swap<span class="op">()</span></code>: Calling
+It</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> swap<span class="op">(</span><span class="dt">int</span> <span class="op">*</span>a<span class="op">,</span> <span class="dt">int</span> <span class="op">*</span>b<span class="op">);</span>  <span class="co">// defined after main()</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> x <span class="op">=</span> <span class="dv">3</span><span class="op">,</span> y <span class="op">=</span> <span class="dv">7</span><span class="op">;</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  printf<span class="op">(</span><span class="st">&quot;Before: x = </span><span class="sc">%d</span><span class="st">, y = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">,</span> y<span class="op">);</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  swap<span class="op">(&amp;</span>x<span class="op">,</span> <span class="op">&amp;</span>y<span class="op">);</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  printf<span class="op">(</span><span class="st">&quot;After:  x = </span><span class="sc">%d</span><span class="st">, y = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">,</span> y<span class="op">);</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="columns">
+<div class="column">
+<p><strong>Output:</strong></p>
+<pre class="text"><code>Before: x = 3, y = 7
+Inside swap: *a = 7, *b = 3
+After:  x = 7, y = 3</code></pre>
+</div><div class="column">
+<ul>
+<li><p>As with <code
+class="sourceCode c">addOne<span class="op">()</span></code>,
+<code>swap(&amp;x, &amp;y)</code> passes
+<strong>addresses</strong></p></li>
+<li><p><code class="sourceCode c"><span class="op">*</span>a</code> and
+<code class="sourceCode c"><span class="op">*</span>b</code> reach <code
+class="sourceCode c">main<span class="op">()</span></code>’s <code
+class="sourceCode c">x</code> and <code
+class="sourceCode c">y</code></p></li>
+<li><p><span class="alert">Pass-by-reference</span> again, with two
+variables</p></li>
+</ul>
+</div>
+</div>
+<p>&lt;handout:1-4&gt;[fragile]<span>Memory Diagram: Inside
+<code>swap(&amp;x, &amp;y)</code></span></p>
+<p>Inside <code
+class="sourceCode c">swap<span class="op">()</span></code>, just before
+it returns:</p>
+<div class="center">
+<p><img src="fig01.svg?v=d7c20844" alt="Diagram" class="diagram" loading="lazy"
+width="452" /></p>
+</div>
+<p>How it got there, one line at a time:</p>
+<ol>
+<li><p><strong>On entry:</strong> <code class="sourceCode c">a</code>
+and <code class="sourceCode c">b</code> are <code
+class="sourceCode c">swap<span class="op">()</span></code>’s own boxes,
+holding the addresses of <code class="sourceCode c">x</code> and <code
+class="sourceCode c">y</code>. <code class="sourceCode c">temp</code>
+has no value yet.</p></li>
+<li><p><code
+class="sourceCode c"><span class="dt">int</span> temp <span class="op">=</span> <span class="op">*</span>a<span class="op">;</span></code>
+follows <code class="sourceCode c">a</code> to <code
+class="sourceCode c">x</code> and copies its 3 into <code
+class="sourceCode c">temp</code>.</p></li>
+<li><p><code
+class="sourceCode c"><span class="op">*</span>a <span class="op">=</span> <span class="op">*</span>b<span class="op">;</span></code>
+follows <code class="sourceCode c">b</code> to <code
+class="sourceCode c">y</code>, then writes its 7 through <code
+class="sourceCode c">a</code> into <code class="sourceCode c">x</code>.
+For a moment both hold 7; the 3 survives only in <code
+class="sourceCode c">temp</code>.</p></li>
+<li><p><code
+class="sourceCode c"><span class="op">*</span>b <span class="op">=</span> temp<span class="op">;</span></code>
+writes the saved 3 through <code class="sourceCode c">b</code> into
+<code class="sourceCode c">y</code>. <code class="sourceCode c">x</code>
+and <code class="sourceCode c">y</code> are swapped.</p></li>
+</ol>
+</section>
+<section id="before-and-after-swapx-y" class="level3">
+<h3>Before and After <code>swap(&amp;x, &amp;y)</code></h3>
+<div class="columns">
+<div class="column figure-col">
+<p><strong>Before the call</strong></p>
+<div class="center">
+<p><img src="fig02.svg?v=21090144" alt="Diagram" class="diagram" loading="lazy"
+width="250" /></p>
+</div>
+</div><div class="column figure-col">
+<p><strong>After the call</strong></p>
+<div class="center">
+<p><img src="fig03.svg?v=d9bc25bd" alt="Diagram" class="diagram" loading="lazy"
+width="250" /></p>
+</div>
+</div>
+</div>
+<p>Same two boxes, same addresses; only what’s <em>inside</em> them
+changed. <code
+class="sourceCode c">swap<span class="op">()</span></code> wrote through
+the pointers it received while it was running; once it <code
+class="sourceCode c"><span class="cf">return</span></code>s, its own
+locals (<code class="sourceCode c">a</code>, <code
+class="sourceCode c">b</code>) are gone, but the change to <code
+class="sourceCode c">main</code>’s <code class="sourceCode c">x</code>
+and <code class="sourceCode c">y</code> stays behind.</p>
+</section>
+<section id="try-it-copies-vs.-addresses" class="level3">
+<h3>Try It: Copies vs. Addresses</h3>
+<div class="tryit">
+<p>Step through the broken and fixed versions of <code
+class="sourceCode c">swap<span class="op">()</span></code>, and watch
+which boxes change:</p>
+<div class="center">
+<p><span><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/swap/"
+class="demo-link" target="_blank"
+rel="noopener"><code>selkirk-cpsc.github.io/cpsc100-course/demos/swap/</code></a></span></p>
+</div>
+<ul>
+<li><p><strong>Broken swap</strong>: <code
+class="sourceCode c">swap<span class="op">()</span></code> swaps its own
+copies, then they are destroyed when it returns</p></li>
+<li><p><strong>Fixed swap</strong>: <code class="sourceCode c">a</code>
+and <code class="sourceCode c">b</code> hold addresses, so <code
+class="sourceCode c"><span class="op">*</span>a</code> and <code
+class="sourceCode c"><span class="op">*</span>b</code> change <code
+class="sourceCode c">main</code>’s <code class="sourceCode c">x</code>
+and <code class="sourceCode c">y</code></p></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="passing-arrays-to-functions" class="level2">
+<h2>Passing Arrays to Functions</h2>
+<section id="passing-arrays-to-functions-1" class="level3">
+<h3>Passing Arrays to Functions</h3>
+<p>In C, arrays are always passed to functions by <span
+class="alert">reference</span>; the function receives the
+<strong>address of the first element</strong>, not a copy of the whole
+array.</p>
+<p><strong>Important points:</strong></p>
+<ul>
+<li><p>You do <em>not</em> need the <code>&amp;</code> operator when
+passing an array; the array’s name already decays to the address of its
+first element (recall Lecture 9).</p></li>
+<li><p>Inside the function, the parameter acts as a
+<strong>pointer</strong> to the array.</p></li>
+<li><p>Any changes made to array elements <strong>inside</strong> the
+function affect the original array in <code
+class="sourceCode c">main<span class="op">()</span></code>; no pointer
+trick required, unlike a plain <code
+class="sourceCode c"><span class="dt">int</span></code>.</p></li>
+<li><p>The flip side: since the parameter is just a pointer, the
+function has no way to know how many elements the array holds
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+<span class="alert">the length must always travel as a separate
+parameter.</span></p></li>
+</ul>
+</section>
+<section id="how-long-is-this-array" class="level3">
+<h3>How Long Is This Array?</h3>
+<p>Instead of typing an array’s length by hand, you can work it out with
+<code class="sourceCode c"><span class="kw">sizeof</span></code>:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> nums<span class="op">[</span><span class="dv">5</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">};</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> length <span class="op">=</span> <span class="kw">sizeof</span><span class="op">(</span>nums<span class="op">)</span> <span class="op">/</span> <span class="kw">sizeof</span><span class="op">(</span>nums<span class="op">[</span><span class="dv">0</span><span class="op">]);</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;length = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> length<span class="op">);</span></span></code></pre></div>
+<p><strong>Output:</strong></p>
+<pre class="text"><code>length = 5</code></pre>
+<ul>
+<li><p><code
+class="sourceCode c"><span class="kw">sizeof</span><span class="op">(</span>nums<span class="op">)</span></code>
+is the whole array in bytes: 5 <code
+class="sourceCode c"><span class="dt">int</span></code>s
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+4 bytes = 20</p></li>
+<li><p><code
+class="sourceCode c"><span class="kw">sizeof</span><span class="op">(</span>nums<span class="op">[</span><span class="dv">0</span><span class="op">])</span></code>
+is one element: 4 bytes</p></li>
+<li><p>20 / 4 = 5 elements. Change the <code
+class="sourceCode c"><span class="op">[</span><span class="dv">5</span><span class="op">]</span></code>
+and <code class="sourceCode c">length</code> follows
+automatically.</p></li>
+</ul>
+</section>
+<section id="a-word-of-warning-sizeof-stops-working" class="level3">
+<h3>A Word of Warning: <code>sizeof</code> Stops Working</h3>
+<p>The same line, moved into a function:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> print_length<span class="op">(</span><span class="dt">int</span> arr<span class="op">[]);</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> nums<span class="op">[</span><span class="dv">5</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">};</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    print_length<span class="op">(</span>nums<span class="op">);</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> print_length<span class="op">(</span><span class="dt">int</span> arr<span class="op">[])</span> <span class="op">{</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> length <span class="op">=</span> <span class="kw">sizeof</span><span class="op">(</span>arr<span class="op">)</span> <span class="op">/</span> <span class="kw">sizeof</span><span class="op">(</span>arr<span class="op">[</span><span class="dv">0</span><span class="op">]);</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;length = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> length<span class="op">);</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Output:</strong> <code
+class="sourceCode c">length <span class="op">=</span> <span class="dv">2</span></code></p>
+<ul>
+<li><p>Inside the function, <code class="sourceCode c">arr</code> is a
+<strong>pointer</strong>, so <code
+class="sourceCode c"><span class="kw">sizeof</span><span class="op">(</span>arr<span class="op">)</span></code>
+is 8 bytes, not the array. 8 / 4 = 2: <span class="alert">the wrong
+answer</span></p></li>
+<li><p>gcc warns about this line, so read your warnings. The fix is on
+the next slide.</p></li>
+</ul>
+</section>
+<section id="the-fix-pass-the-length" class="level3">
+<h3>The Fix: Pass the Length</h3>
+<p>A function that prints an array needs the length as its own
+parameter:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> print_array<span class="op">(</span><span class="dt">int</span> arr<span class="op">[],</span> <span class="dt">int</span> size<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> size<span class="op">;</span> i<span class="op">++)</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> &quot;</span><span class="op">,</span> arr<span class="op">[</span>i<span class="op">]);</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p><code
+class="sourceCode c"><span class="dt">int</span> size</code> is a second
+parameter: the caller tells the function how many elements there
+are</p></li>
+<li><p>The loop runs up to <code class="sourceCode c">size</code>, so
+there’s no <code
+class="sourceCode c"><span class="kw">sizeof</span></code> inside the
+function</p></li>
+<li><p><code
+class="sourceCode c">arr<span class="op">[</span>i<span class="op">]</span></code>
+works just as it would in <code
+class="sourceCode c">main<span class="op">()</span></code></p></li>
+</ul>
+</section>
+<section id="the-fix-calling-print_array" class="level3">
+<h3>The Fix: Calling <code
+class="sourceCode c">print_array<span class="op">()</span></code></h3>
+<div class="sourceCode" id="cb16"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">// defined after main():</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> print_array<span class="op">(</span><span class="dt">int</span> arr<span class="op">[],</span> <span class="dt">int</span> size<span class="op">);</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> nums<span class="op">[</span><span class="dv">5</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">};</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> length <span class="op">=</span> <span class="kw">sizeof</span><span class="op">(</span>nums<span class="op">)</span> <span class="op">/</span> <span class="kw">sizeof</span><span class="op">(</span>nums<span class="op">[</span><span class="dv">0</span><span class="op">]);</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    print_array<span class="op">(</span>nums<span class="op">,</span> length<span class="op">);</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Output:</strong> <code
+class="sourceCode c"><span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">5</span></code></p>
+<ul>
+<li><p>In <code
+class="sourceCode c">main<span class="op">()</span></code>, <code
+class="sourceCode c">nums</code> is still an array, so <code
+class="sourceCode c"><span class="kw">sizeof</span></code> gives the
+right length</p></li>
+<li><p>Work out the length there, and pass it along with the
+array</p></li>
+<li><p>No <code>&amp;</code> on <code class="sourceCode c">nums</code>:
+its name already decays to the address of <code
+class="sourceCode c">nums<span class="op">[</span><span class="dv">0</span><span class="op">]</span></code></p></li>
+</ul>
+</section>
+<section id="changing-an-array-in-place-the-function" class="level3">
+<h3>Changing an Array In Place: The Function</h3>
+<p>Now add a second function, one that <em>changes</em> the array:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> square_elements<span class="op">(</span><span class="dt">int</span> arr<span class="op">[],</span> <span class="dt">int</span> size<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> size<span class="op">;</span> i<span class="op">++)</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>        arr<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> arr<span class="op">[</span>i<span class="op">]</span> <span class="op">*</span> arr<span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p>The same two parameters as <code
+class="sourceCode c">print_array<span class="op">()</span></code>: the
+array and its length</p></li>
+<li><p><code
+class="sourceCode c">arr<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> arr<span class="op">[</span>i<span class="op">]</span> <span class="op">*</span> arr<span class="op">[</span>i<span class="op">];</span></code>
+<strong>writes</strong> each square back into the array</p></li>
+<li><p><code class="sourceCode c">arr</code> holds the address of <code
+class="sourceCode c">main<span class="op">()</span></code>’s array, so
+each write lands in <code
+class="sourceCode c">main<span class="op">()</span></code>’s array, not
+in a copy</p></li>
+</ul>
+</section>
+<section id="changing-an-array-in-place-calling-it" class="level3">
+<h3>Changing an Array In Place: Calling It</h3>
+<div class="sourceCode" id="cb18"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> print_array<span class="op">(</span><span class="dt">int</span> arr<span class="op">[],</span> <span class="dt">int</span> size<span class="op">);</span>      <span class="co">// both defined</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> square_elements<span class="op">(</span><span class="dt">int</span> arr<span class="op">[],</span> <span class="dt">int</span> size<span class="op">);</span>  <span class="co">// after main()</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> nums<span class="op">[</span><span class="dv">5</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">};</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> length <span class="op">=</span> <span class="kw">sizeof</span><span class="op">(</span>nums<span class="op">)</span> <span class="op">/</span> <span class="kw">sizeof</span><span class="op">(</span>nums<span class="op">[</span><span class="dv">0</span><span class="op">]);</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Before: &quot;</span><span class="op">);</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    print_array<span class="op">(</span>nums<span class="op">,</span> length<span class="op">);</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    square_elements<span class="op">(</span>nums<span class="op">,</span> length<span class="op">);</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;After:  &quot;</span><span class="op">);</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    print_array<span class="op">(</span>nums<span class="op">,</span> length<span class="op">);</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="columns">
+<div class="column">
+<p><strong>Output:</strong></p>
+<pre class="text"><code>Before: 1 2 3 4 5
+After:  1 4 9 16 25</code></pre>
+</div><div class="column">
+<ul>
+<li><p><code
+class="sourceCode c">square_elements<span class="op">(</span>nums<span class="op">,</span> length<span class="op">)</span></code>
+changes <code class="sourceCode c">nums</code> itself, with no
+<code>&amp;</code></p></li>
+<li><p>Compare a plain <code
+class="sourceCode c"><span class="dt">int</span></code>, which needed
+<code
+class="sourceCode c"><span class="dt">int</span> <span class="op">*</span></code>
+and <code class="sourceCode c"><span class="op">*</span></code> to do
+the same</p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="try-it-arrays-to-functions" class="level3">
+<h3>Try It: Arrays to Functions</h3>
+<div class="tryit">
+<p>Step through <code
+class="sourceCode c">square_elements<span class="op">()</span></code>
+and both <code
+class="sourceCode c"><span class="kw">sizeof</span></code> examples, and
+watch where <code class="sourceCode c">arr</code> points:</p>
+<div class="center">
+<p><span><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/array-functions/"
+class="demo-link" target="_blank"
+rel="noopener"><code>selkirk-cpsc.github.io/cpsc100-course/demos/array-functions/</code></a></span></p>
+</div>
+<ul>
+<li><p><strong>Square in place</strong>: <code
+class="sourceCode c">arr</code> is one box holding <code
+class="sourceCode c">nums</code>’ address, so every <code
+class="sourceCode c">arr<span class="op">[</span>i<span class="op">]</span></code>
+lands in <code class="sourceCode c">main</code>’s array</p></li>
+<li><p><strong>sizeof in main</strong>: <code
+class="sourceCode c"><span class="kw">sizeof</span><span class="op">(</span>nums<span class="op">)</span></code>
+measures all five boxes, 20 bytes</p></li>
+<li><p><strong>sizeof in a function</strong>: <code
+class="sourceCode c"><span class="kw">sizeof</span><span class="op">(</span>arr<span class="op">)</span></code>
+measures only the pointer’s box, 8 bytes</p></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="passing-strings-to-functions" class="level2">
+<h2>Passing Strings to Functions</h2>
+<section id="passing-strings-to-functions-1" class="level3">
+<h3>Passing Strings to Functions</h3>
+<p>A string is an array of <code
+class="sourceCode c"><span class="dt">char</span></code> ending with
+<code
+class="sourceCode c"><span class="ch">&#39;</span><span class="sc">\0</span><span class="ch">&#39;</span></code>
+(recall the lecture on strings and arrays); since arrays pass by
+reference, so do strings.</p>
+<ul>
+<li><p>When you pass a string to a function, you’re actually passing a
+<em>pointer</em> to its first character.</p></li>
+<li><p>String parameters are usually written as <code
+class="sourceCode c"><span class="dt">char</span> <span class="op">*</span>s</code>
+or <code
+class="sourceCode c"><span class="dt">char</span> s<span class="op">[]</span></code>;
+both are treated as pointers inside the function.</p></li>
+</ul>
+<p>Example prototypes:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> print_message<span class="op">(</span><span class="dt">char</span> <span class="op">*</span>msg<span class="op">);</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> print_greeting<span class="op">(</span><span class="dt">char</span> greeting<span class="op">[]);</span></span></code></pre></div>
+</section>
+<section id="read-only-memory" class="level3">
+<h3>Read-Only Memory</h3>
+<p>A string can live in two kinds of memory:</p>
+<ol>
+<li><p><strong>String literal</strong>: <code
+class="sourceCode c"><span class="dt">char</span> <span class="op">*</span>name <span class="op">=</span> <span class="st">&quot;Turing&quot;</span><span class="op">;</span></code></p>
+<ul>
+<li><p>The letters are stored in <strong>read-only memory</strong>: the
+program can read them, but not change them. <code
+class="sourceCode c">name</code> just points to them.</p></li>
+<li><p>Changing one, <code
+class="sourceCode c">name<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">=</span> <span class="ch">&#39;t&#39;</span><span class="op">;</span></code>,
+usually <span class="alert">crashes the program</span> (segmentation
+fault).</p></li>
+</ul></li>
+<li><p><strong>Character array</strong>: <code
+class="sourceCode c"><span class="dt">char</span> name<span class="op">[]</span> <span class="op">=</span> <span class="st">&quot;Turing&quot;</span><span class="op">;</span></code></p>
+<ul>
+<li><p>The letters are copied into the array, in memory the program can
+change.</p></li>
+<li><p>Safe to change: <code
+class="sourceCode c">name<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">=</span> <span class="ch">&#39;t&#39;</span><span class="op">;</span></code></p></li>
+</ul></li>
+</ol>
+<div class="callout">
+<p><strong>Important Distinction</strong></p>
+<p>Both can be passed to a function, but only a character array can be
+safely changed by it.</p>
+</div>
+</section>
+<section id="example-reading-a-string-read-only" class="level3">
+<h3>Example: Reading a String (Read-Only)</h3>
+<p>For a function that only <em>reads</em> a string, a string literal is
+safe to pass:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> greet<span class="op">(</span><span class="dt">const</span> <span class="dt">char</span> <span class="op">*</span>name<span class="op">);</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    greet<span class="op">(</span><span class="st">&quot;Alan Turing&quot;</span><span class="op">);</span>   <span class="co">// string literal</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> greet<span class="op">(</span><span class="dt">const</span> <span class="dt">char</span> <span class="op">*</span>name<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Hello, </span><span class="sc">%s</span><span class="st">!</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> name<span class="op">);</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code class="sourceCode c"><span class="dt">const</span></code> in
+<code
+class="sourceCode c"><span class="dt">const</span> <span class="dt">char</span> <span class="op">*</span>name</code>
+promises this function won’t change the string. If it tried, the program
+wouldn’t compile, so a read-only literal is safe to pass.</p>
+</section>
+<section id="what-const-protects-against" class="level3">
+<h3>What <code>const</code> Protects Against</h3>
+<p>Now suppose <code
+class="sourceCode c">greet<span class="op">()</span></code> tries to
+change the string it promised only to read:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> greet<span class="op">(</span><span class="dt">const</span> <span class="dt">char</span> <span class="op">*</span>name<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    name<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">=</span> <span class="ch">&#39;a&#39;</span><span class="op">;</span>          <span class="co">// try to change it</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Hello, </span><span class="sc">%s</span><span class="st">!</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> name<span class="op">);</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>gcc refuses to build the program:</strong></p>
+<pre class="text"><code>error: assignment of read-only location &#39;*name&#39;</code></pre>
+<ul>
+<li><p><code class="sourceCode c"><span class="dt">const</span></code>
+makes the compiler check the function body: no writing through <code
+class="sourceCode c">name</code></p></li>
+<li><p>The program is never built, so it can’t crash</p></li>
+<li><p>Without <code
+class="sourceCode c"><span class="dt">const</span></code>, the same
+mistake compiles, then <span class="alert">crashes</span> when it runs
+(coming up with <code
+class="sourceCode c">make_upper<span class="op">()</span></code>)</p></li>
+</ul>
+</section>
+<section id="example-modifying-a-string" class="level3">
+<h3>Example: Modifying a String</h3>
+<p>A function that <em>modifies</em> a string needs a writable array,
+not a literal:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;ctype.h&gt;</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> make_upper<span class="op">(</span><span class="dt">char</span> s<span class="op">[]);</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> name<span class="op">[]</span> <span class="op">=</span> <span class="st">&quot;turing&quot;</span><span class="op">;</span>  <span class="co">// modifiable array</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    make_upper<span class="op">(</span>name<span class="op">);</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%s\n</span><span class="st">&quot;</span><span class="op">,</span> name<span class="op">);</span>    <span class="co">// prints TURING</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> make_upper<span class="op">(</span><span class="dt">char</span> s<span class="op">[])</span> <span class="op">{</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> s<span class="op">[</span>i<span class="op">]</span> <span class="op">!=</span> <span class="ch">&#39;</span><span class="sc">\0</span><span class="ch">&#39;</span><span class="op">;</span> i<span class="op">++)</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>        s<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> toupper<span class="op">(</span>s<span class="op">[</span>i<span class="op">]);</span>  <span class="co">// a -&gt; A; others unchanged</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</section>
+<section id="careful-passing-a-literal-to-make_upper" class="level3">
+<h3>Careful: Passing a Literal to <code
+class="sourceCode c">make_upper<span class="op">()</span></code></h3>
+<p>Keep the same <code
+class="sourceCode c">make_upper<span class="op">()</span></code>, but
+pass it a string literal:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    make_upper<span class="op">(</span><span class="st">&quot;turing&quot;</span><span class="op">);</span>    <span class="co">// a string literal</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Output:</strong> <code
+class="sourceCode c">Segmentation fault <span class="op">(</span>core dumped<span class="op">)</span></code>,
+and gcc gave <span class="alert">no warning</span>, even with <code
+class="sourceCode c"><span class="op">-</span>Wall</code>.</p>
+<ul>
+<li><p><code
+class="sourceCode c"><span class="st">&quot;turing&quot;</span></code>
+is a string literal: its letters are in <strong>read-only
+memory</strong></p></li>
+<li><p><code
+class="sourceCode c">make_upper<span class="op">()</span></code> gets
+the <strong>address</strong> of those letters, not a copy, so <code
+class="sourceCode c">s</code> points straight into read-only
+memory</p></li>
+<li><p>The first write, <code
+class="sourceCode c">s<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">=</span> toupper<span class="op">(</span>s<span class="op">[</span><span class="dv">0</span><span class="op">]);</span></code>,
+tries to change read-only memory, and the program <span
+class="alert">crashes</span></p></li>
+</ul>
+<p><strong>The fix:</strong> copy the letters into a <code
+class="sourceCode c"><span class="dt">char</span></code> array first, as
+on the last slide.</p>
+</section>
+<section id="try-it-read-only-strings" class="level3">
+<h3>Try It: Read-Only Strings</h3>
+<div class="tryit">
+<p>Step through <code
+class="sourceCode c">make_upper<span class="op">()</span></code> with an
+array and with a literal, then <code
+class="sourceCode c">greet<span class="op">()</span></code> reading and
+trying to write:</p>
+<div class="center">
+<p><span><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/read-only-strings/"
+class="demo-link" target="_blank"
+rel="noopener"><code>selkirk-cpsc.github.io/cpsc100-course/demos/read-only-strings/</code></a></span></p>
+</div>
+<ul>
+<li><p><strong>Character array</strong>: <code
+class="sourceCode c">s</code> points into <code
+class="sourceCode c">main</code>’s own copy, so the capitals
+stay</p></li>
+<li><p><strong>String literal</strong>: <code
+class="sourceCode c">s</code> points into read-only memory, and the
+first write crashes the program</p></li>
+<li><p><strong>Reading with const</strong>: reading a literal is always
+safe</p></li>
+<li><p><strong>Changing a const string</strong>: gcc won’t build the
+program, so it never gets the chance to crash</p></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="returning-multiple-values" class="level2">
+<h2>Returning Multiple Values</h2>
+<section id="returning-more-than-one-result" class="level3">
+<h3>Returning More Than One Result</h3>
+<p>Suppose we want to write functions that each produce
+<strong>two</strong> results:</p>
+<ul>
+<li><p>one that works out the sum <em>and</em> the difference of two
+numbers</p></li>
+<li><p>one that finds the smallest <em>and</em> the largest value in an
+array</p></li>
+</ul>
+<p>So far, a function has handed back its result with <code
+class="sourceCode c"><span class="cf">return</span></code>:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> sum<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> a <span class="op">+</span> b<span class="op">;</span>    <span class="co">// one result, one return</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>But <code class="sourceCode c"><span class="cf">return</span></code>
+gives back exactly <strong>one</strong> value. What would the return
+type of <code
+class="sourceCode c">sum_diff<span class="op">()</span></code> even
+be?</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="op">???</span>  sum_diff<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">);</span></span></code></pre></div>
+<p>Start with the sum and difference, and try the obvious thing.</p>
+</section>
+<section id="a-tempting-attempt" class="level3">
+<h3>A Tempting Attempt</h3>
+<p>Why not just <code
+class="sourceCode c"><span class="cf">return</span></code> both?</p>
+<div class="columns">
+<div class="column">
+<div class="sourceCode" id="cb28"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> sum_diff<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">);</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> sum_diff<span class="op">(</span><span class="dv">8</span><span class="op">,</span> <span class="dv">3</span><span class="op">));</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> sum_diff<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> a <span class="op">+</span> b<span class="op">,</span> a <span class="op">-</span> b<span class="op">;</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div><div class="column">
+<p><strong>Output:</strong></p>
+<pre class="text"><code>5</code></pre>
+</div>
+</div>
+<ul>
+<li><p>Only <code
+class="sourceCode c">a <span class="op">-</span> b</code> comes back;
+the sum is silently lost</p></li>
+<li><p>It compiles with no warning; <code
+class="sourceCode c">gcc <span class="op">-</span>Wall</code> says
+<em>left-hand operand of comma expression has no effect</em></p></li>
+</ul>
+<p>One <code class="sourceCode c"><span class="cf">return</span></code>,
+one value: the results must go out through
+<strong>pointers</strong>.</p>
+</section>
+<section id="returning-multiple-values-the-function" class="level3">
+<h3>Returning Multiple Values: The Function</h3>
+<p>The function: two numbers in, two results out.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> sum_diff<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">,</span> <span class="dt">int</span> <span class="op">*</span>sum<span class="op">,</span> <span class="dt">int</span> <span class="op">*</span>diff<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>sum  <span class="op">=</span> a <span class="op">+</span> b<span class="op">;</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>diff <span class="op">=</span> a <span class="op">-</span> b<span class="op">;</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p><code
+class="sourceCode c"><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b</code>
+are ordinary copies of the two numbers</p></li>
+<li><p><code
+class="sourceCode c"><span class="dt">int</span> <span class="op">*</span>sum<span class="op">,</span> <span class="dt">int</span> <span class="op">*</span>diff</code>
+are <strong>pointers</strong>: addresses of where the caller wants the
+results</p></li>
+<li><p><code
+class="sourceCode c"><span class="op">*</span>sum <span class="op">=</span> <span class="op">...</span></code>
+and <code
+class="sourceCode c"><span class="op">*</span>diff <span class="op">=</span> <span class="op">...</span></code>
+write into the caller’s variables</p></li>
+<li><p>The return type is <code
+class="sourceCode c"><span class="dt">void</span></code>: nothing comes
+back through <code
+class="sourceCode c"><span class="cf">return</span></code>; both results
+go out through the pointers</p></li>
+</ul>
+</section>
+<section id="returning-multiple-values-calling-it" class="level3">
+<h3>Returning Multiple Values: Calling It</h3>
+<div class="sourceCode" id="cb31"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="co">// defined after main():</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> sum_diff<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">,</span> <span class="dt">int</span> <span class="op">*</span>sum<span class="op">,</span> <span class="dt">int</span> <span class="op">*</span>diff<span class="op">);</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">8</span><span class="op">,</span> y <span class="op">=</span> <span class="dv">3</span><span class="op">;</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> total<span class="op">,</span> difference<span class="op">;</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>    sum_diff<span class="op">(</span>x<span class="op">,</span> y<span class="op">,</span> <span class="op">&amp;</span>total<span class="op">,</span> <span class="op">&amp;</span>difference<span class="op">);</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Sum = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> total<span class="op">);</span></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Difference = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> difference<span class="op">);</span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="columns">
+<div class="column">
+<p><strong>Output:</strong></p>
+<pre class="text"><code>Sum = 11
+Difference = 5</code></pre>
+</div><div class="column">
+<ul>
+<li><p><code>&amp;total</code> and <code>&amp;difference</code> say
+<strong>where</strong> the results go</p></li>
+<li><p><code class="sourceCode c">total</code> and <code
+class="sourceCode c">difference</code> start uninitialized: <code
+class="sourceCode c">sum_diff<span class="op">()</span></code> fills
+them in</p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="smallest-and-largest-the-plan" class="level3">
+<h3>Smallest and Largest: The Plan</h3>
+<p><strong>The task:</strong> given an array and its length, find both
+the smallest <em>and</em> the largest value.</p>
+<ul>
+<li><p>For <code
+class="sourceCode c"><span class="op">{</span><span class="dv">7</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">9</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">8</span><span class="op">}</span></code>:
+smallest 1, largest 9</p></li>
+</ul>
+<p><strong>The process, in words:</strong></p>
+<ol>
+<li><p>Start <code class="sourceCode c">min</code> and <code
+class="sourceCode c">max</code> at the first element, <code
+class="sourceCode c">arr<span class="op">[</span><span class="dv">0</span><span class="op">]</span></code></p></li>
+<li><p>For each of the other elements, <code
+class="sourceCode c">arr<span class="op">[</span>i<span class="op">]</span></code>:</p>
+<ul>
+<li><p>if <code
+class="sourceCode c">arr<span class="op">[</span>i<span class="op">]</span> <span class="op">&lt;</span> min</code>,
+it’s the new smallest: <code
+class="sourceCode c">min <span class="op">=</span> arr<span class="op">[</span>i<span class="op">]</span></code></p></li>
+<li><p>if <code
+class="sourceCode c">arr<span class="op">[</span>i<span class="op">]</span> <span class="op">&gt;</span> max</code>,
+it’s the new largest: <code
+class="sourceCode c">max <span class="op">=</span> arr<span class="op">[</span>i<span class="op">]</span></code></p></li>
+</ul></li>
+<li><p>Once every element has been checked, <code
+class="sourceCode c">min</code> and <code
+class="sourceCode c">max</code> hold the answers</p></li>
+</ol>
+</section>
+<section id="smallest-and-largest-the-function" class="level3">
+<h3>Smallest and Largest: The Function</h3>
+<p>The plan as a function, with the two results going out through
+pointers:</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> min_max<span class="op">(</span><span class="dt">int</span> arr<span class="op">[],</span> <span class="dt">int</span> size<span class="op">,</span> <span class="dt">int</span> <span class="op">*</span>min<span class="op">,</span> <span class="dt">int</span> <span class="op">*</span>max<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>min <span class="op">=</span> arr<span class="op">[</span><span class="dv">0</span><span class="op">];</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>max <span class="op">=</span> arr<span class="op">[</span><span class="dv">0</span><span class="op">];</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> i <span class="op">&lt;</span> size<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>arr<span class="op">[</span>i<span class="op">]</span> <span class="op">&lt;</span> <span class="op">*</span>min<span class="op">)</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>            <span class="op">*</span>min <span class="op">=</span> arr<span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>arr<span class="op">[</span>i<span class="op">]</span> <span class="op">&gt;</span> <span class="op">*</span>max<span class="op">)</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>            <span class="op">*</span>max <span class="op">=</span> arr<span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p><code
+class="sourceCode c"><span class="dt">int</span> arr<span class="op">[],</span> <span class="dt">int</span> size</code>:
+the array and its length</p></li>
+<li><p><code
+class="sourceCode c"><span class="dt">int</span> <span class="op">*</span>min<span class="op">,</span> <span class="dt">int</span> <span class="op">*</span>max</code>:
+where the two results go</p></li>
+<li><p>Both start at <code
+class="sourceCode c">arr<span class="op">[</span><span class="dv">0</span><span class="op">]</span></code>;
+the loop updates them through the pointers</p></li>
+</ul>
+</section>
+<section id="smallest-and-largest-calling-it" class="level3">
+<h3>Smallest and Largest: Calling It</h3>
+<div class="sourceCode" id="cb34"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="co">// defined after main():</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> min_max<span class="op">(</span><span class="dt">int</span> arr<span class="op">[],</span> <span class="dt">int</span> size<span class="op">,</span> <span class="dt">int</span> <span class="op">*</span>min<span class="op">,</span> <span class="dt">int</span> <span class="op">*</span>max<span class="op">);</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> nums<span class="op">[</span><span class="dv">6</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">7</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">9</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">8</span><span class="op">};</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> length <span class="op">=</span> <span class="kw">sizeof</span><span class="op">(</span>nums<span class="op">)</span> <span class="op">/</span> <span class="kw">sizeof</span><span class="op">(</span>nums<span class="op">[</span><span class="dv">0</span><span class="op">]);</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> smallest<span class="op">,</span> largest<span class="op">;</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    min_max<span class="op">(</span>nums<span class="op">,</span> length<span class="op">,</span> <span class="op">&amp;</span>smallest<span class="op">,</span> <span class="op">&amp;</span>largest<span class="op">);</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Smallest = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> smallest<span class="op">);</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Largest = </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> largest<span class="op">);</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="columns">
+<div class="column">
+<p><strong>Output:</strong></p>
+<pre class="text"><code>Smallest = 1
+Largest = 9</code></pre>
+</div><div class="column">
+<ul>
+<li><p><code class="sourceCode c">nums</code> needs no
+<code>&amp;</code>: it already decays to an address</p></li>
+<li><p><code>&amp;smallest</code> and <code>&amp;largest</code> say
+<strong>where</strong> the two results go</p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="try-it-returning-multiple-values" class="level3">
+<h3>Try It: Returning Multiple Values</h3>
+<div class="tryit">
+<p>Step through <code
+class="sourceCode c">sum_diff<span class="op">()</span></code> and <code
+class="sourceCode c">min_max<span class="op">()</span></code>, and watch
+the results land in <code
+class="sourceCode c">main<span class="op">()</span></code>’s boxes:</p>
+<div class="center">
+<p><span><a
+href="https://selkirk-cpsc.github.io/cpsc100-course/demos/multiple-results/"
+class="demo-link" target="_blank"
+rel="noopener"><code>selkirk-cpsc.github.io/cpsc100-course/demos/multiple-results/</code></a></span></p>
+</div>
+<ul>
+<li><p><strong>sum_diff</strong>: <code
+class="sourceCode c">total</code> and <code
+class="sourceCode c">difference</code> start as garbage, then <code
+class="sourceCode c">sum_diff<span class="op">()</span></code> fills
+them in through <code class="sourceCode c">sum</code> and <code
+class="sourceCode c">diff</code></p></li>
+<li><p><strong>min_max</strong>: <code
+class="sourceCode c"><span class="op">*</span>min</code> and <code
+class="sourceCode c"><span class="op">*</span>max</code> change <code
+class="sourceCode c">main<span class="op">()</span></code>’s <code
+class="sourceCode c">smallest</code> and <code
+class="sourceCode c">largest</code> as the loop runs</p></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="summary" class="level2">
+<h2>Summary</h2>
+<section id="summary-1" class="level3">
+<h3>Summary</h3>
+<ul>
+<li><p><strong>Pass-by-value</strong>: a function gets a copy of each
+argument, so changing a parameter never changes the caller’s
+variable</p></li>
+<li><p><strong>Pass-by-reference</strong>: pass a variable’s address so
+the function can change the original
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+C still copies the argument, but the copy is an address</p></li>
+<li><p><code
+class="sourceCode c"><span class="dt">int</span> <span class="op">*</span>n</code>
+in the <strong>definition</strong>, <code>&amp;x</code> at the
+<strong>call site</strong>, <code
+class="sourceCode c"><span class="op">*</span>n</code> in the
+<strong>body</strong> to reach <code
+class="sourceCode c">x</code></p></li>
+<li><p><code class="sourceCode c">swap<span class="op">()</span></code>
+needs two pointers because it changes two of the caller’s
+variables</p></li>
+</ul>
+<ul>
+<li><p><strong>Arrays and strings pass by reference
+automatically</strong>: no <code>&amp;</code> needed, the name already
+decays to an address</p></li>
+<li><p>Inside a function, <code
+class="sourceCode c"><span class="kw">sizeof</span></code> measures the
+pointer, not the array
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+pass the length as its own parameter</p></li>
+<li><p>A function that changes a string needs a <code
+class="sourceCode c"><span class="dt">char</span></code> array; a string
+literal is read-only, so pass it only to functions that take <code
+class="sourceCode c"><span class="dt">const</span> <span class="dt">char</span> <span class="op">*</span></code></p></li>
+<li><p><strong>Returning multiple values</strong>: a function returns
+only one value directly, so extra results go out through pointer
+parameters</p></li>
+</ul>
+</section>
+</section>
+<nav class="pager" aria-label="Previous and next lecture">
+<a class="prev" href="../lecture09/"><span class="label">← Previous</span>Week
+9: Pointer Fundamentals</a>
+
+</nav>
+</main>
+<script>
+  // light/dark toggle: an explicit choice wins over the system setting
+  (function () {
+    var b = document.getElementById('theme-toggle'), r = document.documentElement;
+    function current() {
+      var t = r.getAttribute('data-theme');
+      return t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    function show() {
+      var dark = current() === 'dark';
+      b.textContent = dark ? '☀ Light' : '☾ Dark';
+      b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    b.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      r.setAttribute('data-theme', next);
+      try { localStorage.setItem('cpsc100-theme', next); } catch (e) {}
+      show();
+      b.blur();   // so Space goes back to the demo's "next step"
+    });
+    show();
+  })();
+</script>
+</body>
+</html>
