@@ -726,8 +726,8 @@ class="sourceCode c">length <span class="op">=</span> <span class="dv">2</span><
 class="sourceCode c"><span class="kw">sizeof</span><span class="op">(</span>arr<span class="op">)</span></code>
 is 8 bytes, not the array. 8 / 4 = 2: <span class="alert">the wrong
 answer</span></p></li>
-<li><p>gcc warns about this line, so read your warnings. The fix is on
-the next slide.</p></li>
+<li><p>gcc warns about this line, so read your warnings. The fix comes
+next: pass the length as its own parameter.</p></li>
 </ul>
 </section>
 <section id="the-fix-pass-the-length" class="level3">
@@ -1018,9 +1018,11 @@ class="sourceCode c">s<span class="op">[</span><span class="dv">0</span><span cl
 tries to change read-only memory, and the program <span
 class="alert">crashes</span></p></li>
 </ul>
-<p><strong>The fix:</strong> copy the letters into a <code
-class="sourceCode c"><span class="dt">char</span></code> array first, as
-on the last slide.</p>
+<p><strong>The fix:</strong> copy the letters into an array first, as in
+“Example: Modifying a String”: <code
+class="sourceCode c"><span class="dt">char</span> name<span class="op">[]</span> <span class="op">=</span> <span class="st">&quot;turing&quot;</span><span class="op">;</span></code>
+then <code
+class="sourceCode c">make_upper<span class="op">(</span>name<span class="op">);</span></code></p>
 </section>
 <section id="try-it-read-only-strings" class="level3">
 <h3>Try It: Read-Only Strings</h3>
