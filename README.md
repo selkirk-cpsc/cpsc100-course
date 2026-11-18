@@ -23,6 +23,7 @@ Each week's lecture written out as a chapter you can read top to bottom, with th
 | 8 | [Functions and Scope Part 2: Scope](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture08-part2/) |
 | 9 | [Pointer Fundamentals](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture09/) |
 | 10 | [Pointers and Functions](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture10/) |
+| 11 | [Midterm 2 Review](https://selkirk-cpsc.github.io/cpsc100-course/lectures/lecture11/) |
 
 ## Interactive Demos
 

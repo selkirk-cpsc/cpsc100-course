@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Midterm 2 Review · CPSC 100 Notes</title>
+<style>
+  :root {
+    --bg: #f6f6f3;
+    --panel: #ffffff;
+    --ink: #1d1d1f;
+    --muted: #6b6b72;
+    --line: #d6d6db;
+    --accent: #2f6fde;
+    --accent-soft: #dce8fd;
+    --alert: #911a28;
+    --code-bg: #f1f1ee;
+    --tok-kw: #7048e8; --tok-type: #0e7178; --tok-num: #b35a00;
+    --tok-str: #2b8a3e; --tok-com: #8a8a93; --tok-pre: #c2255c; --tok-fn: #1c4fb8;
+    --term-bg: #ffffff; --term-ink: #1d1d1f; --term-line: #c9c9cf; --term-in: #1a7f37;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5;
+      --line: #3a3b42; --accent: #6ea0ff; --accent-soft: #1d3157; --alert: #ff8f9c;
+      --code-bg: #25262b;
+      --tok-kw: #b197fc; --tok-type: #3bc9db; --tok-num: #ffa94d;
+      --tok-str: #69db7c; --tok-com: #868e96; --tok-pre: #f783ac; --tok-fn: #74c0fc;
+      --term-bg: #1d1f23; --term-ink: #e6e6e9; --term-line: #33363d; --term-in: #7ee787;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141518; --panel: #1e1f23; --ink: #ececf0; --muted: #9b9ca5;
+    --line: #3a3b42; --accent: #6ea0ff; --accent-soft: #1d3157; --alert: #ff8f9c;
+    --code-bg: #25262b;
+    --tok-kw: #b197fc; --tok-type: #3bc9db; --tok-num: #ffa94d;
+    --tok-str: #69db7c; --tok-com: #868e96; --tok-pre: #f783ac; --tok-fn: #74c0fc;
+    --term-bg: #1d1f23; --term-ink: #e6e6e9; --term-line: #33363d; --term-in: #7ee787;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 17px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  a { color: var(--accent); }
+  code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .9em; }
+
+  .topbar { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .topbar .in { max-width: 820px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 16px; align-items: center; }
+  .topbar a { text-decoration: none; font-weight: 600; }
+  .topbar .crumb { color: var(--muted); font-size: .9rem; }
+
+  main { max-width: 820px; margin: 0 auto; padding: 8px 16px 48px; }
+  header.title { margin: 28px 0 8px; }
+  header.title .week { color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: .85rem; }
+  header.title h1 { margin: 4px 0 0; font-size: 2.1rem; line-height: 1.2; }
+
+  nav#TOC { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 18px; margin: 20px 0 8px; }
+  nav#TOC::before { content: "In this chapter"; display: block; font-weight: 700; margin-bottom: 4px; }
+  nav#TOC ul { margin: 0; padding-left: 1.2em; }
+
+  h2 { font-size: 1.6rem; margin: 2.4em 0 .4em; padding-bottom: .2em; border-bottom: 2px solid var(--line); }
+  h3 { font-size: 1.2rem; margin: 1.8em 0 .3em; }
+  p, li { max-width: 72ch; }
+  li { margin: .2em 0; }
+  li > p { margin: 0; }
+  .alert { color: var(--alert); font-weight: 600; }
+  :not(pre) > code { background: var(--code-bg); padding: .08em .3em; border-radius: 4px; overflow-wrap: anywhere; }
+  math[display="block"] { overflow-x: auto; max-width: 100%; }
+
+  div.sourceCode { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; margin: 1em 0; overflow-x: auto; }
+  pre.sourceCode { margin: 0; padding: 12px 14px; line-height: 1.5; }
+  /* program output and shell sessions (minted text blocks) */
+  pre:not(.sourceCode) { background: var(--panel); border: 1px dashed var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; line-height: 1.5; }
+  /* sample runs of a program (make_notes.py compiles and runs it): a terminal
+     box in the page's theme, with what the user typed highlighted in green */
+  .runoutput { margin: -.3em 0 1.2em; }
+  .run-label { color: var(--muted); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin: .7em 0 .25em; }
+  pre.terminal { background: var(--term-bg); color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 8px; padding: 10px 14px; margin: 0 0 .5em; overflow-x: auto; line-height: 1.5; }
+  pre.terminal .in { color: var(--term-in); font-weight: 700; }
+  .run-label .run-setup { text-transform: none; letter-spacing: 0; font-weight: 400; }
+  pre.numberSource code > span { position: relative; left: -4em; }
+  pre.numberSource { margin-left: 3em; border-left: 1px solid var(--line); padding-left: 4px; }
+  pre.numberSource code > span > a:first-child::before {
+    content: counter(source-line); counter-increment: source-line; position: relative; left: -1em;
+    text-align: right; vertical-align: baseline; display: inline-block; width: 4em; color: var(--tok-com);
+  }
+  pre.numberSource code { counter-reset: source-line 0; }
+  pre > code.sourceCode > span { display: inline-block; line-height: 1.5; }
+  code.sourceCode > span > a:first-child { text-decoration: none; }
+  code span.kw, code span.cf { color: var(--tok-kw); font-weight: 600; }
+  code span.dt { color: var(--tok-type); }
+  code span.dv, code span.fl, code span.bn, code span.cn { color: var(--tok-num); }
+  code span.st, code span.ch, code span.sc, code span.ss, code span.vs { color: var(--tok-str); }
+  code span.co, code span.cv, code span.do, code span.an { color: var(--tok-com); font-style: italic; }
+  code span.pp, code span.im { color: var(--tok-pre); }
+  code span.fu, code span.bu { color: var(--tok-fn); }
+
+  img { max-width: 100%; height: auto; }
+  img.diagram { background: #fff; border-radius: 8px; padding: 8px; display: block; margin: 0 auto; }
+  /* PNGs are drawings (some with transparent backgrounds): same white card, so dark lines stay visible in dark mode */
+  img[src*=".png"] { background: #fff; border-radius: 8px; padding: 8px; }
+  .center, figure { text-align: center; }
+  figure { margin: 1em 0; }
+  figcaption { color: var(--muted); font-size: .9rem; }
+  .credit { text-align: center; color: var(--muted); font-size: .78rem; margin-top: -.6em; }
+  .credit p { max-width: none; }
+
+  /* slide columns: a figure keeps its natural width and the other column
+     fills the rest; when both can't fit, they stack (see notes.lua) */
+  .columns { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .columns > .column { flex: 1 1 280px; min-width: 0; }
+  .columns > .column.figure-col { flex: 0 1 auto; max-width: 100%; margin: 0 auto; }
+  .columns > .column.figure-col img:not(.diagram) { width: 320px; }
+
+  .multicol ul { columns: 4 8em; list-style: none; padding-left: 0; }
+
+  .callout { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 4px 16px; margin: 1em 0; }
+  .tryit { background: var(--accent-soft); border-radius: 10px; padding: 6px 18px; margin: 1.2em 0; }
+  .tryit .center { text-align: left; }
+  a.demo-link { display: inline-block; background: var(--accent); color: var(--bg); padding: 6px 14px; border-radius: 8px; text-decoration: none; }
+  a.demo-link code { background: none; color: inherit; }
+
+  table { border-collapse: collapse; margin: 1em auto; display: block; overflow-x: auto; max-width: 100%; width: fit-content; }
+  th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--panel); }
+
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .pager a { text-decoration: none; max-width: 48%; }
+  .pager .label { display: block; color: var(--muted); font-size: .85rem; }
+  .pager .next { margin-left: auto; text-align: right; }
+  .pager.top { margin-top: 16px; padding: 0 0 12px; border-top: none; border-bottom: 1px solid var(--line); font-size: .95rem; }
+  .pager.top + header.title { margin-top: 18px; }
+  .theme-toggle { font: inherit; font-size: .85rem; line-height: 1.2; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
+  .theme-toggle:hover { border-color: var(--ink); }
+  .topbar .theme-toggle { margin-left: auto; }
+  .topbar .print-btn + .theme-toggle { margin-left: 0; }
+  .topbar a { white-space: nowrap; }
+  @media (max-width: 480px) { .topbar .in:has(.print-btn) .crumb { display: none; } }
+
+  /* printing (the Print / PDF button, or the browser's own Print): light colours
+     on white, no site navigation, code wrapped instead of scrolling, and
+     headings, figures and code kept off page breaks where they fit */
+  @media print {
+    :root:not([data-print]), :root[data-theme] {   /* outranks the dark-mode rules */
+      --bg: #ffffff; --panel: #ffffff; --ink: #1d1d1f; --muted: #6b6b72;
+      --line: #d6d6db; --accent: #2f6fde; --accent-soft: #eef3fd; --alert: #911a28;
+      --code-bg: #f6f6f3;
+      --tok-kw: #7048e8; --tok-type: #0e7178; --tok-num: #b35a00;
+      --tok-str: #2b8a3e; --tok-com: #8a8a93; --tok-pre: #c2255c; --tok-fn: #1c4fb8;
+      --term-bg: #ffffff; --term-ink: #1d1d1f; --term-line: #c9c9cf; --term-in: #1a7f37;
+    }
+    @page { margin: 15mm 14mm; }
+    body { background: #fff; font-size: 11pt; line-height: 1.5; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .topbar, .pager, .theme-toggle, .print-btn { display: none !important; }
+    main { max-width: none; padding: 0; }
+    header.title { margin-top: 0; }
+    h1, h2, h3, h4, .run-label, .label { break-after: avoid; page-break-after: avoid; }
+    figure, img, svg, .columns, .callout, .tryit, table, nav#TOC,
+    div.sourceCode, pre, .runoutput { break-inside: avoid; page-break-inside: avoid; }
+    div.sourceCode, pre, pre.terminal, table, .animation { overflow: visible !important; }
+    pre, pre code, pre.terminal { white-space: pre-wrap !important; overflow-wrap: anywhere; }
+    pre > code.sourceCode > span { display: inline; }
+    a { text-decoration: none; }
+  }
+</style>
+<script>
+  // apply a saved light/dark choice before the page draws (no flash)
+  try { var t = localStorage.getItem('cpsc100-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+</head>
+<body>
+<div class="topbar"><div class="in">
+  <a href="../../">CPSC 100</a>
+  <span class="crumb">Lecture notes</span>
+  <button type="button" class="theme-toggle print-btn" onclick="window.print()" title="Print this page, or choose Save as PDF in the print dialog">⎙ Print / PDF</button>
+  <button type="button" class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</div></div>
+<main>
+<nav class="pager top" aria-label="Previous and next lecture">
+<a class="prev" href="../lecture10/"><span class="label">← Previous</span>Week
+10: Pointers and Functions</a>
+
+</nav>
+<header class="title">
+<div class="week">Week 11</div>
+<h1>Midterm 2 Review</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#week-by-week-recap"
+id="toc-week-by-week-recap">Week-by-Week Recap</a></li>
+<li><a href="#practice-problems" id="toc-practice-problems">Practice
+Problems</a></li>
+<li><a href="#questions" id="toc-questions">Questions?</a></li>
+</ul>
+</nav>
+<section id="week-by-week-recap" class="level2">
+<h2>Week-by-Week Recap</h2>
+<section id="what-midterm-2-covers" class="level3">
+<h3>What Midterm 2 Covers</h3>
+<div class="columns">
+<div class="column">
+<p><strong>Week 6:<br />
+Strings and Arrays</strong></p>
+<ul>
+<li><p>Declaring and indexing</p></li>
+<li><p>Initializing and looping</p></li>
+<li><p>2D arrays</p></li>
+<li><p>Strings and <code
+class="sourceCode c"><span class="op">&lt;</span>string<span class="op">.</span>h<span class="op">&gt;</span></code></p></li>
+</ul>
+</div><div class="column">
+<p><strong>Week 8:<br />
+Functions and Scope</strong></p>
+<ul>
+<li><p>Decomposition and the call box</p></li>
+<li><p>Function anatomy and prototypes</p></li>
+<li><p>Pass-by-value</p></li>
+<li><p>Scope and <code
+class="sourceCode c"><span class="dt">static</span></code></p></li>
+</ul>
+</div><div class="column">
+<p><strong>Week 9:<br />
+Pointers</strong></p>
+<ul>
+<li><p>Addresses, <code>&amp;</code> and <code
+class="sourceCode c"><span class="op">*</span></code></p></li>
+<li><p>Memory diagrams and <code
+class="sourceCode c">NULL</code></p></li>
+<li><p>Arrays decay to pointers</p></li>
+<li><p>Walking an array with <code
+class="sourceCode c">p<span class="op">++</span></code></p></li>
+<li><p><code
+class="sourceCode c"><span class="dt">char</span> <span class="op">[]</span></code>
+vs. <code
+class="sourceCode c"><span class="dt">char</span> <span class="op">*</span></code></p></li>
+<li><p>Copying an address vs. a value</p></li>
+</ul>
+</div>
+</div>
+<p>Material <strong>not</strong> on this midterm: Week 10 (passing
+pointers, arrays and strings <em>into</em> functions).</p>
+</section>
+<section id="week-6-arrays-declaration-and-indexing" class="level3">
+<h3>Week 6: Arrays; Declaration and Indexing</h3>
+<ul>
+<li><p>A string was already an array of <code
+class="sourceCode c"><span class="dt">char</span></code> , and the same
+idea generalizes to <span class="alert">any</span> type</p></li>
+<li><p>Declaration reserves contiguous memory for <code
+class="sourceCode c">N</code> elements, all of the same type</p></li>
+<li><p><span class="alert">Indexing starts at 0</span>: for an array of
+size <code class="sourceCode c">N</code>, valid indices run from <code
+class="sourceCode c"><span class="dv">0</span></code> to <code
+class="sourceCode c">N<span class="op">-</span><span class="dv">1</span></code></p></li>
+<li><p>C performs <span class="alert">no bounds checking</span>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+reading or writing outside <code
+class="sourceCode c"><span class="dv">0</span><span class="er">..N</span><span class="op">-</span><span class="dv">1</span></code>
+is undefined behavior, not a compile error</p></li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> marks<span class="op">[</span><span class="dv">30</span><span class="op">];</span>      <span class="co">// valid indices: 0 .. 29</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>marks<span class="op">[</span><span class="dv">0</span><span class="op">]</span>  <span class="op">=</span> <span class="dv">85</span><span class="op">;</span>      <span class="co">// first element</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>marks<span class="op">[</span><span class="dv">29</span><span class="op">]</span> <span class="op">=</span> <span class="dv">77</span><span class="op">;</span>      <span class="co">// last element</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>marks<span class="op">[</span><span class="dv">30</span><span class="op">]</span> <span class="op">=</span> <span class="dv">100</span><span class="op">;</span>     <span class="co">// </span><span class="al">BUG</span><span class="co">: one past the end</span></span></code></pre></div>
+</section>
+<section id="week-6-arrays-initializing-and-iterating" class="level3">
+<h3>Week 6: Arrays; Initializing and Iterating</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> scores<span class="op">[</span><span class="dv">5</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">90</span><span class="op">,</span> <span class="dv">85</span><span class="op">,</span> <span class="dv">77</span><span class="op">,</span> <span class="dv">60</span><span class="op">,</span> <span class="dv">100</span><span class="op">};</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> sum <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">5</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span> </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">// i &lt; 5, NOT i &lt;= 5</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    sum <span class="op">+=</span> scores<span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="dt">double</span> average <span class="op">=</span> sum <span class="op">/</span> <span class="fl">5.0</span><span class="op">;</span></span></code></pre></div>
+<ul>
+<li><p>Listing fewer initializers than the declared size zero-fills the
+rest: <code
+class="sourceCode c"><span class="op">{</span><span class="dv">90</span><span class="op">,</span> <span class="dv">85</span><span class="op">}</span></code>
+in a size-5 array gives <code
+class="sourceCode c"><span class="op">{</span><span class="dv">90</span><span class="op">,</span> <span class="dv">85</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">0</span><span class="op">}</span></code></p></li>
+<li><p>Standard traversal pattern: start at <code
+class="sourceCode c">i <span class="op">=</span> <span class="dv">0</span></code>,
+stop <span class="alert">before</span> <code
+class="sourceCode c">i</code> reaches the size (<code
+class="sourceCode c">i <span class="op">&lt;</span> N</code>)
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+this is exactly what keeps you in bounds</p></li>
+</ul>
+</section>
+<section id="week-6-two-dimensional-arrays" class="level3">
+<h3>Week 6: Two-Dimensional Arrays</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> grid<span class="op">[</span><span class="dv">2</span><span class="op">][</span><span class="dv">3</span><span class="op">];</span>   <span class="co">// 2 rows, 3 columns</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> row <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> row <span class="op">&lt;</span> <span class="dv">2</span><span class="op">;</span> row<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> col <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> col <span class="op">&lt;</span> <span class="dv">3</span><span class="op">;</span> col<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> &quot;</span><span class="op">,</span> grid<span class="op">[</span>row<span class="op">][</span>col<span class="op">]);</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p>C stores a 2D array as one contiguous strip of memory, laid out
+row by row; <span class="alert">row-major order</span></p></li>
+<li><p>Traversal order: <code
+class="sourceCode c">grid<span class="op">[</span><span class="dv">0</span><span class="op">][</span><span class="dv">0</span><span class="op">],</span> grid<span class="op">[</span><span class="dv">0</span><span class="op">][</span><span class="dv">1</span><span class="op">],</span> grid<span class="op">[</span><span class="dv">0</span><span class="op">][</span><span class="dv">2</span><span class="op">],</span>           grid<span class="op">[</span><span class="dv">1</span><span class="op">][</span><span class="dv">0</span><span class="op">],</span></code>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>…</mi><annotation encoding="application/x-tex">\ldots</annotation></semantics></math></p></li>
+<li><p>Outer loop selects the row, inner loop sweeps across that row’s
+columns, the same nested-loop pattern as earlier weeks</p></li>
+</ul>
+</section>
+<section id="week-6-strings-and-string.h" class="level3">
+<h3>Week 6: Strings and <code>&lt;string.h&gt;</code></h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="dt">char</span> city<span class="op">[]</span> <span class="op">=</span> <span class="st">&quot;Nelson&quot;</span><span class="op">;</span>        <span class="co">// 6 letters + &#39;\0&#39;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%lu\n</span><span class="st">&quot;</span><span class="op">,</span> strlen<span class="op">(</span>city<span class="op">));</span> <span class="co">// 6: &#39;\0&#39; not counted</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%lu\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="kw">sizeof</span><span class="op">(</span>city<span class="op">));</span> <span class="co">// 7: &#39;\0&#39; included</span></span></code></pre></div>
+<ul>
+<li><p>A string is a <code
+class="sourceCode c"><span class="dt">char</span></code> array that ends
+with the <span class="alert">null terminator</span> <code
+class="text">'\0'</code>; every string function walks until it finds
+one</p></li>
+<li><p><code class="sourceCode c">strcpy</code>, <code
+class="sourceCode c">strcat</code>, <code
+class="sourceCode c">strcmp</code>: copy, append, compare. None of them
+checks that the destination is big enough</p></li>
+<li><p><code
+class="sourceCode c">fgets<span class="op">(</span>s<span class="op">,</span> <span class="kw">sizeof</span><span class="op">(</span>s<span class="op">),</span> stdin<span class="op">)</span></code>
+reads a whole line safely; <code>scanf("%s", s)</code> stops at the
+first space (and takes no <code>&amp;</code>: the array name is already
+an address)</p></li>
+</ul>
+</section>
+<section id="week-8-decomposition-and-the-function-call-box"
+class="level3">
+<h3>Week 8: Decomposition and the Function-Call Box</h3>
+<ul>
+<li><p><span class="alert">Decomposition</span>: break a large task into
+smaller, named subtasks. This is the core habit of software
+design</p></li>
+<li><p>A rectangle with a <span class="alert">bar at each end</span> is
+a <span class="alert">function call</span>; the dashed box still means
+only “loop body”</p></li>
+<li><p>Its internals (Input/Process/Output/Decision shapes) live in a
+separate diagram</p></li>
+</ul>
+<div class="center">
+<p><img src="fig01.svg?v=29e58594" alt="Flow diagram with boxes: Read n; prime = is_prime(n); Print prime" class="diagram" loading="lazy"
+width="199" /></p>
+</div>
+</section>
+<section id="week-8-function-anatomy-and-prototypes" class="level3">
+<h3>Week 8: Function Anatomy and Prototypes</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>return_type function_name<span class="op">(</span> parameter list <span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// body</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> value<span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p>Every function must be <span class="alert">declared before it is
+used</span>; a <strong>prototype</strong> lets the compiler check a call
+before it sees the full definition</p></li>
+<li><p><code class="sourceCode c"><span class="dt">void</span></code>
+return type
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+no value returned; <code
+class="sourceCode c"><span class="dt">void</span></code> parameter list
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+no arguments</p></li>
+<li><p><span class="alert">Argument</span> = value passed at the call
+site; <span class="alert">parameter</span> = the name used in the
+definition</p></li>
+</ul>
+</section>
+<section id="week-8-pass-by-value" class="level3">
+<h3>Week 8: Pass-by-Value</h3>
+<ul>
+<li><p>C <span class="alert">always copies</span> the argument into the
+parameter
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+a function cannot change the caller’s variable this way</p></li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> addOne<span class="op">(</span><span class="dt">int</span> n<span class="op">);</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    addOne<span class="op">(</span>x<span class="op">);</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span> <span class="co">// still 5</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> addOne<span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> n <span class="op">+</span> <span class="dv">1</span><span class="op">;</span>        <span class="co">// changes only the copy</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</section>
+<section id="week-8-scope-and-storage-duration" class="level3">
+<h3>Week 8: Scope and Storage Duration</h3>
+<ul>
+<li><p><span class="alert">Local</span> scope: inside a function; <span
+class="alert">block</span> scope: inside a pair of braces; <span
+class="alert">global</span> scope: outside all functions, visible
+everywhere in the file</p></li>
+<li><p>Each function call gets its own <span
+class="alert">private</span> set of local variables. This is
+<em>why</em> one function can’t see another’s variables</p></li>
+<li><p>Globals create hidden connections between functions; prefer
+parameters and return values</p></li>
+<li><p><code class="sourceCode c"><span class="dt">static</span></code>
+locals are created <span class="alert">once</span> and persist between
+calls, instead of being destroyed when the block ends</p></li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> count_calls<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">static</span> <span class="dt">int</span> calls <span class="op">=</span> <span class="dv">0</span><span class="op">;</span>  <span class="co">// initialized once</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    calls<span class="op">++;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Called </span><span class="sc">%d</span><span class="st"> time(s)</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> calls<span class="op">);</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</section>
+<section id="week-9-addresses-and" class="level3">
+<h3>Week 9: Addresses, <code>&amp;</code>, and <code
+class="text">*</code></h3>
+<ul>
+<li><p>Every variable lives at a specific <span
+class="alert">address</span> in memory</p></li>
+<li><p>A <span class="alert">pointer</span> is a variable whose value is
+an address: it “points to” another variable</p></li>
+<li><p><code>&amp;</code> produces the address of a variable; <code
+class="sourceCode c"><span class="op">*</span></code> <span
+class="alert">dereferences</span> a pointer
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+follows it to the value at the other end</p></li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> age <span class="op">=</span> <span class="dv">19</span><span class="op">;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>pAge <span class="op">=</span> <span class="op">&amp;</span>age<span class="op">;</span> <span class="co">// pAge holds the address of age</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>pAge <span class="op">=</span> <span class="dv">25</span><span class="op">;</span> <span class="co">// writes through the pointer: age is </span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>            <span class="co">// now 25</span></span></code></pre></div>
+</section>
+<section id="week-9-memory-diagrams-and-null" class="level3">
+<h3>Week 9: Memory Diagrams and <code class="text">NULL</code></h3>
+<div class="center">
+<p><img src="fig02.svg?v=0f99b766" alt="Diagram" class="diagram" loading="lazy"
+width="271" /></p>
+</div>
+<ul>
+<li><p>Draw boxes for variables (name, address, value); arrows for
+pointer relationships. This is the essential tool for reasoning about
+pointers</p></li>
+<li><p><code class="sourceCode c">NULL</code>: a pointer that points to
+nothing; <span class="alert">always check</span> before
+dereferencing:</p>
+<div class="center">
+<p><code
+class="sourceCode c"><span class="cf">if</span> <span class="op">(</span>p <span class="op">!=</span> NULL<span class="op">)</span></code></p>
+</div></li>
+</ul>
+</section>
+<section id="week-9-arrays-decay-to-pointers" class="level3">
+<h3>Week 9: Arrays Decay to Pointers</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> vals<span class="op">[</span><span class="dv">5</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">10</span><span class="op">,</span> <span class="dv">20</span><span class="op">,</span> <span class="dv">30</span><span class="op">,</span> <span class="dv">40</span><span class="op">,</span> <span class="dv">50</span><span class="op">};</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>pVals <span class="op">=</span> vals<span class="op">;</span>  <span class="co">// vals decays to &amp;vals[0]</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>vals<span class="op">[</span><span class="dv">4</span><span class="op">]</span> <span class="op">=</span> <span class="dv">60</span><span class="op">;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="op">*(</span>pVals <span class="op">+</span> <span class="dv">4</span><span class="op">)</span> <span class="op">=</span> <span class="dv">60</span><span class="op">;</span>  <span class="co">// pointer arithmetic;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// same element</span></span></code></pre></div>
+<ul>
+<li><p>An array name decays to a pointer to its first element in most
+expressions</p></li>
+<li><p><code
+class="sourceCode c"><span class="op">*(</span>pVals <span class="op">+</span> i<span class="op">)</span></code>
+reaches the same element as <code
+class="sourceCode c">vals<span class="op">[</span>i<span class="op">]</span></code></p></li>
+<li><p>But an array name is <span class="alert">not</span> a variable
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+it can’t be reassigned (<code
+class="sourceCode c">vals<span class="op">++</span></code> is an error;
+<code class="sourceCode c">pVals<span class="op">++</span></code> is
+fine)</p></li>
+</ul>
+</section>
+<section id="week-9-walking-an-array-with-a-pointer" class="level3">
+<h3>Week 9: Walking an Array with a Pointer</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> vals<span class="op">[</span><span class="dv">4</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">3</span><span class="op">,</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">1</span><span class="op">};</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>p <span class="op">=</span> vals<span class="op">;</span>         <span class="co">// p points at vals[0]</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">4</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> &quot;</span><span class="op">,</span> <span class="op">*</span>p<span class="op">);</span> <span class="co">// the value p points at</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    p<span class="op">++;</span>              <span class="co">// move to the next element</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p><code class="sourceCode c">p<span class="op">++</span></code>
+moves the pointer one <span class="alert">element</span> along, not one
+byte; for an <code
+class="sourceCode c"><span class="dt">int</span></code> array that is 4
+bytes</p></li>
+<li><p>The same walk works on a string: start at the first <code
+class="sourceCode c"><span class="dt">char</span></code> and stop when
+<code class="sourceCode c"><span class="op">*</span>p</code> is <code
+class="text">'\0'</code></p></li>
+</ul>
+</section>
+<section id="week-9-char-vs.-char" class="level3">
+<h3>Week 9: <code>char []</code> vs. <code>char *</code></h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="dt">char</span> name<span class="op">[]</span>  <span class="op">=</span> <span class="st">&quot;Ada&quot;</span><span class="op">;</span> <span class="co">// an array you own: 4 chars</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="dt">char</span> <span class="op">*</span>pName  <span class="op">=</span> <span class="st">&quot;Ada&quot;</span><span class="op">;</span> <span class="co">// points to a string in</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                      <span class="co">// read-only memory</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>pName <span class="op">=</span> <span class="st">&quot;Grace&quot;</span><span class="op">;</span> <span class="co">// allowed: pName is a variable</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>name  <span class="op">=</span> <span class="st">&quot;Grace&quot;</span><span class="op">;</span> <span class="co">// ERROR: an array name can&#39;t be</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                 <span class="co">// assigned</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                 </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>strcpy<span class="op">(</span>name<span class="op">,</span> <span class="st">&quot;Bo&quot;</span><span class="op">);</span> <span class="co">// copy INTO the array instead</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>pName<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">=</span> <span class="ch">&#39;B&#39;</span><span class="op">;</span>     <span class="co">// CRASH: can&#39;t change read-only</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// memory</span></span></code></pre></div>
+<ul>
+<li><p>An array name is a <span class="alert">fixed address</span>; a
+pointer is a variable that can hold a different address later</p></li>
+<li><p>An array of strings is usually an array of pointers: <code
+class="sourceCode c"><span class="dt">char</span> <span class="op">*</span>days<span class="op">[</span><span class="dv">3</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="st">&quot;Mon&quot;</span><span class="op">,</span> <span class="st">&quot;Tue&quot;</span><span class="op">,</span> <span class="st">&quot;Wed&quot;</span><span class="op">};</span></code></p></li>
+</ul>
+</section>
+<section id="week-9-two-pointers-two-variables" class="level3">
+<h3>Week 9: Two Pointers, Two Variables</h3>
+<p>The next two slides both start from these three lines:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> m <span class="op">=</span> <span class="dv">1</span><span class="op">,</span> n <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>p <span class="op">=</span> <span class="op">&amp;</span>m<span class="op">;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>q <span class="op">=</span> <span class="op">&amp;</span>n<span class="op">;</span></span></code></pre></div>
+<div class="center">
+
+</div>
+<p><code class="sourceCode c">p</code> holds the address of <code
+class="sourceCode c">m</code>; <code class="sourceCode c">q</code> holds
+the address of <code class="sourceCode c">n</code>.</p>
+</section>
+<section id="week-9-copying-an-address" class="level3">
+<h3>Week 9: Copying an Address</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> q<span class="op">;</span>   <span class="co">// no *: changes where p points</span></span></code></pre></div>
+<div class="center">
+
+</div>
+<p><code class="sourceCode c">q</code>’s <span
+class="alert">address</span> is copied into <code
+class="sourceCode c">p</code>, so now <code
+class="sourceCode c">p</code> and <code class="sourceCode c">q</code>
+both point at <code class="sourceCode c">n</code>. <code
+class="sourceCode c">m</code> is still 1.</p>
+</section>
+<section id="week-9-copying-a-value" class="level3">
+<h3>Week 9: Copying a Value</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>p <span class="op">=</span> <span class="op">*</span>q<span class="op">;</span> <span class="co">// with *: changes the variable p points at</span></span></code></pre></div>
+<div class="center">
+
+</div>
+<p>The <span class="alert">value</span> at <code
+class="sourceCode c">q</code> (5) is copied into the variable at <code
+class="sourceCode c">p</code>, so <code class="sourceCode c">m</code> is
+now 5. <code class="sourceCode c">p</code> still points at <code
+class="sourceCode c">m</code>.</p>
+<p><span class="alert">Rule:</span> without a <code
+class="sourceCode c"><span class="op">*</span></code>, you change where
+a pointer points; with a <code
+class="sourceCode c"><span class="op">*</span></code>, you change the
+variable it points at.</p>
+</section>
+</section>
+<section id="practice-problems" class="level2">
+<h2>Practice Problems</h2>
+<section id="problem-1-array-bounds" class="level3">
+<h3>Problem 1: Array Bounds</h3>
+<p>What is wrong with this code?</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> scores<span class="op">[</span><span class="dv">10</span><span class="op">];</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;=</span> <span class="dv">10</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    scores<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</section>
+<section id="solution-1-array-bounds" class="level3">
+<h3>Solution 1: Array Bounds</h3>
+<div class="sourceCode" id="cb16"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> scores<span class="op">[</span><span class="dv">10</span><span class="op">];</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;=</span> <span class="dv">10</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span> </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// </span><span class="al">BUG</span><span class="co">: i reaches 10</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    scores<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Valid indices for <code
+class="sourceCode c">scores<span class="op">[</span><span class="dv">10</span><span class="op">]</span></code>
+run <span class="alert">0 to 9</span>. When <code
+class="sourceCode c">i</code> is <code
+class="sourceCode c"><span class="dv">10</span></code>, <code
+class="sourceCode c">scores<span class="op">[</span><span class="dv">10</span><span class="op">]</span></code>
+writes one element past the end of the array
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+undefined behavior, not a compile error. Fix: <code
+class="sourceCode c">i <span class="op">&lt;</span> <span class="dv">10</span></code>.</p>
+</section>
+<section id="problem-2-used-before-declared" class="level3">
+<h3>Problem 2: Used Before Declared</h3>
+<p>Why does this fail to compile?</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> result <span class="op">=</span> square<span class="op">(</span><span class="dv">5</span><span class="op">);</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> result<span class="op">);</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> square<span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> n <span class="op">*</span> n<span class="op">;</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</section>
+<section id="solution-2-used-before-declared" class="level3">
+<h3>Solution 2: Used Before Declared</h3>
+<div class="sourceCode" id="cb18"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> square<span class="op">(</span><span class="dt">int</span> n<span class="op">);</span>   <span class="co">// FIX: prototype before main()</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> result <span class="op">=</span> square<span class="op">(</span><span class="dv">5</span><span class="op">);</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> result<span class="op">);</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> square<span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> n <span class="op">*</span> n<span class="op">;</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The compiler hasn’t seen <span class="alert">anything</span> about
+<code class="sourceCode c">square</code> (not a prototype, not a
+definition) by the time <code
+class="sourceCode c">main<span class="op">()</span></code> calls it. A
+prototype above <code
+class="sourceCode c">main<span class="op">()</span></code> fixes this
+regardless of where the definition appears later.</p>
+</section>
+<section id="problem-3-pass-by-value" class="level3">
+<h3>Problem 3: Pass-by-Value</h3>
+<p>What does this print?</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> triple<span class="op">(</span><span class="dt">int</span> n<span class="op">);</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    triple<span class="op">(</span>x<span class="op">);</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> triple<span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="dv">3</span><span class="op">*</span>n<span class="op">;</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</section>
+<section id="solution-3-pass-by-value" class="level3">
+<h3>Solution 3: Pass-by-Value</h3>
+<div class="sourceCode" id="cb20"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> triple<span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="dv">3</span><span class="op">*</span>n<span class="op">;</span>   <span class="co">// changes only the local copy</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Prints <span class="alert">5</span>, not 15. <code
+class="sourceCode c">n</code> is a copy of <code
+class="sourceCode c">x</code>; C always passes by value. Fix, if a new
+value is wanted, <span class="alert">return</span> it:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> triple<span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">3</span><span class="op">*</span>n<span class="op">;</span> </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>and store it with <code
+class="sourceCode c">x <span class="op">=</span> triple<span class="op">(</span>x<span class="op">);</span></code>.</p>
+</section>
+<section id="problem-4-missing-null-check" class="level3">
+<h3>Problem 4: Missing <code>NULL</code> Check</h3>
+<p>What happens when this runs?</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>p <span class="op">=</span> NULL<span class="op">;</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">*</span>p<span class="op">);</span></span></code></pre></div>
+</section>
+<section id="solution-4-missing-null-check" class="level3">
+<h3>Solution 4: Missing <code>NULL</code> Check</h3>
+<div class="sourceCode" id="cb23"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>p <span class="op">=</span> NULL<span class="op">;</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">*</span>p<span class="op">);</span>   <span class="co">// no NULL check!</span></span></code></pre></div>
+<p><span class="alert">Segmentation fault</span>: <code
+class="sourceCode c"><span class="op">*</span>p</code> dereferences an
+address that points nowhere valid, and the OS kills the program
+immediately. Fix:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>p <span class="op">!=</span> NULL<span class="op">)</span> <span class="op">{</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">*</span>p<span class="op">);</span> <span class="op">}</span></span></code></pre></div>
+<p>Always check before dereferencing.</p>
+</section>
+<section id="problem-5-2d-array-traversal" class="level3">
+<h3>Problem 5: 2D Array Traversal</h3>
+<p>What is wrong with this code, meant to print a
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn><mo>×</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">3\times2</annotation></semantics></math>
+grid (3 rows, 2 columns)?</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> grid<span class="op">[</span><span class="dv">3</span><span class="op">][</span><span class="dv">2</span><span class="op">]</span> <span class="op">=</span> <span class="op">{{</span><span class="dv">1</span><span class="op">,</span><span class="dv">2</span><span class="op">},{</span><span class="dv">3</span><span class="op">,</span><span class="dv">4</span><span class="op">},{</span><span class="dv">5</span><span class="op">,</span><span class="dv">6</span><span class="op">}};</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> row <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> row <span class="op">&lt;</span> <span class="dv">2</span><span class="op">;</span> row<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> col <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> col <span class="op">&lt;</span> <span class="dv">3</span><span class="op">;</span> col<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>        printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> &quot;</span><span class="op">,</span> grid<span class="op">[</span>row<span class="op">][</span>col<span class="op">]);</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</section>
+<section id="solution-5-2d-array-traversal" class="level3">
+<h3>Solution 5: 2D Array Traversal</h3>
+<div class="sourceCode" id="cb26"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> grid<span class="op">[</span><span class="dv">3</span><span class="op">][</span><span class="dv">2</span><span class="op">]</span> <span class="op">=</span> <span class="op">{{</span><span class="dv">1</span><span class="op">,</span><span class="dv">2</span><span class="op">},{</span><span class="dv">3</span><span class="op">,</span><span class="dv">4</span><span class="op">},{</span><span class="dv">5</span><span class="op">,</span><span class="dv">6</span><span class="op">}};</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> row <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> row <span class="op">&lt;</span> <span class="dv">2</span><span class="op">;</span> row<span class="op">++)</span> <span class="op">{</span>   </span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// </span><span class="al">BUG</span><span class="co">: swapped bounds</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> col <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> col <span class="op">&lt;</span> <span class="dv">3</span><span class="op">;</span> col<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>        printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> &quot;</span><span class="op">,</span> grid<span class="op">[</span>row<span class="op">][</span>col<span class="op">]);</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The outer loop bound must match the <span class="alert">row</span>
+count (3) and the inner loop bound must match the <span
+class="alert">column</span> count (2); they were swapped. This both
+misses row 2 entirely and reads <code
+class="sourceCode c">grid<span class="op">[</span><span class="dv">0</span><span class="op">][</span><span class="dv">2</span><span class="op">]</span></code>/<code
+class="sourceCode c">grid<span class="op">[</span><span class="dv">1</span><span class="op">][</span><span class="dv">2</span><span class="op">]</span></code>,
+which are out of bounds. Fix: <code
+class="sourceCode c">row <span class="op">&lt;</span> <span class="dv">3</span></code>
+outer, <code
+class="sourceCode c">col <span class="op">&lt;</span> <span class="dv">2</span></code>
+inner.</p>
+</section>
+<section id="problem-6-pointer-arithmetic" class="level3">
+<h3>Problem 6: Pointer Arithmetic</h3>
+<p>What does this print?</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> vals<span class="op">[</span><span class="dv">5</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">10</span><span class="op">,</span> <span class="dv">20</span><span class="op">,</span> <span class="dv">30</span><span class="op">,</span> <span class="dv">40</span><span class="op">,</span> <span class="dv">50</span><span class="op">};</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>p <span class="op">=</span> vals <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">*</span>p<span class="op">,</span> <span class="op">*(</span>p <span class="op">+</span> <span class="dv">2</span><span class="op">));</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>p<span class="op">++;</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">*</span>p<span class="op">,</span> vals<span class="op">[</span><span class="dv">4</span><span class="op">]</span> <span class="op">-</span> <span class="op">*</span>p<span class="op">);</span></span></code></pre></div>
+</section>
+<section id="solution-6-pointer-arithmetic" class="level3">
+<h3>Solution 6: Pointer Arithmetic</h3>
+<pre class="text"><code>20 40
+30 20</code></pre>
+<ul>
+<li><p><code
+class="sourceCode c">vals <span class="op">+</span> <span class="dv">1</span></code>
+is the address of <code
+class="sourceCode c">vals<span class="op">[</span><span class="dv">1</span><span class="op">]</span></code>,
+so <code class="sourceCode c"><span class="op">*</span>p</code> is 20
+and <code
+class="sourceCode c"><span class="op">*(</span>p <span class="op">+</span> <span class="dv">2</span><span class="op">)</span></code>
+is <code
+class="sourceCode c">vals<span class="op">[</span><span class="dv">3</span><span class="op">]</span></code>,
+40</p></li>
+<li><p>After <code
+class="sourceCode c">p<span class="op">++</span></code>, <code
+class="sourceCode c">p</code> points at <code
+class="sourceCode c">vals<span class="op">[</span><span class="dv">2</span><span class="op">]</span></code>:
+<code class="sourceCode c"><span class="op">*</span>p</code> is 30, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>50</mn><mo>−</mo><mn>30</mn><mo>=</mo><mn>20</mn></mrow><annotation encoding="application/x-tex">50 - 30 = 20</annotation></semantics></math></p></li>
+<li><p><code
+class="sourceCode c"><span class="op">*(</span>p <span class="op">+</span> i<span class="op">)</span></code>
+counts <code class="sourceCode c">i</code> elements from wherever <code
+class="sourceCode c">p</code> points <em>now</em></p></li>
+</ul>
+</section>
+<section id="problem-7-static-local-variables" class="level3">
+<h3>Problem 7: <code>static</code> Local Variables</h3>
+<p>How many times does this print, and what values?</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> count_calls<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    count_calls<span class="op">();</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    count_calls<span class="op">();</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    count_calls<span class="op">();</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> count_calls<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">static</span> <span class="dt">int</span> calls <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    calls<span class="op">++;</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> calls<span class="op">);</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</section>
+<section id="solution-7-static-local-variables" class="level3">
+<h3>Solution 7: <code>static</code> Local Variables</h3>
+<p>Prints <span class="alert">1, 2, 3</span>, not <code
+class="sourceCode c"><span class="dv">1</span><span class="op">,</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">1</span></code>.
+<code class="sourceCode c">calls</code> is initialized to <code
+class="sourceCode c"><span class="dv">0</span></code> only on the <span
+class="alert">first</span> call; every later call reuses the <span
+class="alert">same</span> <code class="sourceCode c">calls</code>
+instead of resetting it, because a <code
+class="sourceCode c"><span class="dt">static</span></code> local
+persists between calls instead of being destroyed when the function
+returns.</p>
+</section>
+<section id="problem-8-what-do-i-do" class="level3">
+<h3>Problem 8: What Do I Do?</h3>
+<p>This function has no useful name.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> what_do_i_do<span class="op">(</span><span class="dt">int</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(</span>x <span class="op">*</span> x <span class="op">&lt;=</span> n<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>        x<span class="op">++;</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x <span class="op">-</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>For the call <code
+class="sourceCode c">what_do_i_do<span class="op">(</span><span class="dv">30</span><span class="op">)</span></code>:</p>
+<ol>
+<li><p>What does it return?</p></li>
+<li><p>In one sentence, what does the function do?</p></li>
+<li><p>What are its parameters and its local variables?</p></li>
+<li><p>Suggest a better name.</p></li>
+</ol>
+</section>
+<section id="solution-8-what-do-i-do" class="level3">
+<h3>Solution 8: What Do I Do?</h3>
+<ol>
+<li><p>Returns <span class="alert">5</span>. <code
+class="sourceCode c">x</code> counts up while <code
+class="sourceCode c">x <span class="op">*</span> x <span class="op">&lt;=</span> <span class="dv">30</span></code>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn><mo>×</mo><mn>5</mn><mo>=</mo><mn>25</mn></mrow><annotation encoding="application/x-tex">5 \times 5 = 25</annotation></semantics></math>
+passes,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>6</mn><mo>×</mo><mn>6</mn><mo>=</mo><mn>36</mn></mrow><annotation encoding="application/x-tex">6 \times 6 = 36</annotation></semantics></math>
+fails, so the loop stops at 6 and returns
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>6</mn><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">6 - 1</annotation></semantics></math>.</p></li>
+<li><p>It finds the largest whole number whose square is at most <code
+class="sourceCode c">n</code>: the whole-number square root.</p></li>
+<li><p>Parameter: <code class="sourceCode c">n</code>. Local variable:
+<code class="sourceCode c">x</code>.</p></li>
+<li><p><code
+class="sourceCode c">int_sqrt<span class="op">(..)</span></code></p></li>
+</ol>
+<p><span class="alert">Tip:</span> trace it with a small input first,
+writing down each variable’s value on every pass, then look for the
+pattern.</p>
+</section>
+<section id="problem-9-flow-diagram-with-a-function-call"
+class="level3">
+<h3>Problem 9: Flow Diagram with a Function Call</h3>
+<p>The function from Problem 8, renamed <code
+class="sourceCode c">int_sqrt<span class="op">(</span>n<span class="op">)</span></code>,
+is ready to use. Draw the <span class="alert">top-level</span> flow
+diagram for this program:</p>
+<ul>
+<li><p>It has an array <code
+class="sourceCode c"><span class="dt">int</span> nums<span class="op">[</span><span class="dv">5</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">16</span><span class="op">,</span> <span class="dv">20</span><span class="op">,</span> <span class="dv">49</span><span class="op">,</span> <span class="dv">50</span><span class="op">,</span> <span class="dv">81</span><span class="op">};</span></code></p></li>
+<li><p>For each element, it calls <code
+class="sourceCode c">int_sqrt<span class="op">()</span></code> <span
+class="alert">once</span> and saves the result in <code
+class="sourceCode c">r</code></p></li>
+<li><p>If <code
+class="sourceCode c">r <span class="op">*</span> r</code> equals the
+element, it prints the element (a perfect square)</p></li>
+</ul>
+<p>Use a <code class="sourceCode c"><span class="cf">for</span></code>
+loop, a function-call box, and a dashed box around the loop body. What
+does the program print?</p>
+</section>
+<section id="solution-9-flow-diagram-with-a-function-call"
+class="level3">
+<h3>Solution 9: Flow Diagram with a Function Call</h3>
+<div class="columns">
+<div class="column figure-col">
+<div class="center">
+<p><img src="fig03.svg?v=a019cdeb" alt="Flow diagram with boxes: Start; Declare: int nums[5] = \...\, int r; Initialize counter: i = 0; i &lt; 5?; r = int_sqrt(nums[i]); r * r == nums[i]?; Print nums[i]; Update counter: i++; Stop" class="diagram" loading="lazy"
+width="530" /></p>
+</div>
+</div><div class="column">
+<ul>
+<li><p>The call box saves the result:<br />
+<code
+class="sourceCode c">r <span class="op">=</span> int_sqrt<span class="op">(</span>nums<span class="op">[</span>i<span class="op">])</span></code></p></li>
+<li><p>The <em>decision</em> uses <code class="sourceCode c">r</code>,
+so the function is called only once per element</p></li>
+<li><p>The top level doesn’t show <em>how</em> <code
+class="sourceCode c">int_sqrt</code> works. That is its own
+diagram</p></li>
+</ul>
+<p>Prints <span class="alert">16 49 81</span>.</p>
+</div>
+</div>
+</section>
+<section id="problem-10-a-2d-array-through-a-pointer" class="level3">
+<h3>Problem 10: A 2D Array Through a Pointer</h3>
+<p>What does this print?</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> seats<span class="op">[</span><span class="dv">2</span><span class="op">][</span><span class="dv">4</span><span class="op">]</span> <span class="op">=</span> <span class="op">{{</span><span class="dv">3</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">5</span><span class="op">,</span> <span class="dv">1</span><span class="op">},</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>                   <span class="op">{</span><span class="dv">2</span><span class="op">,</span> <span class="dv">6</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">4</span><span class="op">}};</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>p <span class="op">=</span> <span class="op">&amp;</span>seats<span class="op">[</span><span class="dv">0</span><span class="op">][</span><span class="dv">0</span><span class="op">];</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="op">*(</span>p <span class="op">+</span> <span class="dv">5</span><span class="op">),</span> <span class="op">*(</span>p <span class="op">+</span> <span class="dv">1</span> <span class="op">*</span> <span class="dv">4</span> <span class="op">+</span> <span class="dv">3</span><span class="op">));</span></span></code></pre></div>
+</section>
+<section id="solution-10-a-2d-array-through-a-pointer" class="level3">
+<h3>Solution 10: A 2D Array Through a Pointer</h3>
+<p>Output:</p>
+<pre class="text"><code>6 4</code></pre>
+<ul>
+<li><p>In memory, <code class="sourceCode c">seats</code> is one strip,
+row by row: <code class="text">3 0 5 1 2 6 0 4</code></p></li>
+<li><p><code
+class="sourceCode c">seats<span class="op">[</span>row<span class="op">][</span>col<span class="op">]</span></code>
+is at offset
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">row</mtext><mo>×</mo><mn>4</mn><mo>+</mo><mtext mathvariant="normal">col</mtext></mrow><annotation encoding="application/x-tex">\text{row} \times 4 + \text{col}</annotation></semantics></math>
+from <code class="sourceCode c">p</code>, because each row holds 4
+elements</p></li>
+<li><p>Offset 5 is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>×</mo><mn>4</mn><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">1 \times 4 + 1</annotation></semantics></math>:
+<code
+class="sourceCode c">seats<span class="op">[</span><span class="dv">1</span><span class="op">][</span><span class="dv">1</span><span class="op">]</span></code>,
+which is 6</p></li>
+<li><p><code
+class="sourceCode c"><span class="op">*(</span>p <span class="op">+</span> <span class="dv">1</span> <span class="op">*</span> <span class="dv">4</span> <span class="op">+</span> <span class="dv">3</span><span class="op">)</span></code>
+is offset 7: <code
+class="sourceCode c">seats<span class="op">[</span><span class="dv">1</span><span class="op">][</span><span class="dv">3</span><span class="op">]</span></code>,
+which is 4</p></li>
+</ul>
+</section>
+<section id="problem-11-one-loop-instead-of-two" class="level3">
+<h3>Problem 11: One Loop Instead of Two</h3>
+<p>This prints <code class="sourceCode c">seats</code> from Problem 10,
+one row per line:</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> r <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> r <span class="op">&lt;</span> <span class="dv">2</span><span class="op">;</span> r<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> c <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> c <span class="op">&lt;</span> <span class="dv">4</span><span class="op">;</span> c<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>        printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> &quot;</span><span class="op">,</span> seats<span class="op">[</span>r<span class="op">][</span>c<span class="op">]);</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Rewrite it as a <span class="alert">single</span> loop (no nested
+loops) that reads every element through
+<code>int *p = &amp;seats[0][0];</code> and prints exactly the same two
+lines.</p>
+</section>
+<section id="solution-11-one-loop-instead-of-two" class="level3">
+<h3>Solution 11: One Loop Instead of Two</h3>
+<div class="sourceCode" id="cb34"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>p <span class="op">=</span> <span class="op">&amp;</span>seats<span class="op">[</span><span class="dv">0</span><span class="op">][</span><span class="dv">0</span><span class="op">];</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">2</span> <span class="op">*</span> <span class="dv">4</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> &quot;</span><span class="op">,</span> <span class="op">*(</span>p <span class="op">+</span> i<span class="op">));</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">((</span>i <span class="op">+</span> <span class="dv">1</span><span class="op">)</span> <span class="op">%</span> <span class="dv">4</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span>  <span class="co">// a full row printed</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>        printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p>One loop visits all
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mo>×</mo><mn>4</mn><mo>=</mo><mn>8</mn></mrow><annotation encoding="application/x-tex">2 \times 4 = 8</annotation></semantics></math>
+elements in memory order</p></li>
+<li><p><code
+class="sourceCode c">i <span class="op">+</span> <span class="dv">1</span></code>
+is how many elements have been printed so far. When it is a multiple of
+4, a whole row is done: print the newline there</p></li>
+</ul>
+</section>
+<section id="problem-12-walking-a-string-with-a-pointer" class="level3">
+<h3>Problem 12: Walking a String with a Pointer</h3>
+<p>What does this print? (<code
+class="sourceCode c"><span class="op">&lt;</span>ctype<span class="op">.</span>h<span class="op">&gt;</span></code>
+is included.)</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="dt">char</span> sign<span class="op">[]</span> <span class="op">=</span> <span class="st">&quot;Rm 204B, Bldg 7!&quot;</span><span class="op">;</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="dt">char</span> <span class="op">*</span>p <span class="op">=</span> sign<span class="op">;</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> upper <span class="op">=</span> <span class="dv">0</span><span class="op">,</span> punct <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="op">(*</span>p <span class="op">!=</span> <span class="ch">&#39;</span><span class="sc">\0</span><span class="ch">&#39;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>isupper<span class="op">(*</span>p<span class="op">))</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>        upper<span class="op">++;</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>ispunct<span class="op">(*</span>p<span class="op">))</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>        punct<span class="op">++;</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>    p<span class="op">++;</span></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%d</span><span class="st"> </span><span class="sc">%d\n</span><span class="st">&quot;</span><span class="op">,</span> upper<span class="op">,</span> punct<span class="op">);</span></span></code></pre></div>
+</section>
+<section id="solution-12-walking-a-string-with-a-pointer"
+class="level3">
+<h3>Solution 12: Walking a String with a Pointer</h3>
+<p>Output:</p>
+<pre class="text"><code>3 2</code></pre>
+<ul>
+<li><p>Upper case: <code
+class="sourceCode c"><span class="ch">&#39;R&#39;</span></code>, the
+<code class="sourceCode c"><span class="ch">&#39;B&#39;</span></code> in
+<code class="text">204B</code>, and the <code
+class="sourceCode c"><span class="ch">&#39;B&#39;</span></code> in <code
+class="text">Bldg</code></p></li>
+<li><p>Punctuation: <code
+class="sourceCode c"><span class="ch">&#39;,&#39;</span></code> and
+<code class="sourceCode c"><span class="ch">&#39;!&#39;</span></code>;
+digits and spaces count as neither</p></li>
+<li><p><code class="sourceCode c"><span class="op">*</span>p</code> is
+the character <code class="sourceCode c">p</code> points at; <code
+class="sourceCode c">p<span class="op">++</span></code> moves to the
+next one</p></li>
+<li><p>The loop stops at the <code class="text">'\0'</code>, which is
+never counted</p></li>
+</ul>
+</section>
+<section id="problem-13-a-pointer-walk-in-memory" class="level3">
+<h3>Problem 13: A Pointer Walk in Memory</h3>
+<p>(<code
+class="sourceCode c"><span class="op">&lt;</span>ctype<span class="op">.</span>h<span class="op">&gt;</span></code>
+is included.)</p>
+<div class="sourceCode" id="cb37"><pre
+class="sourceCode numberSource c numberLines"><code class="sourceCode c"><span id="cb37-1"><a href="#cb37-1"></a><span class="dt">char</span> word<span class="op">[]</span> <span class="op">=</span> <span class="st">&quot;pin&quot;</span><span class="op">;</span></span>
+<span id="cb37-2"><a href="#cb37-2"></a><span class="dt">char</span> <span class="op">*</span>p <span class="op">=</span> word<span class="op">;</span></span>
+<span id="cb37-3"><a href="#cb37-3"></a></span>
+<span id="cb37-4"><a href="#cb37-4"></a><span class="cf">while</span> <span class="op">(*</span>p <span class="op">!=</span> <span class="ch">&#39;</span><span class="sc">\0</span><span class="ch">&#39;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb37-5"><a href="#cb37-5"></a>    <span class="op">*</span>p <span class="op">=</span> toupper<span class="op">(*</span>p<span class="op">);</span></span>
+<span id="cb37-6"><a href="#cb37-6"></a>    p<span class="op">++;</span></span>
+<span id="cb37-7"><a href="#cb37-7"></a><span class="op">}</span></span>
+<span id="cb37-8"><a href="#cb37-8"></a>printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%s\n</span><span class="st">&quot;</span><span class="op">,</span> word<span class="op">);</span></span></code></pre></div>
+<ol>
+<li><p>Draw the memory diagram after line 2. <code
+class="sourceCode c">word</code> starts at <code
+class="text">0x7ffe20</code>, and <code class="sourceCode c">p</code> is
+at <code class="text">0x7ffe28</code>.</p></li>
+<li><p>Redraw it after each pass of the loop.</p></li>
+<li><p>Where does <code class="sourceCode c">p</code> point when the
+loop ends? What is printed?</p></li>
+</ol>
+</section>
+<section id="solution-13-a-pointer-walk-in-memory" class="level3">
+<h3>Solution 13: A Pointer Walk in Memory</h3>
+<div class="center">
+
+</div>
+<div class="overprint">
+<p><strong>After line 2:</strong> each <code
+class="sourceCode c"><span class="dt">char</span></code> takes <span
+class="alert">1 byte</span>, so the addresses go up by 1. <code
+class="sourceCode c">p</code> holds <code class="text">0x7ffe20</code>,
+the address of <code
+class="sourceCode c">word<span class="op">[</span><span class="dv">0</span><span class="op">]</span></code>.</p>
+<p><strong>Pass 1:</strong> <code
+class="sourceCode c"><span class="op">*</span>p <span class="op">=</span> toupper<span class="op">(*</span>p<span class="op">)</span></code>
+changes <code
+class="sourceCode c"><span class="ch">&#39;p&#39;</span></code> to <code
+class="sourceCode c"><span class="ch">&#39;P&#39;</span></code>, then
+<code class="sourceCode c">p<span class="op">++</span></code> moves
+<code class="sourceCode c">p</code> <span class="alert">one byte</span>
+to <code
+class="sourceCode c">word<span class="op">[</span><span class="dv">1</span><span class="op">]</span></code>.</p>
+<p><strong>Pass 2:</strong> <code
+class="sourceCode c"><span class="ch">&#39;i&#39;</span></code> becomes
+<code class="sourceCode c"><span class="ch">&#39;I&#39;</span></code>,
+and <code class="sourceCode c">p</code> moves to <code
+class="sourceCode c">word<span class="op">[</span><span class="dv">2</span><span class="op">]</span></code>.</p>
+<p><strong>Pass 3:</strong> <code
+class="sourceCode c"><span class="ch">&#39;n&#39;</span></code> becomes
+<code class="sourceCode c"><span class="ch">&#39;N&#39;</span></code>,
+and <code class="sourceCode c">p</code> moves to <code
+class="sourceCode c">word<span class="op">[</span><span class="dv">3</span><span class="op">]</span></code>.</p>
+<p>Now <code class="sourceCode c"><span class="op">*</span>p</code> is
+<code class="text">'\0'</code>, so the loop stops with <code
+class="sourceCode c">p</code> pointing at the <span class="alert">null
+terminator</span>. Prints <span class="alert">PIN</span>.</p>
+</div>
+</section>
+</section>
+<section id="questions" class="level2">
+<h2>Questions?</h2>
+<section id="questions-1" class="level3">
+<h3>Questions?</h3>
+<p>Questions?</p>
+</section>
+</section>
+<nav class="pager" aria-label="Previous and next lecture">
+<a class="prev" href="../lecture10/"><span class="label">← Previous</span>Week
+10: Pointers and Functions</a>
+
+</nav>
+</main>
+<script>
+  // light/dark toggle: an explicit choice wins over the system setting
+  (function () {
+    var b = document.getElementById('theme-toggle'), r = document.documentElement;
+    function current() {
+      var t = r.getAttribute('data-theme');
+      return t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    function show() {
+      var dark = current() === 'dark';
+      b.textContent = dark ? '☀ Light' : '☾ Dark';
+      b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    b.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      r.setAttribute('data-theme', next);
+      try { localStorage.setItem('cpsc100-theme', next); } catch (e) {}
+      show();
+      b.blur();   // so Space goes back to the demo's "next step"
+    });
+    show();
+  })();
+</script>
+</body>
+</html>
