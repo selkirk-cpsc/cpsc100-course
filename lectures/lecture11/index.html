@@ -525,7 +525,8 @@ class="sourceCode c"><span class="dt">char</span> <span class="op">*</span>days<
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>p <span class="op">=</span> <span class="op">&amp;</span>m<span class="op">;</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span>q <span class="op">=</span> <span class="op">&amp;</span>n<span class="op">;</span></span></code></pre></div>
 <div class="center">
-
+<p><img src="fig03.svg?v=60349edb" alt="Memory diagram: p holds 0x7ffd00 and points at m (1); q holds 0x7ffd04 and points at n (5)" class="diagram" loading="lazy"
+width="520" /></p>
 </div>
 <p><code class="sourceCode c">p</code> holds the address of <code
 class="sourceCode c">m</code>; <code class="sourceCode c">q</code> holds
@@ -535,7 +536,8 @@ the address of <code class="sourceCode c">n</code>.</p>
 <h3>Week 9: Copying an Address</h3>
 <div class="sourceCode" id="cb13"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> q<span class="op">;</span>   <span class="co">// no *: changes where p points</span></span></code></pre></div>
 <div class="center">
-
+<p><img src="fig04.svg?v=99bcb72e" alt="Memory diagram after p = q: p now holds 0x7ffd04, so p and q both point at n (5); m is still 1" class="diagram" loading="lazy"
+width="520" /></p>
 </div>
 <p><code class="sourceCode c">q</code>’s <span
 class="alert">address</span> is copied into <code
@@ -548,7 +550,8 @@ class="sourceCode c">m</code> is still 1.</p>
 <h3>Week 9: Copying a Value</h3>
 <div class="sourceCode" id="cb14"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>p <span class="op">=</span> <span class="op">*</span>q<span class="op">;</span> <span class="co">// with *: changes the variable p points at</span></span></code></pre></div>
 <div class="center">
-
+<p><img src="fig05.svg?v=a71a5f76" alt="Memory diagram after *p = *q: m is now 5; p still points at m and q at n" class="diagram" loading="lazy"
+width="520" /></p>
 </div>
 <p>The <span class="alert">value</span> at <code
 class="sourceCode c">q</code> (5) is copied into the variable at <code
@@ -839,7 +842,7 @@ class="level3">
 <div class="columns">
 <div class="column figure-col">
 <div class="center">
-<p><img src="fig03.svg?v=a019cdeb" alt="Flow diagram with boxes: Start; Declare: int nums[5] = \...\, int r; Initialize counter: i = 0; i &lt; 5?; r = int_sqrt(nums[i]); r * r == nums[i]?; Print nums[i]; Update counter: i++; Stop" class="diagram" loading="lazy"
+<p><img src="fig06.svg?v=a019cdeb" alt="Flow diagram with boxes: Start; Declare: int nums[5] = \...\, int r; Initialize counter: i = 0; i &lt; 5?; r = int_sqrt(nums[i]); r * r == nums[i]?; Print nums[i]; Update counter: i++; Stop" class="diagram" loading="lazy"
 width="530" /></p>
 </div>
 </div><div class="column">
@@ -993,16 +996,16 @@ loop ends? What is printed?</p></li>
 </section>
 <section id="solution-13-a-pointer-walk-in-memory" class="level3">
 <h3>Solution 13: A Pointer Walk in Memory</h3>
-<div class="center">
-
-</div>
-<div class="overprint">
 <p><strong>After line 2:</strong> each <code
 class="sourceCode c"><span class="dt">char</span></code> takes <span
 class="alert">1 byte</span>, so the addresses go up by 1. <code
 class="sourceCode c">p</code> holds <code class="text">0x7ffe20</code>,
 the address of <code
 class="sourceCode c">word<span class="op">[</span><span class="dv">0</span><span class="op">]</span></code>.</p>
+<div class="center">
+<p><img src="fig07.svg?v=5ff429a7" alt="Memory diagram after line 2: word holds &#x27;p&#x27; &#x27;i&#x27; &#x27;n&#x27; &#x27;\0&#x27; at 0x7ffe20 to 0x7ffe23; p holds 0x7ffe20 and points at word[0]" class="diagram" loading="lazy"
+width="520" /></p>
+</div>
 <p><strong>Pass 1:</strong> <code
 class="sourceCode c"><span class="op">*</span>p <span class="op">=</span> toupper<span class="op">(*</span>p<span class="op">)</span></code>
 changes <code
@@ -1012,21 +1015,32 @@ class="sourceCode c"><span class="ch">&#39;P&#39;</span></code>, then
 <code class="sourceCode c">p</code> <span class="alert">one byte</span>
 to <code
 class="sourceCode c">word<span class="op">[</span><span class="dv">1</span><span class="op">]</span></code>.</p>
+<div class="center">
+<p><img src="fig08.svg?v=c2dc8081" alt="Memory diagram after pass 1: word holds &#x27;P&#x27; &#x27;i&#x27; &#x27;n&#x27; &#x27;\0&#x27;; p holds 0x7ffe21 and points at word[1]" class="diagram" loading="lazy"
+width="520" /></p>
+</div>
 <p><strong>Pass 2:</strong> <code
 class="sourceCode c"><span class="ch">&#39;i&#39;</span></code> becomes
 <code class="sourceCode c"><span class="ch">&#39;I&#39;</span></code>,
 and <code class="sourceCode c">p</code> moves to <code
 class="sourceCode c">word<span class="op">[</span><span class="dv">2</span><span class="op">]</span></code>.</p>
+<div class="center">
+<p><img src="fig09.svg?v=022e31ef" alt="Memory diagram after pass 2: word holds &#x27;P&#x27; &#x27;I&#x27; &#x27;n&#x27; &#x27;\0&#x27;; p holds 0x7ffe22 and points at word[2]" class="diagram" loading="lazy"
+width="520" /></p>
+</div>
 <p><strong>Pass 3:</strong> <code
 class="sourceCode c"><span class="ch">&#39;n&#39;</span></code> becomes
 <code class="sourceCode c"><span class="ch">&#39;N&#39;</span></code>,
 and <code class="sourceCode c">p</code> moves to <code
 class="sourceCode c">word<span class="op">[</span><span class="dv">3</span><span class="op">]</span></code>.</p>
+<div class="center">
+<p><img src="fig10.svg?v=a7c4b7e8" alt="Memory diagram after pass 3: word holds &#x27;P&#x27; &#x27;I&#x27; &#x27;N&#x27; &#x27;\0&#x27;; p holds 0x7ffe23 and points at the null terminator, word[3]" class="diagram" loading="lazy"
+width="520" /></p>
+</div>
 <p>Now <code class="sourceCode c"><span class="op">*</span>p</code> is
 <code class="text">'\0'</code>, so the loop stops with <code
 class="sourceCode c">p</code> pointing at the <span class="alert">null
 terminator</span>. Prints <span class="alert">PIN</span>.</p>
-</div>
 </section>
 </section>
 <section id="questions" class="level2">
